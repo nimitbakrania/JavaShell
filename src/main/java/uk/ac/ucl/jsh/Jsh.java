@@ -1,5 +1,9 @@
 package uk.ac.ucl.jsh;
-#JULIAN
+<<<<<<< HEAD
+// JULIAN push test 
+=======
+// push test 2
+>>>>>>> f8b1595ef2760aae18094b7ea638df8e070aea38
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -29,11 +33,14 @@ public class Jsh {
     public static void eval(String cmdline, OutputStream output) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(output);
 
+        // Make this into a function.
         CharStream parserInput = CharStreams.fromString(cmdline); 
         JshGrammarLexer lexer = new JshGrammarLexer(parserInput);
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);        
         JshGrammarParser parser = new JshGrammarParser(tokenStream);
         ParseTree tree = parser.command();
+        // 
+
         ArrayList<String> rawCommands = new ArrayList<String>();
         String lastSubcommand = "";
         for (int i=0; i<tree.getChildCount(); i++) {
@@ -47,7 +54,7 @@ public class Jsh {
         rawCommands.add(lastSubcommand);
         for (String rawCommand : rawCommands) {
             String spaceRegex = "[^\\s\"']+|\"([^\"]*)\"|'([^']*)'";
-            ArrayList<String> tokens = new ArrayList<String>();
+            ArrayList<String> tokens = new ArrayList<String>();           // Holds the seperated cmd tokens.
             Pattern regex = Pattern.compile(spaceRegex);
             Matcher regexMatcher = regex.matcher(rawCommand);
             String nonQuote;
@@ -72,6 +79,7 @@ public class Jsh {
             String appName = tokens.get(0);
             ArrayList<String> appArgs = new ArrayList<String>(tokens.subList(1, tokens.size()));
             switch (appName) {
+                // write this into functions.
             case "cd":
                 if (appArgs.isEmpty()) {
                     throw new RuntimeException("cd: missing argument");
@@ -160,7 +168,7 @@ public class Jsh {
                 if (appArgs.isEmpty()) {
                     throw new RuntimeException("head: missing arguments");
                 }
-                if (appArgs.size() != 1 && appArgs.size() != 3) {
+                if (appArgs.size() != 1 && appArgs.size() != 3) {                      
                     throw new RuntimeException("head: wrong arguments");
                 }
                 if (appArgs.size() == 3 && !appArgs.get(0).equals("-n")) {
