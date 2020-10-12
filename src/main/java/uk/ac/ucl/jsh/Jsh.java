@@ -1,9 +1,6 @@
 package uk.ac.ucl.jsh;
-<<<<<<< HEAD
 // JULIAN push test 
-=======
 // push test 2
->>>>>>> f8b1595ef2760aae18094b7ea638df8e070aea38
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
