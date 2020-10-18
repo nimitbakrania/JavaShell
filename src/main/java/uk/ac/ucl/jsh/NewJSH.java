@@ -17,11 +17,20 @@ public class NewJSH {
         ArrayList<String> raw_commands = parser.parse(cmdline);
 
         for (String command : raw_commands) {
-            ArrayList<String> info = parser.split_in2_tokens(command, currentDirectory);
-            String appName = info.get(0);
-            info.remove(0);
-            switch (appName) {
+            ArrayList<String> app_args = parser.split_in2_tokens(command, currentDirectory);
+            String app_name = app_args.get(0);
+            app_args.remove(0);
+            switch (app_name) {
                 // execute different app_runner methods depending on app name.
+                case "cd" : app_runner.cd(app_args); break;
+                case "ls" : app_runner.ls(app_args); break;
+                case "pwd" : app_runner.pwd(); break;
+                case "cat" : app_runner.cat(app_args); break;
+                case "echo" : app_runner.echo(app_args); break;
+                case "head" : app_runner.head(app_args); break;
+                case "tail" : app_runner.tail(app_args); break;
+                case "grep" : app_runner.grep(app_args); break;
+                default : throw new RuntimeException(app_name + ": unknown application");
             }
         }
     }
