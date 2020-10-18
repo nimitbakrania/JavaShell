@@ -3,6 +3,7 @@ package uk.ac.ucl.jsh;
 import java.util.Scanner;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 public class NewJSH {
@@ -13,7 +14,8 @@ public class NewJSH {
 
 
     private void eval(String cmdline, OutputStream output) throws IOException {
-
+        
+        OutputStreamWriter writer = new OutputStreamWriter(output);
         ArrayList<String> raw_commands = parser.parse(cmdline);
 
         for (String command : raw_commands) {
