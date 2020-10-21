@@ -1,13 +1,16 @@
 package uk.ac.ucl.jsh;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /* This class is responsible for running the applications. It should receive
@@ -44,18 +47,17 @@ public class ApplicationRunner {
     }
 
     /* Prints the current working directory in jsh.*/
-    public void pwd() {
+    public void pwd(OutputStreamWriter writer) throws IOException {
         writer.write(curr_directory);
         writer.write(System.getProperty("line.separator"));
         writer.flush();
-        break;
     }
 
     /* Lists all files in the current directory or given argument.
        @params = app_args : arraylist containing directory to print files in or should be empty 
                             in the case where you want to print the current directory contents.
     */
-    public void ls(ArrayList<String> app_args) {
+    public void ls(ArrayList<String> app_args, OutputStreamWriter writer) throws IOException {
         File currDir;
         if (app_args.isEmpty()) {
             currDir = new File(curr_directory);
@@ -82,13 +84,12 @@ public class ApplicationRunner {
         } catch (NullPointerException e) {
                 throw new RuntimeException("ls: no such directory");
         }
-        break;
     }
 
     /* Concatenates all contents of the files given as arguments and prints them in jsh.
        @params = app_args : contains files that need to be read.
     */
-    public void cat(ArrayList<String> app_args) {
+    public void cat(ArrayList<String> app_args, OutputStreamWriter writer) {
         if (app_args.isEmpty()) {
             throw new RuntimeException("cat: missing arguments");
         } else {
@@ -112,14 +113,13 @@ public class ApplicationRunner {
                 }
             }
         }
-        break;
     }
 
     /* Outputs whatever argument it is given. If output is directed towards a file it is written there else
        it is printed in jsh.
        @params = app_args : contains arguments to print. 
     */
-    public void echo(ArrayList<String> app_args) {
+    public void echo(ArrayList<String> app_args, OutputStreamWriter writer) throws IOException {
         boolean atLeastOnePrinted = false;
         for (String arg : app_args) {
         writer.write(arg);
@@ -131,14 +131,13 @@ public class ApplicationRunner {
             writer.write(System.getProperty("line.separator"));
             writer.flush();
         }
-        break;
     }
 
     /* Outputs the first N lines in given file where N is specified in app_args. If output isnt redirected 
     it should be printed in jsh.
        @params = app_args : contains arguments to head. Should contain N and also the file to read.
     */
-    public void head(ArrayList<String> app_args) {
+    public void head(ArrayList<String> app_args, OutputStreamWriter writer) {
         if (app_args.isEmpty()) {
             throw new RuntimeException("head: missing arguments");
         }
@@ -179,14 +178,13 @@ public class ApplicationRunner {
         } else {
             throw new RuntimeException("head: " + headArg + " does not exist");
         }
-        break;
     }
 
     /* Outputs the last N lines in a given file where N is specified in app_args. If file is < N, print all lines
        without throwing an error. If output isnt redirected, print in jsh.
        @params = app_args : contains arguments to tail. Should contain N and also the file to read.
     */
-    public void tail(ArrayList<String> app_args) {
+    public void tail(ArrayList<String> app_args, OutputStreamWriter writer) {
         if (app_args.isEmpty()) {
             throw new RuntimeException("tail: missing arguments");
         }
@@ -234,14 +232,13 @@ public class ApplicationRunner {
         } else {
             throw new RuntimeException("tail: " + tailArg + " does not exist");
         }
-        break;
     }
 
     /* Pattern matches the (CHECK IDK IF IT IS REGEX OR STRING) in a given file/directory. Outputs all the lines
        that contain the pattern and if the output isn't redircted, print in jsh.
        @params = app_args : contains arguments to grep. Should have a pattern and directory/file.
     */
-    public void grep(ArrayList<String> app_args) {
+    public void grep(ArrayList<String> app_args, OutputStreamWriter writer) {
         if (app_args.size() < 2) {
             throw new RuntimeException("grep: wrong number of arguments");
         }
@@ -278,6 +275,5 @@ public class ApplicationRunner {
                 throw new RuntimeException("grep: cannot open " + app_args.get(j + 1));
             }
       }
-      break;
     } 
 }
