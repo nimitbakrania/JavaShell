@@ -25,13 +25,13 @@ public class NewJSH {
             switch (app_name) {
                 // execute different app_runner methods depending on app name.
                 case "cd" : app_runner.cd(app_args); break;
-                case "ls" : app_runner.ls(app_args); break;
-                case "pwd" : app_runner.pwd(); break;
-                case "cat" : app_runner.cat(app_args); break;
-                case "echo" : app_runner.echo(app_args); break;
-                case "head" : app_runner.head(app_args); break;
-                case "tail" : app_runner.tail(app_args); break;
-                case "grep" : app_runner.grep(app_args); break;
+                case "ls" : app_runner.ls(app_args, writer); break;
+                case "pwd" : app_runner.pwd(writer); break;
+                case "cat" : app_runner.cat(app_args, writer); break;
+                case "echo" : app_runner.echo(app_args, writer); break;
+                case "head" : app_runner.head(app_args, writer); break;
+                case "tail" : app_runner.tail(app_args, writer); break;
+                case "grep" : app_runner.grep(app_args, writer); break;
                 default : throw new RuntimeException(app_name + ": unknown application");
             }
         }
