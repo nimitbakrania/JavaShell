@@ -5,7 +5,9 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class JshCore implements Coreinterface {
+import Currinterface;
+
+public class JshCore implements Currinterface {
 
     private Path currentDirectory, homeDirectory;
     private String lineSeparator;
