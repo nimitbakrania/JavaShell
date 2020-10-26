@@ -1,7 +1,7 @@
 FROM maven:3.6-jdk-11
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update \
+RUN apt-get -o Acquire::Max-FutureTime=864000000000 update \
     && apt-get -y install --no-install-recommends apt-utils dialog 2>&1 \
     #
     # Install git, process tools, lsb-release (common in install instructions for CLIs)

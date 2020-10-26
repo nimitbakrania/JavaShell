@@ -1,5 +1,7 @@
 package uk.ac.ucl.jsh.individualClasses;
 
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;

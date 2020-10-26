@@ -9,11 +9,39 @@ import java.util.ArrayList;
 public class NewJSH {
 
     private static String currentDirectory = System.getProperty("user.dir");
-    private ApplicationRunner app_runner = new ApplicationRunner();
+    private App app = new App();
     private Parser parser = new Parser();
 
 
+    private void eval2(String cmdline, OutputStream output) throws IOException {
+
+        ArrayList<ArrayList<String>> commands = this.parser.parse(cmdline, currentDirectory);
+
+        for (ArrayList<String> a_command : commands) {
+            // a_command is app_args
+            String name = a_command.get(0);
+            a_command.remove(0);
+
+            switch (name) {
+                case "cd" : // create cd object and call dynamic dispatch method.
+                case "ls" : // create ls object "  "
+                case "pwd" : // create pwd object
+                case "cat" : // create cat object
+                case "echo" : // create echo object
+                case "head" : //
+                case "tail" : //
+                case "grep" : //
+                default : throw new RuntimeException(name + ": unknown application.");
+            }
+        }
+    }
+
+
     private void eval(String cmdline, OutputStream output) throws IOException {
+
+        ArrayList<ArrayList<String>> commands = this.parser.parse(cmdline, currentDirectory);
+        this.app.exec(commands, new OutputStreamWriter(output), currentDirectory);
+
         
         OutputStreamWriter writer = new OutputStreamWriter(output);
         ArrayList<String> raw_commands = parser.parse(cmdline);

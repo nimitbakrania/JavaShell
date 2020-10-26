@@ -24,12 +24,25 @@ public class Parser {
         curr_cmdline = "";
     }
 
+
+    public ArrayList<ArrayList<String>> parse(String cmdline, String current_directory) throws IOException {
+
+        this.curr_cmdline = cmdline;
+        ArrayList<String> raw_commands = get_commands();
+        ArrayList<ArrayList<String>> ret = new ArrayList<ArrayList<String>>();
+        
+        for (String command : raw_commands) {
+            ret.add(split_in2_tokens(command, current_directory));
+        }
+
+        return ret;
+    }
+
     /* Run this when parsing a command from cmd. It will return app_args which can be passed
        to ApplicationRunner to run application.
     */
-    public ArrayList<String> parse(String cmdline) {
+    public ArrayList<String> get_commands() {
 
-        curr_cmdline = cmdline;
         CharStream parserInput = CharStreams.fromString(cmdline); 
         JshGrammarLexer lexer = new JshGrammarLexer(parserInput);
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);        
