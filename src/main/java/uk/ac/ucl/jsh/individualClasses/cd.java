@@ -1,5 +1,6 @@
 package uk.ac.ucl.jsh.individualClasses;
 
+import uk.ac.ucl.jsh.AnirudhAbstract;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.BufferedReader;
@@ -13,10 +14,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
-public class cd extends abstractJSH{
+public class cd extends AnirudhAbstract {
 
- @Override
- public String run(ArrayList<String> app_args, String curr_directory) throws IOException {
+ public String run(ArrayList<String> app_args, OutputStreamWriter writer, String curr_directory) throws IOException {
   if (app_args.isEmpty()) {
    throw new RuntimeException("cd: missing argument");
   } else if (app_args.size() > 1) {

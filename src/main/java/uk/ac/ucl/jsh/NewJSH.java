@@ -9,7 +9,6 @@ import java.util.ArrayList;
 public class NewJSH {
 
     private static String currentDirectory = System.getProperty("user.dir");
-    private App app = new App();
     private Parser parser = new Parser();
 
 
@@ -21,9 +20,11 @@ public class NewJSH {
             // a_command is app_args
             String name = a_command.get(0);
             a_command.remove(0);
+            AnirudhAbstract app = null;
 
             switch (name) {
-                case "cd" : // create cd object and call dynamic dispatch method.
+                case "cd" : app = new cd();
+                        break;
                 case "ls" : // create ls object "  "
                 case "pwd" : // create pwd object
                 case "cat" : // create cat object
@@ -32,6 +33,10 @@ public class NewJSH {
                 case "tail" : //
                 case "grep" : //
                 default : throw new RuntimeException(name + ": unknown application.");
+            }
+
+            if (app != null) {
+                app.run();
             }
         }
     }

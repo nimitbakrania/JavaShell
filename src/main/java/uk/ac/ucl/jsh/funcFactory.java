@@ -1,8 +1,12 @@
 package uk.ac.ucl.jsh;
+import uk.ac.ucl.jsh.AnirudhAbstract;
 
 public class funcFactory {
-    public funcInterface mkApplication(String application) {
-        funcInterface app;
+
+    public funcFactory() { }
+
+    public AnirudhAbstract mkApplication(String application) {
+        AbstractAnirudh app = null;
         switch (application) {
             case "cd":
                 app = new Cd();
