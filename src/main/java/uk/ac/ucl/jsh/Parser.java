@@ -18,21 +18,30 @@ import org.antlr.v4.runtime.tree.ParseTree;
 */
 public class Parser {
     
-    private String curr_cmdline;
+    private String currCmdline;
 
     public Parser() {
-        curr_cmdline = "";
+        currCmdline = "";
     }
 
+    /* This calls get_commands to seperate all the commands in the cmdline. It then goes through each command
+       and splits each one into tokens. It puts the tokens in each command into a seperate arraylist and adds them into
+       ret.
+       @params = cmdline : arguments supplied on commandline
+                 current_directory : directory we are currently in.
+       @returns = Arraylist containing arraylists of tokenized commands. Each arraylist contains tokens for one command.
+                  The value at index 0 in each arraylist is the application name.
+       @throws = IOException if ...
+ 
+    */ 
+    public ArrayList<ArrayList<String>> parse(String cmdline, String currentDirectory) throws IOException {
 
-    public ArrayList<ArrayList<String>> parse(String cmdline, String current_directory) throws IOException {
-
-        this.curr_cmdline = cmdline;
-        ArrayList<String> raw_commands = get_commands();
+        this.currCmdline = cmdline;
+        ArrayList<String> rawCommands = getCommands();
         ArrayList<ArrayList<String>> ret = new ArrayList<ArrayList<String>>();
         
-        for (String command : raw_commands) {
-            ret.add(split_in2_tokens(command, current_directory));
+        for (String command : rawCommands) {
+            ret.add(splitIn2Tokens(command, currentDirectory));
         }
 
         return ret;
@@ -41,7 +50,7 @@ public class Parser {
     /* Run this when parsing a command from cmd. It will return app_args which can be passed
        to ApplicationRunner to run application.
     */
-    public ArrayList<String> get_commands() {
+    private ArrayList<String> getCommands() {
 
         CharStream parserInput = CharStreams.fromString(cmdline); 
         JshGrammarLexer lexer = new JshGrammarLexer(parserInput);
@@ -69,12 +78,12 @@ public class Parser {
                  current_directory : directory that jsh is currently running in.
        @returns = arraylist containing tokens.
     */
-    public ArrayList<String> split_in2_tokens(String raw_command, String current_directory) throws IOException {
+    private ArrayList<String> splitIn2Tokens(String rawCommand, String currentDirectory) throws IOException {
 
         String spaceRegex = "[^\\s\"']+|\"([^\"]*)\"|'([^']*)'";
         ArrayList<String> tokens = new ArrayList<String>();           // Holds the seperated cmd tokens.
         Pattern regex = Pattern.compile(spaceRegex);
-        Matcher regexMatcher = regex.matcher(raw_command);
+        Matcher regexMatcher = regex.matcher(rawCommand);
         String nonQuote;
         while (regexMatcher.find()) {
             if (regexMatcher.group(1) != null || regexMatcher.group(2) != null) {
@@ -83,7 +92,7 @@ public class Parser {
             } else {
                 nonQuote = regexMatcher.group().trim();
                 ArrayList<String> globbingResult = new ArrayList<String>();
-                Path dir = Paths.get(current_directory);
+                Path dir = Paths.get(currentDirectory);
                 DirectoryStream<Path> stream = Files.newDirectoryStream(dir, nonQuote);
                 for (Path entry : stream) {
                     globbingResult.add(entry.getFileName().toString());

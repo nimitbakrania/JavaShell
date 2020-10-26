@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 public class pwd extends AnirudhAbstract{
 
  public void run(OutputStreamWriter writer, String curr_directory) throws IOException {
+     
   writer.write(curr_directory);
   writer.write(System.getProperty("line.separator"));
   writer.flush();

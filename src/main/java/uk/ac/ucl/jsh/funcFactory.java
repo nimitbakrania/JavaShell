@@ -1,39 +1,40 @@
 package uk.ac.ucl.jsh;
-import uk.ac.ucl.jsh.AnirudhAbstract;
 
-public class funcFactory {
+import uk.ac.ucl.jsh.individualClasses.*;
 
-    public funcFactory() { }
+public class Factory {
 
-    public AnirudhAbstract mkApplication(String application) {
-        AbstractAnirudh app = null;
+    public Factory() { }
+
+    public App mkApplication(String application) {
+        App app;
         switch (application) {
             case "cd":
-                app = new Cd();
+                app = new cd();
                 break;
             case "pwd":
-                app = new Pwd();
+                app = new pwd();
                 break;
             case "find":
-                app = new Find();
+                app = new find();
                 break;
             case "ls":
-                app = new Ls();
+                app = new ls();
                 break;
             case "cat":
-                app = new Cat();
+                app = new cat();
                 break;
             case "echo":
-                app = new Echo();
+                app = new echo();
                 break;
             case "head":
-                app = new Head();
+                app = new head();
                 break;
             case "tail":
-                app = new Tail();
+                app = new tail();
                 break;
             case "grep":
-                app = new Grep();
+                app = new grep();
                 break;
 			
             default:
