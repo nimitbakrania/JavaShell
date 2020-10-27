@@ -3,10 +3,7 @@ package uk.ac.ucl.jsh;
 import java.util.ArrayList;
 import uk.ac.ucl.jsh.core.JshCore;
 
-public abstract class App {
+public interface App {
 
-    public App() { }
-
-    public void run(JshCore core, ArrayList<String> appArgs) { }
-    
+    public void run(JshCore core, ArrayList<String> appArgs);
 }
