@@ -1,11 +1,8 @@
-
 package uk.ac.ucl.jsh.core;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import Currinterface;
 
 public class JshCore implements Currinterface {
 

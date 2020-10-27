@@ -1,6 +1,8 @@
 package uk.ac.ucl.jsh;
 
 import java.util.Scanner;
+
+import App;
 import uk.ac.ucl.jsh.core.JshCore;
 import java.io.IOException;
 import java.io.OutputStream;
