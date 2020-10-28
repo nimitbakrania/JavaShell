@@ -1,4 +1,5 @@
 package uk.ac.ucl.jsh.core;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
@@ -15,19 +16,29 @@ public class JshCore implements Currinterface {
         currentDirectory = Paths.get(System.getProperty("user.dir"));
         homeDirectory = Paths.get(System.getProperty("user.home"));
         lineSeparator = System.getProperty("line.separator");
-
         outputStream = System.out;
         inputStream = System.in;
     }
-
 
     public Path getCurrentDirectory() {
         return currentDirectory;
     }
 
-    public String getLineSeparator() { return lineSeparator; }
+    public InputStream getInputStream(){
+        return inputStream;
+    }
 
-    public void setOutputStream(OutputStream outputStream) { this.outputStream = outputStream; }
+    public String getLineSeparator() {
+        return lineSeparator;
+    }
+
+    public void setOutputStream(OutputStream outputStream) {
+        this.outputStream = outputStream;
+    }
+
+    public OutputStream getOutputStream() {
+        return outputStream;
+    }
 
     public void setCurrentDirectory(Path path) {
         currentDirectory = path;

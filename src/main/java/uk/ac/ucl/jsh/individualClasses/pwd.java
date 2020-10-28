@@ -1,25 +1,30 @@
 package uk.ac.ucl.jsh.individualClasses;
-
-import uk.ac.ucl.jsh.AnirudhAbstract;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.BufferedReader;
-import java.io.File;
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
 import java.util.ArrayList;
-import java.util.regex.Pattern;
 
-public class pwd extends AnirudhAbstract{
+import uk.ac.ucl.jsh.core.JshCore;
 
- public void run(OutputStreamWriter writer, String curr_directory) throws IOException {
-     
-  writer.write(curr_directory);
-  writer.write(System.getProperty("line.separator"));
-  writer.flush();
- }
+public class pwd implements App {
+
+    public void run(OutputStreamWriter writer, String curr_directory) throws IOException {
+
+        writer.write(curr_directory);
+        writer.write(System.getProperty("line.separator"));
+        writer.flush();
+    }
+
+    @Override
+    public void run(JshCore core, ArrayList<String> appArgs) throws IOException {
+        if(appArgs.isEmpty()){
+            throw new RuntimeException("pwd: too many arguments");
+        }
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(core.getOutputStream(), StandardCharsets.UTF_8));
+        writer.write(core.getCurrentDirectory().toString());
+        writer.write(System.getProperty("line.separator"));
+        writer.flush();
+    }
 }

@@ -1,4 +1,5 @@
-package uk.ac.ucl.jsh.Application;
+package uk.ac.ucl.jsh.App;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -20,6 +21,7 @@ public abstract class AbstractA implements funcInterface {
         //Err output stream is default to be Sys.err
         inputStream = jshCore.getInputStream();
         outputStream = jshCore.getOutputStream();
+
         outputStreamWriter = new OutputStreamWriter(outputStream);
     }
 
