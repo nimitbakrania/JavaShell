@@ -1,13 +1,16 @@
 package uk.ac.ucl.jsh.individualClasses;
+
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import uk.ac.ucl.jsh.core.JshCore;
 
 public class cd implements App {
 
     @Override
-    public void run(JshCore core, ArrayList<String> appArgs) throws IOException {
+    public void run(JshCore core, ArrayList<String> appArgs, InputStream input, OutputStream output) throws IOException {
         if (appArgs.isEmpty()) {
             core.setCurrentDirectory(core.getCurrentDirectory());
         }
