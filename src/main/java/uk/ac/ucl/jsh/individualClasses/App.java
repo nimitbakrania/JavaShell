@@ -7,4 +7,5 @@ import uk.ac.ucl.jsh.core.JshCore;
 public interface App {
 
     public void run(ArrayList<String> appArgs, InputStream input, OutputStream output) throws IOException;
+    
 }
