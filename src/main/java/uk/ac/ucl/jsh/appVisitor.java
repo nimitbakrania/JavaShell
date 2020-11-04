@@ -1,5 +1,7 @@
 package uk.ac.ucl.jsh;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,17 +19,17 @@ import org.antlr.v4.runtime.tree.ParseTree;
 public interface appVisitor{
 
     public interface ourInterface{
-        public int accept(baseVisitor visitor);
+        public void accept(baseVisitor visitor);
     }
 
     public class cd implements ourInterface{
-        inputStream input;
-        outputStream output;
-        dir directory;
-        public cd(inputstream outputstream thisdirectory){
-            this.input = inputstream;
-            this.output = outputstream;
-            this.directory = thisdirectory;
+        InputStream input;
+        OutputStream output;
+        String directory;
+        public cd(InputStream input, OutputStream output) {
+            this.input = input;
+            this.output = output;
+            this.directory = System.getProperty("user.dir");
         }
         public void accept(baseVisitor visitor){
             visitor.visit(this);
@@ -46,7 +48,24 @@ public interface appVisitor{
 
     }
 
-    public class tail implements ourInterface{
+    public class tail implements ourInterface {
+
+        InputStream input;
+        OutputStream output;
+        String directory;
+
+        public tail(InputStream input, OutputStream output) {
+
+            this.input = input;
+            this.output = output;
+            this.directory = System.getProperty("user.dir");
+
+        }
+
+        public void accept(baseVisitor visitor) {
+
+            visitor.visit(this);
+        }
 
     }
 
@@ -66,7 +85,23 @@ public interface appVisitor{
         }
     }
 
-    public class ls implements ourInterface{
+    public class ls implements ourInterface {
+
+        InputStream input;
+        OutputStream output;
+        String directory;
+
+        public ls(InputStream input, OutputStream output) {
+
+            this.input = input;
+            this.output = output;
+            this.directory = System.getProperty("user.dir");
+        }
+
+        public void accept(baseVisitor visitor) {
+
+            visitor.visit(this);
+        }
 
     }
 

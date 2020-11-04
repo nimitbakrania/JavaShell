@@ -1,19 +1,5 @@
 package uk.ac.ucl.jsh;
 
-import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-
 public interface baseVisitor{
     public void visit(appVisitor.cd app);
     public void visit(appVisitor.pwd app);

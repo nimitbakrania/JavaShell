@@ -15,7 +15,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 
-public class visitorApplication implements baseVisitor{
+public class visitorApplication implements baseVisitor {
     public void visit(appVisitor.cd app){
         //app function for cd
     }
