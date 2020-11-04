@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -15,7 +16,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class cat implements App {
-
+    /*
     public void run(ArrayList<String> app_args, OutputStreamWriter writer, String curr_directory) throws IOException {
         if (app_args.isEmpty()) {
             throw new RuntimeException("cat: missing arguments");
@@ -41,11 +42,11 @@ public class cat implements App {
             }
         }
     }
+*/
 
     @Override
-    public void run(JshCore core, ArrayList<String> appArgs) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(core.getOutputStream(), StandardCharsets.UTF_8));
-        InputStream input = core.getInputStream();
+    public void run(JshCore core, ArrayList<String> appArgs, InputStream input, OutputStream output) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8));
         // decides whether stdin must be used when no args provided
         if (appArgs.isEmpty()) {
             if (input == null) {
