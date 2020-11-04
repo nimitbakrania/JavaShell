@@ -50,8 +50,20 @@ public interface appVisitor{
 
     }
 
-    public class app implements ourInterface{
+    public class cat implements ourInterface{
+        inputStream input;
+        outputStream output;
+        dir directory;
 
+        public cat(inputstream outputstream thisdirectory){
+            this.input = inputstream;
+            this.output = outputstream;
+            this.directory = thisdirectory;
+        }
+
+        public void accept(baseVisitor visitor){
+            visitor.visit(this);
+        }
     }
 
     public class ls implements ourInterface{
