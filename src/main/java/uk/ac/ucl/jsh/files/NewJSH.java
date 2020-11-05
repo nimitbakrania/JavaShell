@@ -1,9 +1,6 @@
-package uk.ac.ucl.jsh;
+package uk.ac.ucl.jsh.files;
 
 import java.util.Scanner;
-
-import App;
-import uk.ac.ucl.jsh.core.JshCore;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -12,20 +9,22 @@ import java.util.ArrayList;
 public class NewJSH {
 
     private Parser parser = new Parser();
-    private JshCore core = new JshCore();
+    private String currentDirectory = System.getProperty("user.dir");
 
 
     private void eval(String cmdline, OutputStream output) throws IOException {
+        // first parse
+        // check if its pipe or seq or call. for now assume its always call
+        // use factory to make specific visitable.* application and reutrn it.
+        // call accept on that obj.
+        ArrayList<ArrayList<String>> lines = parser.parse(cmdline, currentDirectory);
+        Call call = new Call();
 
-        Factory factory = new Factory();
-        ArrayList<ArrayList<String>> commands = this.parser.parse(cmdline, this.core.getCurrentDirectory());
-
-        for (ArrayList<String> aCommand : commands) {
-            String name = aCommand.get(0);
-            aCommand.remove(0);
-            App app = factory.mkApplication(name);
-            app.run(this.core, aCommand);
+        for (ArrayList<String> line : lines) {
+            // we are assuming theyre all call.
+            call.eval(line.get(0), line.subList(1, line.size());         // first argument is application name eg "cd", "grep" the second argument is appArgs.
         }
+
     }
 
     public static void main(String[] args) {

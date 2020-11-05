@@ -1,13 +1,20 @@
-package uk.ac.ucl.jsh;
+package uk.ac.ucl.jsh.files;
 
-import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -52,7 +59,7 @@ public class Parser {
     */
     private ArrayList<String> getCommands() {
 
-        CharStream parserInput = CharStreams.fromString(cmdline); 
+        CharStream parserInput = CharStreams.fromString(currCmdline); 
         JshGrammarLexer lexer = new JshGrammarLexer(parserInput);
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);        
         JshGrammarParser parser = new JshGrammarParser(tokenStream);

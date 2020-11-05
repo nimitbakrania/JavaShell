@@ -1,4 +1,4 @@
-package uk.ac.ucl.jsh;
+package uk.ac.ucl.jsh.files;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,21 +20,26 @@ public interface Visitable {
     
     public void accept(baseVisitor visitor);
 
-    public class cd implements Visitable {
+    public class Cd implements Visitable {
+
         InputStream input;
         OutputStream output;
         String directory;
-        public cd(InputStream input, OutputStream output) {
+
+        public Cd(InputStream input, OutputStream output) {
+
             this.input = input;
             this.output = output;
             this.directory = System.getProperty("user.dir");
         }
+
         public void accept(baseVisitor visitor){
+
             visitor.visit(this);
         }
     }
 
-    public class pwd implements Visitable {
+    public class Pwd implements Visitable {
 
         @Override
         public void accept(baseVisitor visitor) {
@@ -44,46 +49,56 @@ public interface Visitable {
 
     }
 
-    public class echo implements Visitable{
+    public class Echo implements Visitable {
+
         InputStream input;
         OutputStream output;
         String directory;
         ArrayList<String> appArgs;
-        public echo(InputStream inputstream, OutputStream outputstream, ArrayList<String> appArgs){
+
+        public Echo(InputStream inputstream, OutputStream outputstream, ArrayList<String> appArgs) {
+
             this.input = inputstream;
             this.output = outputstream;
             this.directory = System.getProperty("user.dir");
             this.appArgs = appArgs;
         }
-        public void accept(baseVisitor visitor){
+
+        public void accept(baseVisitor visitor) {
+
             visitor.visit(this);
         }
     }
 
-    public class head implements Visitable{
-        inputStream input;
-        outputStream output;
-        String directory;
-        String[] appArgs;
-        public head(inputStream inputstream, outputStream outputstream, String[] args){
-            this.input = inputstream;
-            this.output = outputstream;
-            this.directory = System.getProperty("user.dir");
-            this.appArgs = args;
-        }
-        public void accept(baseVisitor visitor){
-            visitor.visit(this);
-        }
-    }
-
-    public class tail implements Visitable {
+    public class Head implements Visitable{
 
         InputStream input;
         OutputStream output;
         String directory;
         ArrayList<String> appArgs;
 
-        public tail(InputStream input, OutputStream output, ArrayList<String> appArgs) {
+        public Head(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
+
+            this.input = inputstream;
+            this.output = outputstream;
+            this.directory = System.getProperty("user.dir");
+            this.appArgs = args;
+        }
+
+        public void accept(baseVisitor visitor){
+
+            visitor.visit(this);
+        }
+    }
+
+    public class Tail implements Visitable {
+
+        InputStream input;
+        OutputStream output;
+        String directory;
+        ArrayList<String> appArgs;
+
+        public Tail(InputStream input, OutputStream output, ArrayList<String> appArgs) {
 
             this.input = input;
             this.output = output;
@@ -98,29 +113,31 @@ public interface Visitable {
 
     }
 
-    public class cat implements Visitable{
+    public class Cat implements Visitable {
+
         InputStream input;
         OutputStream output;
         String directory;
 
-        public cat(InputStream input,  OutputStream output, thisdirectory){
+        public Cat(InputStream input,  OutputStream output) {
             this.input = input;
             this.output = output;
-            this.directory = thisdirectory;
+            this.directory = System.getProperty("user.dir");
         }
+
         public void accept(baseVisitor visitor){
             visitor.visit(this);
         }
     }
 
-    public class ls implements Visitable {
+    public class Ls implements Visitable {
 
         InputStream input;
         OutputStream output;
         String directory;
         ArrayList<String> appArgs;
 
-        public ls(InputStream input, OutputStream output, ArrayList<String> appArgs) {
+        public Ls(InputStream input, OutputStream output, ArrayList<String> appArgs) {
 
             this.input = input;
             this.output = output;
@@ -134,18 +151,23 @@ public interface Visitable {
         }
     }
 
-    public class grep implements Visitable{
-        inputStream input;
-        outputStream output;
+    public class Grep implements Visitable {
+
+        InputStream input;
+        OutputStream output;
         String directory;
-        String[] appArgs;
-        public grep(inputStream inputstream, outputStream outputstream, String[] args){
+        ArrayList<String> appArgs;
+
+        public Grep(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
+
             this.input = inputstream;
             this.output = outputstream;
             this.directory = System.getProperty("user.dir");
             this.appArgs = args;
         }
-        public void accept(baseVisitor visitor){
+
+        public void accept(baseVisitor visitor) {
+
             visitor.visit(this);
         }
     }

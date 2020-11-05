@@ -1,14 +1,11 @@
-package uk.ac.ucl.jsh;
-
-import App;
-import uk.ac.ucl.jsh.individualClasses.*;
+package uk.ac.ucl.jsh.files;
 
 public class Factory {
 
     public Factory() { }
 
-    public App mkApplication(String application) {
-        App app;
+    public Visitable mkApplication(String application) {
+        Visitable app;
         switch (application) {
             case "cd":
                 app = new cd();

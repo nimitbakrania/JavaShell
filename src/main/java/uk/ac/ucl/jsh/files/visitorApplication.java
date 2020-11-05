@@ -1,26 +1,29 @@
-package uk.ac.ucl.jsh;
+package uk.ac.ucl.jsh.files;
 
-import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.io.BufferedWriter;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 
 public class visitorApplication implements baseVisitor {
-    public void visit(appVisitor.cd app){
+
+    public visitorApplication() { }
+
+    public void visit(Visitable.Cd app) {
+
         if (appArgs.isEmpty()) {
             // takes user to home directory when 'cd' is called alone
             Jsh.setCurrentDirectory(Jsh.getHomeDirectory());
@@ -42,8 +45,9 @@ public class visitorApplication implements baseVisitor {
             Jsh.setCurrentDirectory(currentDirectory);
         }
     }
-    public void visit(appVisitor.pwd app)
-    {
+
+    public void visit(Visitable.Pwd app) {
+
         if(appArgs.isEmpty()){
             throw new RuntimeException("pwd: too many arguments");
         }
@@ -52,8 +56,10 @@ public class visitorApplication implements baseVisitor {
         writer.write(System.getProperty("line.separator"));
         writer.flush();
     }
-    public void visit(appVisitor.echo app)
-    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8));
+
+    public void visit(Visitable.Echo app) {
+
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8));
         boolean atLeastOnePrinted = !appArgs.isEmpty();
         // arguments printed with space between them, ensuring no space printed after last element
         int count = 0;
@@ -73,7 +79,8 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
-    public void visit(appVisitor.echo app){
+    public void visit(Visitable.Echo app) {
+
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(app.output, StandardCharsets.UTF_8));
         boolean atLeastOnePrinted = !app.appArgs.isEmpty();
         int count = 0;
@@ -91,7 +98,8 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
-    public void visit(appVisitor.head app){
+    public void visit(Visitable.Head app) {
+
         if (app.appArgs.isEmpty()) {
             throw new RuntimeException("head: missing arguments");
         }
@@ -134,9 +142,61 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
-    public void visit(appVisitor.tail app);
+    public void visit(Visitable.Tail app) {
 
-    public void visit(appVisitor.cat app){
+        if (app.appArgs.isEmpty()) {
+            throw new RuntimeException("tail: missing arguments");
+        }
+        if (app.appArgs.size() != 1 && app.appArgs.size() != 3) {
+            throw new RuntimeException("tail: wrong arguments");
+        }
+        if (app.appArgs.size() == 3 && !app.appArgs.get(0).equals("-n")) {
+            throw new RuntimeException("tail: wrong argument " + app.appArgs.get(0));
+        }
+        
+        int tailLines = 10;
+        String tailArg;
+        if (app.appArgs.size() == 3) {
+            try {
+                tailLines = Integer.parseInt(app.appArgs.get(1));
+            } catch (Exception e) {
+                throw new RuntimeException("tail: wrong argument " + app.appArgs.get(1));
+            }
+            tailArg = app.appArgs.get(2);
+        } else {
+            tailArg = app.appArgs.get(0);
+        }
+
+        File tailFile = new File(currentDirectory + File.separator + tailArg);
+        if (tailFile.exists()) {
+            Charset encoding = StandardCharsets.UTF_8;
+            Path filePath = Paths.get((String) currentDirectory + File.separator + tailArg);
+            ArrayList<String> storage = new ArrayList<>();
+            try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    storage.add(line);
+                }
+                int index = 0;
+                if (tailLines > storage.size()) {
+                    index = 0;
+                } else {
+                    index = storage.size() - tailLines;
+                }
+                for (int i = index; i < storage.size(); i++) {
+                    app.output.write(storage.get(i) + System.getProperty("line.separator"));
+                    app.output.flush();
+                }            
+            } catch (IOException e) {
+                throw new RuntimeException("tail: cannot open " + tailArg);
+            }
+        } else {
+            throw new RuntimeException("tail: " + tailArg + " does not exist");
+        }
+    }
+
+    public void visit(Visitable.Cat app) {
+
         String currentDirectory = new String(app.directory)
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(app.output, StandardCharsets.UTF_8));
         InputStream input = app.input;
@@ -177,9 +237,39 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
-    public void visit(appVisitor.ls app);
+    public void visit(Visitable.Ls app) {
 
-    public void visit(appVisitor.grep app){
+        File currDir;
+        if (app.appArgs.isEmpty()) {
+            currDir = new File(currentDirectory);
+        } else if (app.appArgs.size() == 1) {
+            currDir = new File(app.appArgs.get(0));
+        } else {
+            throw new RuntimeException("ls: too many arguments");
+        }
+
+        try {
+            File[] listOfFiles = currDir.listFiles();
+            boolean atLeastOnePrinted = false;
+            for (File file : listOfFiles) {
+                if (!file.getName().startsWith(".")) {
+                    app.output.write(file.getName());
+                    app.output.write("\t");
+                    app.output.flush();
+                    atLeastOnePrinted = true;
+                }
+            }
+            if (atLeastOnePrinted) {
+                app.output.write(System.getProperty("line.separator"));
+                app.output.flush();
+            }
+        } catch (NullPointerException e) {
+            throw new RuntimeException("ls: no such directory");
+        }
+    }
+
+    public void visit(Visitable.Grep app) {
+
         if (app.appArgs.size() < 2) {
             throw new RuntimeException("grep: wrong number of arguments");
         }
