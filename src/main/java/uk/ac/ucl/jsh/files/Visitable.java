@@ -3,18 +3,6 @@ package uk.ac.ucl.jsh.files;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
 
 public interface Visitable {
     
@@ -26,7 +14,7 @@ public interface Visitable {
         OutputStream output;
         String directory;
 
-        public Cd(InputStream input, OutputStream output) {
+        public Cd(InputStream input, OutputStream output, ArrayList<String> appArgs) {
 
             this.input = input;
             this.output = output;
