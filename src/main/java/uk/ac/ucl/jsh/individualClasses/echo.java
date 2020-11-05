@@ -30,6 +30,5 @@ public class echo implements App {
             writer.write(System.getProperty("line.separator"));
             writer.flush();
         }
-
-  }
+    }
 }

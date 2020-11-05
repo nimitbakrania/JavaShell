@@ -1,14 +1,14 @@
 package uk.ac.ucl.jsh;
 
 public interface baseVisitor{
-    public void visit(appVisitor.cd app);
-    public void visit(appVisitor.pwd app);
-    public void visit(appVisitor.echo app);
-    public void visit(appVisitor.head app);
-    public void visit(appVisitor.tail app);
-    public void visit(appVisitor.cat app);
-    public void visit(appVisitor.ls app);
-    public void visit(appVisitor.grep app);
+    public void visit(Visitable.cd app);
+    public void visit(Visitable.pwd app);
+    public void visit(Visitable.echo app);
+    public void visit(Visitable.head app);
+    public void visit(Visitable.tail app);
+    public void visit(Visitable.cat app);
+    public void visit(Visitable.ls app);
+    public void visit(Visitable.grep app);
 }
 
 /*
