@@ -41,11 +41,35 @@ public interface appVisitor{
     }
 
     public class echo implements ourInterface{
-
+        inputStream input;
+        outputStream output;
+        String directory;
+        String[] appArgs;
+        public echo(inputStream inputstream, outputStream outputstream, String[] args){
+            this.input = inputstream;
+            this.output = outputstream;
+            this.directory = System.getProperty("user.dir");
+            this.appArgs = args;
+        }
+        public void accept(baseVisitor visitor){
+            visitor.visit(this);
+        }
     }
 
     public class head implements ourInterface{
-
+        inputStream input;
+        outputStream output;
+        String directory;
+        String[] appArgs;
+        public head(inputStream inputstream, outputStream outputstream, String[] args){
+            this.input = inputstream;
+            this.output = outputstream;
+            this.directory = System.getProperty("user.dir");
+            this.appArgs = args;
+        }
+        public void accept(baseVisitor visitor){
+            visitor.visit(this);
+        }
     }
 
     public class tail implements ourInterface {
@@ -72,14 +96,14 @@ public interface appVisitor{
     public class cat implements ourInterface{
         inputStream input;
         outputStream output;
-        dir directory;
-
-        public cat(inputstream outputstream thisdirectory){
+        String directory;
+        String[] appArgs;
+        public cat(inputStream inputstream, outputStream outputstream, String[] args){
             this.input = inputstream;
             this.output = outputstream;
-            this.directory = thisdirectory;
+            this.directory = System.getProperty("user.dir");
+            this.appArgs = args;
         }
-
         public void accept(baseVisitor visitor){
             visitor.visit(this);
         }
@@ -106,7 +130,19 @@ public interface appVisitor{
     }
 
     public class grep implements ourInterface{
-
+        inputStream input;
+        outputStream output;
+        String directory;
+        String[] appArgs;
+        public grep(inputStream inputstream, outputStream outputstream, String[] args){
+            this.input = inputstream;
+            this.output = outputstream;
+            this.directory = System.getProperty("user.dir");
+            this.appArgs = args;
+        }
+        public void accept(baseVisitor visitor){
+            visitor.visit(this);
+        }
     }
 
 }

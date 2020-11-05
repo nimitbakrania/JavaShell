@@ -20,16 +20,76 @@ public class visitorApplication implements baseVisitor {
         //app function for cd
     }
     public void visit(appVisitor.pwd app);
-    public void visit(appVisitor.echo app);
-    public void visit(appVisitor.head app);
+
+    public void visit(appVisitor.echo app){
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(app.output, StandardCharsets.UTF_8));
+        boolean atLeastOnePrinted = !app.appArgs.isEmpty();
+        int count = 0;
+        for (String arg : app.appArgs) {
+            writer.write(arg);
+            if (count < appArgs.size() - 1) {
+                writer.write(" ");
+            }
+            writer.flush();
+            count++;
+        }
+        if (atLeastOnePrinted) {
+            writer.write(System.getProperty("line.separator"));
+            writer.flush();
+        }
+    }
+
+    public void visit(appVisitor.head app){
+        if (app.appArgs.isEmpty()) {
+            throw new RuntimeException("head: missing arguments");
+        }
+        if (app.appArgs.size() != 1 && app.appArgs.size() != 3) {
+            throw new RuntimeException("head: wrong arguments");
+        }
+        if (app.appArgs.size() == 3 && !app.appArgs.get(0).equals("-n")) {
+            throw new RuntimeException("head: wrong argument " + app.appArgs.get(0));
+        }
+        int headLines = 10;
+        String headArg;
+        if (app.appArgs.size() == 3) {
+            try {
+                headLines = Integer.parseInt(app.appArgs.get(1));
+            } catch (Exception e) {
+                throw new RuntimeException("head: wrong argument " + app.appArgs.get(1));
+            }
+            headArg = app.appArgs.get(2);
+        } else {
+            headArg = app.appArgs.get(0);
+        }
+        File headFile = new File(app.directory + File.separator + headArg);
+        if (headFile.exists()) {
+            Charset encoding = StandardCharsets.UTF_8;
+            Path filePath = Paths.get((String) app.directory + File.separator + headArg);
+            try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
+                for (int i = 0; i < headLines; i++) {
+                    String line = null;
+                    if ((line = reader.readLine()) != null) {
+                        writer.write(line);
+                        writer.write(System.getProperty("line.separator"));
+                        writer.flush();
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("head: cannot open " + headArg);
+            }
+        } else {
+            throw new RuntimeException("head: " + headArg + " does not exist");
+        }
+    }
+
     public void visit(appVisitor.tail app);
 
     public void visit(appVisitor.cat app){
         String currentDirectory = new String(app.directory)
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(core.getOutputStream(), StandardCharsets.UTF_8));
-        InputStream input = core.getInputStream();
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(app.output, StandardCharsets.UTF_8));
+        InputStream input = app.input;
         // decides whether stdin must be used when no args provided
-        if (appArgs.isEmpty()) {
+        if (app.appArgs.isEmpty()) {
             if (input == null) {
                 throw new RuntimeException("cat: missing arguments");
             }
@@ -66,5 +126,44 @@ public class visitorApplication implements baseVisitor {
     }
 
     public void visit(appVisitor.ls app);
-    public void visit(appVisitor.grep app);
+
+    public void visit(appVisitor.grep app){
+        if (app.appArgs.size() < 2) {
+            throw new RuntimeException("grep: wrong number of arguments");
+        }
+        Pattern grepPattern = Pattern.compile(app.appArgs.get(0));
+        int numOfFiles = app.appArgs.size() - 1;
+        Path filePath;
+        Path[] filePathArray = new Path[numOfFiles];
+        Path currentDir = Paths.get(app.directory);
+        for (int i = 0; i < numOfFiles; i++) {
+            filePath = currentDir.resolve(app.appArgs.get(i + 1));
+            if (Files.notExists(filePath) || Files.isDirectory(filePath) ||
+                    !Files.exists(filePath) || !Files.isReadable(filePath)) {
+                throw new RuntimeException("grep: wrong file argument");
+            }
+            filePathArray[i] = filePath;
+        }
+        for (int j = 0; j < filePathArray.length; j++) {
+            Charset encoding = StandardCharsets.UTF_8;
+            try (BufferedReader reader = Files.newBufferedReader(filePathArray[j], encoding)) {
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    Matcher matcher = grepPattern.matcher(line);
+                    if (matcher.find()) {
+                        if (numOfFiles > 1) {
+                            writer.write(app.appArgs.get(j+1));
+                            writer.write(":");
+                        }
+                        writer.write(line);
+                        writer.write(System.getProperty("line.separator"));
+                        writer.flush();
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("grep: cannot open " + app.appArgs.get(j + 1));
+            }
+        }
+    }
+
 }
