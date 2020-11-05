@@ -47,23 +47,35 @@ public interface appVisitor{
     }
 
     public class echo implements ourInterface{
-
-        @Override
-        public void accept(baseVisitor visitor) {
-            // TODO Auto-generated method stub
-
+        inputStream input;
+        outputStream output;
+        String directory;
+        String[] appArgs;
+        public echo(inputStream inputstream, outputStream outputstream, String[] args){
+            this.input = inputstream;
+            this.output = outputstream;
+            this.directory = System.getProperty("user.dir");
+            this.appArgs = args;
         }
-
+        public void accept(baseVisitor visitor){
+            visitor.visit(this);
+        }
     }
 
     public class head implements ourInterface{
-
-        @Override
-        public void accept(baseVisitor visitor) {
-            // TODO Auto-generated method stub
-
+        inputStream input;
+        outputStream output;
+        String directory;
+        String[] appArgs;
+        public head(inputStream inputstream, outputStream outputstream, String[] args){
+            this.input = inputstream;
+            this.output = outputstream;
+            this.directory = System.getProperty("user.dir");
+            this.appArgs = args;
         }
-
+        public void accept(baseVisitor visitor){
+            visitor.visit(this);
+        }
     }
 
     public class tail implements ourInterface {
@@ -97,7 +109,6 @@ public interface appVisitor{
             this.output = output;
             this.directory = thisdirectory;
         }
-
         public void accept(baseVisitor visitor){
             visitor.visit(this);
         }
@@ -124,7 +135,19 @@ public interface appVisitor{
     }
 
     public class grep implements ourInterface{
-    
+        inputStream input;
+        outputStream output;
+        String directory;
+        String[] appArgs;
+        public grep(inputStream inputstream, outputStream outputstream, String[] args){
+            this.input = inputstream;
+            this.output = outputstream;
+            this.directory = System.getProperty("user.dir");
+            this.appArgs = args;
+        }
+        public void accept(baseVisitor visitor){
+            visitor.visit(this);
+        }
     }
 
 }
