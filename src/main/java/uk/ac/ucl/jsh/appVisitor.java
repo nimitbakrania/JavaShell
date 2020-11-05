@@ -16,13 +16,13 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-public interface appVisitor{
+public interface appVisitor {
 
-    public interface ourInterface{
+    public interface ourInterface {
         public void accept(baseVisitor visitor);
     }
 
-    public class cd implements ourInterface{
+    public class cd implements ourInterface {
         InputStream input;
         OutputStream output;
         String directory;
@@ -36,15 +36,15 @@ public interface appVisitor{
         }
     }
 
-    public class pwd implements ourInterface{
+    public class pwd implements ourInterface {
 
     }
 
-    public class echo implements ourInterface{
+    public class echo implements ourInterface {
 
     }
 
-    public class head implements ourInterface{
+    public class head implements ourInterface {
 
     }
 
@@ -69,7 +69,7 @@ public interface appVisitor{
 
     }
 
-    public class cat implements ourInterface{
+    public class cat implements ourInterface {
         inputStream input;
         outputStream output;
         dir directory;
@@ -102,10 +102,9 @@ public interface appVisitor{
 
             visitor.visit(this);
         }
-
     }
 
-    public class grep implements ourInterface{
+    public class grep implements ourInterface {
 
     }
 
