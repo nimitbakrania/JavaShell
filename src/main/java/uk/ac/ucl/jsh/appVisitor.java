@@ -38,13 +38,31 @@ public interface appVisitor{
 
     public class pwd implements ourInterface{
 
+        @Override
+        public void accept(baseVisitor visitor) {
+            // TODO Auto-generated method stub
+
+        }
+
     }
 
     public class echo implements ourInterface{
 
+        @Override
+        public void accept(baseVisitor visitor) {
+            // TODO Auto-generated method stub
+
+        }
+
     }
 
     public class head implements ourInterface{
+
+        @Override
+        public void accept(baseVisitor visitor) {
+            // TODO Auto-generated method stub
+
+        }
 
     }
 
@@ -70,13 +88,13 @@ public interface appVisitor{
     }
 
     public class cat implements ourInterface{
-        inputStream input;
-        outputStream output;
-        dir directory;
+        InputStream input;
+        OutputStream output;
+        String directory;
 
-        public cat(inputstream outputstream thisdirectory){
-            this.input = inputstream;
-            this.output = outputstream;
+        public cat(InputStream input,  OutputStream output, thisdirectory){
+            this.input = input;
+            this.output = output;
             this.directory = thisdirectory;
         }
 
@@ -106,7 +124,7 @@ public interface appVisitor{
     }
 
     public class grep implements ourInterface{
-
+    
     }
 
 }

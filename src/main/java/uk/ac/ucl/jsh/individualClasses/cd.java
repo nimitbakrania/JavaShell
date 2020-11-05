@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import uk.ac.ucl.jsh.core.JshCore;
 
 public class cd implements App {
-
     @Override
     public void run(JshCore core, ArrayList<String> appArgs, InputStream input, OutputStream output) throws IOException {
         if (appArgs.isEmpty()) {

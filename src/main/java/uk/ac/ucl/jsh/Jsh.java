@@ -27,6 +27,32 @@ import org.antlr.v4.runtime.tree.ParseTree;
 public class Jsh {
 
     private static String currentDirectory = System.getProperty("user.dir");
+    final private static String homeDirectory = System.getProperty("user.dir");
+    private static ArrayList<String> commands = new ArrayList<>();
+    private static boolean default_constr = true;
+    public Jsh(){
+
+    }
+    public Jsh(boolean bool) {
+        default_constr = bool;
+
+    }
+
+    public static String getHomeDirectory() {
+        return homeDirectory;
+    }
+
+    public static ArrayList<String> getCommands() {
+		return commands;
+	}
+
+    public static String getCurrentDirectory() {
+        return currentDirectory;
+    }
+    
+    public static void setCurrentDirectory(String dir) {
+        Jsh.currentDirectory = dir;
+    }
 
     public static void eval(String cmdline, OutputStream output) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(output);
