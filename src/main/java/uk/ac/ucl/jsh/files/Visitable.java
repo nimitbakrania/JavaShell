@@ -29,10 +29,22 @@ public interface Visitable {
 
     public class Pwd implements Visitable {
 
-        @Override
-        public void accept(baseVisitor visitor) {
-            // TODO Auto-generated method stub
+        InputStream input;
+        OutputStream output;
+        String directory;
+        ArrayList<String> appArgs;
 
+        public Pwd(InputStream inputstream, OutputStream outputstream, ArrayList<String> appArgs) {
+
+            this.input = inputstream;
+            this.output = outputstream;
+            this.directory = System.getProperty("user.dir");
+            this.appArgs = appArgs;
+        }
+
+        public void accept(baseVisitor visitor) {
+
+            visitor.visit(this);
         }
 
     }
