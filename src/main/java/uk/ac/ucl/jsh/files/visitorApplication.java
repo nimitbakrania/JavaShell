@@ -57,27 +57,6 @@ public class visitorApplication implements baseVisitor {
         writer.flush();
     }
 
-    public void visit(Visitable.Echo app) {
-
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8));
-        boolean atLeastOnePrinted = !appArgs.isEmpty();
-        // arguments printed with space between them, ensuring no space printed after last element
-        int count = 0;
-        for (String arg : appArgs) {
-            writer.write(arg);
-            if (count < appArgs.size() - 1) {
-                writer.write(" ");
-            }
-            writer.flush();
-            count++;
-        }
-
-        // newline only printed if there are arguments called on echo
-        if (atLeastOnePrinted) {
-            writer.write(System.getProperty("line.separator"));
-            writer.flush();
-        }
-    }
 
     public void visit(Visitable.Echo app) {
 
