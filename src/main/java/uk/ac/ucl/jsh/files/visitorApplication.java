@@ -34,11 +34,6 @@ public class visitorApplication implements baseVisitor {
             throw new RuntimeException("cd: " + dirString + " is not an existing directory");
         }
         app.currentDirectory = dir.getCanonicalPath();
-        break;
-        case "pwd":
-        writer.write(app.currentDirectory);
-        writer.write(System.getProperty("line.separator"));
-        writer.flush();
     }
 
     public void visit(Visitable.Pwd app) {
