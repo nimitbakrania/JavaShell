@@ -12,15 +12,15 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String directory;
+        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Cd(InputStream inputstream, OutputStream outputstream, ArrayList<String> appArgs, String thisDirectory) {
+        public Cd(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.directory = thisDirectory;
-            this.appArgs = appArgs;
+            this.currentDirectory = thisDirectory;
+            this.appArgs = args;
         }
 
         public void accept(baseVisitor visitor) {
@@ -33,15 +33,15 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String directory;
+        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Pwd(InputStream inputstream, OutputStream outputstream, ArrayList<String> appArgs, String thisDirectory) {
+        public Pwd(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.directory = thisDirectory;
-            this.appArgs = appArgs;
+            this.currentDirectory = thisDirectory;
+            this.appArgs = args;
         }
 
         public void accept(baseVisitor visitor) {
@@ -55,15 +55,15 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String directory;
+        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Echo(InputStream inputstream, OutputStream outputstream, ArrayList<String> appArgs, String thisDirectory) {
+        public Echo(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.directory = thisDirectory;
-            this.appArgs = appArgs;
+            this.currentDirectory = thisDirectory;
+            this.appArgs = args;
         }
 
         public void accept(baseVisitor visitor) {
@@ -76,15 +76,15 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String directory;
+        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Head(InputStream inputstream, OutputStream outputstream, ArrayList<String> appArgs, String thisDirectory) {
+        public Head(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.directory = thisDirectory;
-            this.appArgs = appArgs;
+            this.currentDirectory = thisDirectory;
+            this.appArgs = args;
         }
 
         public void accept(baseVisitor visitor) {
@@ -97,15 +97,15 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String directory;
+        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Tail(InputStream inputstream, OutputStream outputstream, ArrayList<String> appArgs, String thisDirectory) {
+        public Tail(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.directory = thisDirectory;
-            this.appArgs = appArgs;
+            this.currentDirectory = thisDirectory;
+            this.appArgs = args;
         }
 
         public void accept(baseVisitor visitor) {
@@ -119,15 +119,15 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String directory;
+        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Cat(InputStream inputstream, OutputStream outputstream, ArrayList<String> appArgs, String thisDirectory) {
+        public Cat(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.directory = thisDirectory;
-            this.appArgs = appArgs;
+            this.currentDirectory = thisDirectory;
+            this.appArgs = args;
         }
 
         public void accept(baseVisitor visitor) {
@@ -140,15 +140,15 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String directory;
+        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Ls(InputStream inputstream, OutputStream outputstream, ArrayList<String> appArgs, String thisDirectory) {
+        public Ls(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.directory = thisDirectory;
-            this.appArgs = appArgs;
+            this.currentDirectory = thisDirectory;
+            this.appArgs = args;
         }
 
         public void accept(baseVisitor visitor) {
@@ -161,15 +161,15 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String directory;
+        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Grep(InputStream inputstream, OutputStream outputstream, ArrayList<String> appArgs, String thisDirectory) {
+        public Grep(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.directory = thisDirectory;
-            this.appArgs = appArgs;
+            this.currentDirectory = thisDirectory;
+            this.appArgs = args;
         }
 
         public void accept(baseVisitor visitor) {

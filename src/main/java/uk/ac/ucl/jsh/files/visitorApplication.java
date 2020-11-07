@@ -23,53 +23,43 @@ public class visitorApplication implements baseVisitor {
     public visitorApplication() { }
 
     public void visit(Visitable.Cd app) {
-
-        if (appArgs.isEmpty()) {
-            // takes user to home directory when 'cd' is called alone
-            Jsh.setCurrentDirectory(Jsh.getHomeDirectory());
-        }
-        else if (appArgs.size() > 1) {
+        if (app.appArgs.isEmpty()) {
+            throw new RuntimeException("cd: missing argument");
+        } else if (app.appArgs.size() > 1) {
             throw new RuntimeException("cd: too many arguments");
         }
-        else {
-            // takes user to directory specified in arg
-            String currentDirectory = Jsh.getCurrentDirectory();
-            String dirString = appArgs.get(0);
-            File dir = new File(currentDirectory, dirString);
-            
-            if (!dir.exists() || !dir.isDirectory()) {
-                throw new RuntimeException("cd: " + dirString + " is not an existing directory");
-            }
-    
-            currentDirectory = dir.getCanonicalPath();
-            Jsh.setCurrentDirectory(currentDirectory);
+        String dirString = app.appArgs.get(0);
+        File dir = new File(app.currentDirectory, dirString);
+        if (!dir.exists() || !dir.isDirectory()) {
+            throw new RuntimeException("cd: " + dirString + " is not an existing directory");
         }
+        app.currentDirectory = dir.getCanonicalPath();
+        break;
+        case "pwd":
+        writer.write(app.currentDirectory);
+        writer.write(System.getProperty("line.separator"));
+        writer.flush();
     }
 
     public void visit(Visitable.Pwd app) {
 
-        if(appArgs.isEmpty()){
+        if(app.appArgs.isEmpty()){
             throw new RuntimeException("pwd: too many arguments");
         }
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8));
-        writer.write(core.getCurrentDirectory().toString());
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(app.output, StandardCharsets.UTF_8));
+        writer.write(core.getapp.currentDirectory().toString());
         writer.write(System.getProperty("line.separator"));
         writer.flush();
     }
 
 
     public void visit(Visitable.Echo app) {
-
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(app.output, StandardCharsets.UTF_8));
-        boolean atLeastOnePrinted = !app.appArgs.isEmpty();
-        int count = 0;
+        boolean atLeastOnePrinted = false;
         for (String arg : app.appArgs) {
             writer.write(arg);
-            if (count < appArgs.size() - 1) {
-                writer.write(" ");
-            }
+            writer.write(" ");
             writer.flush();
-            count++;
+            atLeastOnePrinted = true;
         }
         if (atLeastOnePrinted) {
             writer.write(System.getProperty("line.separator"));
@@ -78,7 +68,6 @@ public class visitorApplication implements baseVisitor {
     }
 
     public void visit(Visitable.Head app) {
-
         if (app.appArgs.isEmpty()) {
             throw new RuntimeException("head: missing arguments");
         }
@@ -100,10 +89,10 @@ public class visitorApplication implements baseVisitor {
         } else {
             headArg = app.appArgs.get(0);
         }
-        File headFile = new File(app.directory + File.separator + headArg);
+        File headFile = new File(app.currentDirectory + File.separator + headArg);
         if (headFile.exists()) {
             Charset encoding = StandardCharsets.UTF_8;
-            Path filePath = Paths.get((String) app.directory + File.separator + headArg);
+            Path filePath = Paths.get((String) app.currentDirectory + File.separator + headArg);
             try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
                 for (int i = 0; i < headLines; i++) {
                     String line = null;
@@ -122,7 +111,6 @@ public class visitorApplication implements baseVisitor {
     }
 
     public void visit(Visitable.Tail app) {
-
         if (app.appArgs.isEmpty()) {
             throw new RuntimeException("tail: missing arguments");
         }
@@ -132,7 +120,6 @@ public class visitorApplication implements baseVisitor {
         if (app.appArgs.size() == 3 && !app.appArgs.get(0).equals("-n")) {
             throw new RuntimeException("tail: wrong argument " + app.appArgs.get(0));
         }
-        
         int tailLines = 10;
         String tailArg;
         if (app.appArgs.size() == 3) {
@@ -145,11 +132,10 @@ public class visitorApplication implements baseVisitor {
         } else {
             tailArg = app.appArgs.get(0);
         }
-
-        File tailFile = new File(currentDirectory + File.separator + tailArg);
+        File tailFile = new File(app.currentDirectory + File.separator + tailArg);
         if (tailFile.exists()) {
             Charset encoding = StandardCharsets.UTF_8;
-            Path filePath = Paths.get((String) currentDirectory + File.separator + tailArg);
+            Path filePath = Paths.get((String) app.currentDirectory + File.separator + tailArg);
             ArrayList<String> storage = new ArrayList<>();
             try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
                 String line = null;
@@ -163,9 +149,9 @@ public class visitorApplication implements baseVisitor {
                     index = storage.size() - tailLines;
                 }
                 for (int i = index; i < storage.size(); i++) {
-                    app.output.write(storage.get(i) + System.getProperty("line.separator"));
-                    app.output.flush();
-                }            
+                    writer.write(storage.get(i) + System.getProperty("line.separator"));
+                    writer.flush();
+                }
             } catch (IOException e) {
                 throw new RuntimeException("tail: cannot open " + tailArg);
             }
@@ -175,72 +161,54 @@ public class visitorApplication implements baseVisitor {
     }
 
     public void visit(Visitable.Cat app) {
-
-        String currentDirectory = new String(app.directory)
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(app.output, StandardCharsets.UTF_8));
-        InputStream input = app.input;
-        // decides whether stdin must be used when no args provided
         if (app.appArgs.isEmpty()) {
-            if (input == null) {
-                throw new RuntimeException("cat: missing arguments");
-            }
-            else {
-                String line = new String(input.readAllBytes());
-                writer.write(line);
-                writer.flush();
-            }
-        }
-        else {
-            File currFile = new File(currentDirectory + File.separator + arg);
-
-            if(currFile.isDirectory()){
-                writer.write("cat: " + currFile.getName() + " is a directory");
-                writer.write(System.getProperty("line.separator"));
-                writer.flush();
-                continue;
-            }
-
-            if (currFile.exists()) {
-                Path filePath = Paths.get(currentDirectory + File.separator + arg);
-                try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
-                    String line = null;
-                    while ((line = reader.readLine()) != null) {
-                        writer.write(String.valueOf(line));
-                        writer.write(System.getProperty("line.separator"));
-                        writer.flush();
+            throw new RuntimeException("cat: missing arguments");
+        } else {
+            for (String arg : app.appArgs) {
+                Charset encoding = StandardCharsets.UTF_8;
+                File currFile = new File(app.currentDirectory + File.separator + arg);
+                if (currFile.exists()) {
+                    Path filePath = Paths.get(app.currentDirectory + File.separator + arg);
+                    try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
+                        String line = null;
+                        while ((line = reader.readLine()) != null) {
+                            writer.write(String.valueOf(line));
+                            writer.write(System.getProperty("line.separator"));
+                            writer.flush();
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException("cat: cannot open " + arg);
                     }
+                } else {
+                    throw new RuntimeException("cat: file does not exist");
                 }
-            } else {
-                throw new RuntimeException("cat: file does not exist");
             }
         }
     }
 
     public void visit(Visitable.Ls app) {
-
         File currDir;
         if (app.appArgs.isEmpty()) {
-            currDir = new File(currentDirectory);
+            currDir = new File(app.currentDirectory);
         } else if (app.appArgs.size() == 1) {
             currDir = new File(app.appArgs.get(0));
         } else {
             throw new RuntimeException("ls: too many arguments");
         }
-
         try {
             File[] listOfFiles = currDir.listFiles();
             boolean atLeastOnePrinted = false;
             for (File file : listOfFiles) {
                 if (!file.getName().startsWith(".")) {
-                    app.output.write(file.getName());
-                    app.output.write("\t");
-                    app.output.flush();
+                    writer.write(file.getName());
+                    writer.write("\t");
+                    writer.flush();
                     atLeastOnePrinted = true;
                 }
             }
             if (atLeastOnePrinted) {
-                app.output.write(System.getProperty("line.separator"));
-                app.output.flush();
+                writer.write(System.getProperty("line.separator"));
+                writer.flush();
             }
         } catch (NullPointerException e) {
             throw new RuntimeException("ls: no such directory");
@@ -248,7 +216,6 @@ public class visitorApplication implements baseVisitor {
     }
 
     public void visit(Visitable.Grep app) {
-
         if (app.appArgs.size() < 2) {
             throw new RuntimeException("grep: wrong number of arguments");
         }
@@ -256,7 +223,7 @@ public class visitorApplication implements baseVisitor {
         int numOfFiles = app.appArgs.size() - 1;
         Path filePath;
         Path[] filePathArray = new Path[numOfFiles];
-        Path currentDir = Paths.get(app.directory);
+        Path currentDir = Paths.get(app.currentDirectory);
         for (int i = 0; i < numOfFiles; i++) {
             filePath = currentDir.resolve(app.appArgs.get(i + 1));
             if (Files.notExists(filePath) || Files.isDirectory(filePath) ||
