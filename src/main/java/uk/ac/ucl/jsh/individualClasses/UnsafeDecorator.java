@@ -6,16 +6,16 @@ import java.util.ArrayList;
 
 // catch all exceptions here and print instead of throwing, allowing the program to continue instead of terminating
 public class UnsafeDecorator implements App {
-    private App app;
+    private Visitable app;
 
-    public UnsafeDecorator(App application)
+    public UnsafeDecorator(Visitable application)
     {
-        app = application;
+        this.app = application;
     }
     @Override
-    public void run(ArrayList<String> appArgs, InputStream input, OutputStream output) throws IOException {
+    public void accept(baseVisitor visitor) throws IOException {
         try{
-            app.run(appArgs, input, output);
+            this.app.accept(visitor);
         }
         catch(Exception e)
         {
