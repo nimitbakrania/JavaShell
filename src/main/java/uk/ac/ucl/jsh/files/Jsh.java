@@ -3,7 +3,6 @@ package uk.ac.ucl.jsh.files;
 import java.util.Scanner;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 public class Jsh {
@@ -22,7 +21,7 @@ public class Jsh {
 
         for (ArrayList<String> line : lines) {
             // we are assuming theyre all call.
-            call.eval(null, output, line.get(0), this.currentDirectory, line.subList(1, line.size()));         // first argument is application name eg "cd", "grep" the second argument is appArgs.
+            call.eval(null, output, line.get(0), this.currentDirectory, (ArrayList<String>)line.subList(1, line.size()));         // first argument is application name eg "cd", "grep" the second argument is appArgs.
         }
 
     }
