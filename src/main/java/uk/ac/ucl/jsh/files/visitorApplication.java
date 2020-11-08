@@ -3,16 +3,13 @@ package uk.ac.ucl.jsh.files;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,7 +19,7 @@ public class visitorApplication implements baseVisitor {
 
     public visitorApplication() { }
 
-    public void visit(Visitable.Cd app) {
+    public void visit(Visitable.Cd app) throws IOException{
         if (app.appArgs.isEmpty()) {
             throw new RuntimeException("cd: missing argument");
         } else if (app.appArgs.size() > 1) {
@@ -36,19 +33,20 @@ public class visitorApplication implements baseVisitor {
         app.currentDirectory = dir.getCanonicalPath();
     }
 
-    public void visit(Visitable.Pwd app) {
+    public void visit(Visitable.Pwd app) throws IOException{
 
         if(app.appArgs.isEmpty()){
             throw new RuntimeException("pwd: too many arguments");
         }
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(app.output, StandardCharsets.UTF_8));
-        writer.write(core.getapp.currentDirectory().toString());
+        OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
+        writer.write(app.currentDirectory.toString());
         writer.write(System.getProperty("line.separator"));
         writer.flush();
     }
 
 
-    public void visit(Visitable.Echo app) {
+    public void visit(Visitable.Echo app) throws IOException{
+        OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         boolean atLeastOnePrinted = false;
         for (String arg : app.appArgs) {
             writer.write(arg);
@@ -62,7 +60,8 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
-    public void visit(Visitable.Head app) {
+    public void visit(Visitable.Head app) throws IOException{
+        OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         if (app.appArgs.isEmpty()) {
             throw new RuntimeException("head: missing arguments");
         }
@@ -105,7 +104,8 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
-    public void visit(Visitable.Tail app) {
+    public void visit(Visitable.Tail app) throws IOException{
+        OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         if (app.appArgs.isEmpty()) {
             throw new RuntimeException("tail: missing arguments");
         }
@@ -155,7 +155,8 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
-    public void visit(Visitable.Cat app) {
+    public void visit(Visitable.Cat app) throws IOException{
+        OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         if (app.appArgs.isEmpty()) {
             throw new RuntimeException("cat: missing arguments");
         } else {
@@ -181,7 +182,8 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
-    public void visit(Visitable.Ls app) {
+    public void visit(Visitable.Ls app) throws IOException{
+        OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         File currDir;
         if (app.appArgs.isEmpty()) {
             currDir = new File(app.currentDirectory);
@@ -210,7 +212,8 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
-    public void visit(Visitable.Grep app) {
+    public void visit(Visitable.Grep app) throws IOException{
+        OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         if (app.appArgs.size() < 2) {
             throw new RuntimeException("grep: wrong number of arguments");
         }
