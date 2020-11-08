@@ -8,35 +8,35 @@ public class Factory {
 
     public Factory() { }
 
-    public Visitable mkApplication(InputStream in, OutputStream out, String currentDirectory, String application, ArrayList<String> appArgs) {
-        Visitable app;
+    public UnsafeDecorator mkApplication(InputStream in, OutputStream out, String currentDirectory, String application, ArrayList<String> appArgs) {
+        UnsafeDecorator app;
         switch (application) {
             case "cd":
-                app = new Visitable.Cd(in, out, currentDirectory, appArgs);
+                app = new UnsafeDecorator(new Visitable.Cd(in, out, appArgs, currentDirectory));
                 break;
             case "pwd":
-                app = new Visitable.Pwd(in, out, currentDirectory, appArgs);
+                app = new UnsafeDecorator(new Visitable.Pwd(in, out, appArgs, currentDirectory));
                 break;
             case "find":
-                app = new Visitable.Find(in, out, currentDirectory, appArgs);
+                app = new UnsafeDecorator(new Visitable.Find(in, out, appArgs, currentDirectory));
                 break;
             case "ls":
-                app = new Visitable.Ls(in, out, currentDirectory, appArgs);
+                app = new UnsafeDecorator(new Visitable.Ls(in, out, appArgs, currentDirectory));
                 break;
             case "cat":
-                app = new Visitable.Cat(in, out, currentDirectory, appArgs);
+                app = new UnsafeDecorator(new Visitable.Cat(in, out, appArgs, currentDirectory));
                 break;
             case "echo":
-                app = new Visitable.Echo(in, out, currentDirectory, appArgs);
+                app = new UnsafeDecorator(new Visitable.Echo(in, out, appArgs, currentDirectory));
                 break;
             case "head":
-                app = new Visitable.Head(in, out, currentDirectory, appArgs);
+                app = new UnsafeDecorator(new Visitable.Head(in, out, appArgs, currentDirectory));
                 break;
             case "tail":
-                app = new Visitable.Tail(in, out, currentDirectory, appArgs);
+                app = new UnsafeDecorator(new Visitable.Tail(in, out, appArgs, currentDirectory));
                 break;
             case "grep":
-                app = new Visitable.Grep(in, out, currentDirectory, appArgs);
+                app = new UnsafeDecorator(new Visitable.Grep(in, out, appArgs, currentDirectory));
                 break;
             default:
                 throw new RuntimeException(application + ": unknown application");
