@@ -1,12 +1,13 @@
 package uk.ac.ucl.jsh.files;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
 public interface Visitable {
-    
-    public void accept(baseVisitor visitor);
+
+    public void accept(baseVisitor visitor) throws IOException;
 
     public class Cd implements Visitable {
 
@@ -23,7 +24,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) {
+        public void accept(baseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -44,7 +45,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) {
+        public void accept(baseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -66,7 +67,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) {
+        public void accept(baseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -87,7 +88,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) {
+        public void accept(baseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -108,7 +109,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) {
+        public void accept(baseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -130,7 +131,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) {
+        public void accept(baseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -151,7 +152,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) {
+        public void accept(baseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -172,7 +173,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) {
+        public void accept(baseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
