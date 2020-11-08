@@ -22,7 +22,7 @@ public class NewJSH {
 
         for (ArrayList<String> line : lines) {
             // we are assuming theyre all call.
-            call.eval(null, output, line.get(0), line.subList(1, line.size());         // first argument is application name eg "cd", "grep" the second argument is appArgs.
+            call.eval(null, output, line.get(0), this.currentDirectory, line.subList(1, line.size());         // first argument is application name eg "cd", "grep" the second argument is appArgs.
         }
 
     }
