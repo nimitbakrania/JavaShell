@@ -17,9 +17,6 @@ public class Factory {
             case "pwd":
                 app = new UnsafeDecorator(new Visitable.Pwd(in, out, appArgs, currentDirectory));
                 break;
-            case "find":
-                app = new UnsafeDecorator(new Visitable.Find(in, out, appArgs, currentDirectory));
-                break;
             case "ls":
                 app = new UnsafeDecorator(new Visitable.Ls(in, out, appArgs, currentDirectory));
                 break;
@@ -42,4 +39,5 @@ public class Factory {
                 throw new RuntimeException(application + ": unknown application");
             }
 		return app;
+    }
 }

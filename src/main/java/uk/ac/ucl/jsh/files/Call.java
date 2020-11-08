@@ -11,7 +11,7 @@ public class Call implements Command {
     public void eval(InputStream in, OutputStream out, String currentDirectory, String app, ArrayList<String> appArgs) {
 
         Factory factory = new Factory();
-        UnsafeDecorator application = factory.mkApplication(in, out, app, appArgs);
+        UnsafeDecorator application = factory.mkApplication(in, out, currentDirectory, app, appArgs);
         application.accept(visitor);
     }
     

@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
-public class NewJSH {
+public class Jsh {
 
     private Parser parser = new Parser();
     private String currentDirectory = System.getProperty("user.dir");
@@ -22,13 +22,13 @@ public class NewJSH {
 
         for (ArrayList<String> line : lines) {
             // we are assuming theyre all call.
-            call.eval(null, output, line.get(0), this.currentDirectory, line.subList(1, line.size());         // first argument is application name eg "cd", "grep" the second argument is appArgs.
+            call.eval(null, output, line.get(0), this.currentDirectory, line.subList(1, line.size()));         // first argument is application name eg "cd", "grep" the second argument is appArgs.
         }
 
     }
 
     public static void main(String[] args) {
-        NewJSH obj = new NewJSH();
+        Jsh obj = new Jsh();
         if (args.length > 0) {
             if (args.length != 2) {
                 System.out.println("jsh: wrong number of arguments");
@@ -46,7 +46,7 @@ public class NewJSH {
             Scanner input = new Scanner(System.in);
             try {
                 while (true) {
-                    String prompt = obj.core.getCurrentDirectory() + "> ";
+                    String prompt = System.getProperty("user.dir") + "> ";
                     System.out.print(prompt);
                     try {
                         String cmdline = input.nextLine();
