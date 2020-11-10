@@ -1,4 +1,4 @@
-package uk.ac.ucl.jsh.files;
+package uk.ac.ucl.jsh;
 
 // catch all exceptions here and print instead of throwing, allowing the program to continue instead of terminating
 public class UnsafeDecorator {

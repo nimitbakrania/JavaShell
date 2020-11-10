@@ -1,20 +1,15 @@
-package uk.ac.ucl.jsh.files;
+package uk.ac.ucl.jsh;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import uk.ac.ucl.jsh.JshGrammarLexer;
+import uk.ac.ucl.jsh.JshGrammarParser;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -27,8 +22,11 @@ public class Parser {
     
     private String currCmdline;
 
-    public Parser() {
-        currCmdline = "";
+    public Parser() { }
+
+    private void setCmdline(String cmdline) {
+
+        this.currCmdline = cmdline;
     }
 
     /* This calls get_commands to seperate all the commands in the cmdline. It then goes through each command
@@ -43,7 +41,7 @@ public class Parser {
     */ 
     public ArrayList<ArrayList<String>> parse(String cmdline, String currentDirectory) throws IOException {
 
-        this.currCmdline = cmdline;
+        setCmdline(cmdline);
         ArrayList<String> rawCommands = getCommands();
         ArrayList<ArrayList<String>> ret = new ArrayList<ArrayList<String>>();
         
@@ -59,7 +57,7 @@ public class Parser {
     */
     private ArrayList<String> getCommands() {
 
-        CharStream parserInput = CharStreams.fromString(currCmdline); 
+        CharStream parserInput = CharStreams.fromString(this.currCmdline); 
         JshGrammarLexer lexer = new JshGrammarLexer(parserInput);
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);        
         JshGrammarParser parser = new JshGrammarParser(tokenStream);
