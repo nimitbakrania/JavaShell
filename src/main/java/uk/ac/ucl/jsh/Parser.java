@@ -29,6 +29,58 @@ public class Parser {
         this.currCmdline = cmdline;
     }
 
+    public ArrayList<ArrayList<String>> parse(String cmdline, String currentDirectory) throws IOException {
+
+        ArrayList<ArrayList<String>> ret = new ArrayList<ArrayList<String>>();
+        
+        CharStream parserInput = CharStreams.fromString(cmdline); 
+        JshGrammarLexer lexer = new JshGrammarLexer(parserInput);
+        CommonTokenStream tokenStream = new CommonTokenStream(lexer);        
+        JshGrammarParser parser = new JshGrammarParser(tokenStream);
+        ParseTree tree = parser.command();
+
+        ArrayList<String> rawCommands = new ArrayList<String>();
+        String lastSubcommand = "";
+        for (int i=0; i<tree.getChildCount(); i++) {
+            if (!tree.getChild(i).getText().equals(";")) {
+                lastSubcommand += tree.getChild(i).getText();
+            } else {
+                rawCommands.add(lastSubcommand);
+                lastSubcommand = "";
+            }
+        }
+        rawCommands.add(lastSubcommand);
+        
+        for (String rawCommand : rawCommands) {
+            String spaceRegex = "[^\\s\"']+|\"([^\"]*)\"|'([^']*)'";
+            ArrayList<String> tokens = new ArrayList<String>();           // Holds the seperated cmd tokens.
+            Pattern regex = Pattern.compile(spaceRegex);
+            Matcher regexMatcher = regex.matcher(rawCommand);
+            String nonQuote;
+            while (regexMatcher.find()) {
+                if (regexMatcher.group(1) != null || regexMatcher.group(2) != null) {
+                    String quoted = regexMatcher.group(0).trim();
+                    tokens.add(quoted.substring(1,quoted.length()-1));
+                } else {
+                    nonQuote = regexMatcher.group().trim();
+                    ArrayList<String> globbingResult = new ArrayList<String>();
+                    Path dir = Paths.get(currentDirectory);
+                    DirectoryStream<Path> stream = Files.newDirectoryStream(dir, nonQuote);
+                    for (Path entry : stream) {
+                        globbingResult.add(entry.getFileName().toString());
+                    }
+                    if (globbingResult.isEmpty()) {
+                        globbingResult.add(nonQuote);
+                    }
+                    tokens.addAll(globbingResult);
+                }
+            }
+            ret.add(tokens);
+        }
+
+        return ret;
+    }
+
     /* This calls get_commands to seperate all the commands in the cmdline. It then goes through each command
        and splits each one into tokens. It puts the tokens in each command into a seperate arraylist and adds them into
        ret.
@@ -39,7 +91,7 @@ public class Parser {
        @throws = IOException if ...
  
     */ 
-    public ArrayList<ArrayList<String>> parse(String cmdline, String currentDirectory) throws IOException {
+    public ArrayList<ArrayList<String>> parse2(String cmdline, String currentDirectory) throws IOException {
 
         setCmdline(cmdline);
         ArrayList<String> rawCommands = getCommands();
@@ -52,9 +104,7 @@ public class Parser {
         return ret;
     }
 
-    /* Run this when parsing a command from cmd. It will return app_args which can be passed
-       to ApplicationRunner to run application.
-    */
+    /*
     private ArrayList<String> getCommands() {
 
         CharStream parserInput = CharStreams.fromString(this.currCmdline); 
@@ -77,12 +127,6 @@ public class Parser {
         return rawCommands;
     }
 
-    /* Goes through the command given and splits it into tokens. The token at index 0 in ret array
-       is app name while rest are app args.
-       @params = raw_command : command to tokenize.
-                 current_directory : directory that jsh is currently running in.
-       @returns = arraylist containing tokens.
-    */
     private ArrayList<String> splitIn2Tokens(String rawCommand, String currentDirectory) throws IOException {
 
         String spaceRegex = "[^\\s\"']+|\"([^\"]*)\"|'([^']*)'";
@@ -112,4 +156,5 @@ public class Parser {
         ArrayList<String> ret = new ArrayList<String>(tokens.subList(0, tokens.size()));
         return ret;
     }
+    */
 }
