@@ -1,5 +1,5 @@
 package uk.ac.ucl.jsh;
-
+/*
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -16,8 +16,8 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-/* This class is responsible for parsing the input written in the jsh.
-*/
+ This class is responsible for parsing the input written in the jsh.
+
 public class Parser {
     
     private String currCmdline;
@@ -81,17 +81,8 @@ public class Parser {
         return ret;
     }
 
-    /* This calls get_commands to seperate all the commands in the cmdline. It then goes through each command
-       and splits each one into tokens. It puts the tokens in each command into a seperate arraylist and adds them into
-       ret.
-       @params = cmdline : arguments supplied on commandline
-                 current_directory : directory we are currently in.
-       @returns = Arraylist containing arraylists of tokenized commands. Each arraylist contains tokens for one command.
-                  The value at index 0 in each arraylist is the application name.
-       @throws = IOException if ...
- 
-    */ 
-    public ArrayList<ArrayList<String>> parse2(String cmdline, String currentDirectory) throws IOException {
+    /* 
+    public ArrayList<ArrayList<String>> parse(String cmdline, String currentDirectory) throws IOException {
 
         setCmdline(cmdline);
         ArrayList<String> rawCommands = getCommands();
@@ -104,7 +95,7 @@ public class Parser {
         return ret;
     }
 
-    /*
+    
     private ArrayList<String> getCommands() {
 
         CharStream parserInput = CharStreams.fromString(this.currCmdline); 
@@ -156,5 +147,6 @@ public class Parser {
         ArrayList<String> ret = new ArrayList<String>(tokens.subList(0, tokens.size()));
         return ret;
     }
-    */
+    
 }
+*/
