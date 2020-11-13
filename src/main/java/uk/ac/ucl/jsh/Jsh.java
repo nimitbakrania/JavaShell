@@ -44,7 +44,7 @@ public class Jsh {
         rawCommands.add(lastSubcommand);
         for (String rawCommand : rawCommands) {
             String spaceRegex = "[^\\s\"']+|\"([^\"]*)\"|'([^']*)'";
-            ArrayList<String> tokens = new ArrayList<String>();           // Holds the seperated cmd tokens.
+            ArrayList<String> tokens = new ArrayList<String>();          
             Pattern regex = Pattern.compile(spaceRegex);
             Matcher regexMatcher = regex.matcher(rawCommand);
             String nonQuote;
@@ -66,7 +66,7 @@ public class Jsh {
                     tokens.addAll(globbingResult);
                 }
             }
-            call.eval(null, output, tokens.get(0), this.currentDirectory, (ArrayList<String>)tokens.subList(1, tokens.size()));         // first argument is application name eg "cd", "grep" the second argument is appArgs.
+            call.eval(null, output, tokens.get(0), this.currentDirectory, (ArrayList<String>)tokens.subList(1, tokens.size()));         
         }
 
     }
