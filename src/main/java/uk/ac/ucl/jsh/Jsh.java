@@ -4,17 +4,7 @@ import java.util.Scanner;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
 
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
 
 public class Jsh {
 
@@ -23,50 +13,12 @@ public class Jsh {
 
     public static void eval(String cmdline, OutputStream output) throws IOException {
         
+        OurParser parser = new OurParser();
         Call call = new Call();
-        CharStream parserInput = CharStreams.fromString(cmdline); 
-        JshGrammarLexer lexer = new JshGrammarLexer(parserInput);
-        CommonTokenStream tokenStream = new CommonTokenStream(lexer);        
-        JshGrammarParser parser = new JshGrammarParser(tokenStream);
-        ParseTree tree = parser.command();
-
-        ArrayList<String> rawCommands = new ArrayList<String>();
-        String lastSubcommand = "";
-        for (int i=0; i<tree.getChildCount(); i++) {
-            if (!tree.getChild(i).getText().equals(";")) {
-                lastSubcommand += tree.getChild(i).getText();
-            } else {
-                rawCommands.add(lastSubcommand);
-                lastSubcommand = "";
-            }
-        }
-        rawCommands.add(lastSubcommand);
-        for (String rawCommand : rawCommands) {
-            String spaceRegex = "[^\\s\"']+|\"([^\"]*)\"|'([^']*)'";
-            ArrayList<String> tokens = new ArrayList<String>();           // Holds the seperated cmd tokens.
-            Pattern regex = Pattern.compile(spaceRegex);
-            Matcher regexMatcher = regex.matcher(rawCommand);
-            String nonQuote;
-            while (regexMatcher.find()) {
-                if (regexMatcher.group(1) != null || regexMatcher.group(2) != null) {
-                    String quoted = regexMatcher.group(0).trim();
-                    tokens.add(quoted.substring(1,quoted.length()-1));
-                } else {
-                    nonQuote = regexMatcher.group().trim();
-                    ArrayList<String> globbingResult = new ArrayList<String>();
-                    Path dir = Paths.get(currentDirectory);
-                    DirectoryStream<Path> stream = Files.newDirectoryStream(dir, nonQuote);
-                    for (Path entry : stream) {
-                        globbingResult.add(entry.getFileName().toString());
-                    }
-                    if (globbingResult.isEmpty()) {
-                        globbingResult.add(nonQuote);
-                    }
-                    tokens.addAll(globbingResult);
-                }
-            }
-            String appName = tokens.get(0);
-            ArrayList<String> appArgs = new ArrayList<String>(tokens.subList(1, tokens.size()));
+        ArrayList<ArrayList<String>> lines = parser.parse(cmdline, currentDirectory);
+        for (ArrayList<String> line : lines) {
+            String appName = line.get(0);
+            ArrayList<String> appArgs = (ArrayList<String>) line.subList(1, line.size());
             call.eval(null, System.out, currentDirectory, appName, appArgs);
         }
     }
