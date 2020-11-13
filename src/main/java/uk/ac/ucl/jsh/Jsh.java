@@ -18,19 +18,18 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 public class Jsh {
 
-    private String currentDirectory = System.getProperty("user.dir");
+    private static String currentDirectory = System.getProperty("user.dir");
 
 
-    private void eval(String cmdline, OutputStream output) throws IOException {
-
+    public static void eval(String cmdline, OutputStream output) throws IOException {
+        
         Call call = new Call();
-
         CharStream parserInput = CharStreams.fromString(cmdline); 
         JshGrammarLexer lexer = new JshGrammarLexer(parserInput);
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);        
         JshGrammarParser parser = new JshGrammarParser(tokenStream);
         ParseTree tree = parser.command();
-         
+
         ArrayList<String> rawCommands = new ArrayList<String>();
         String lastSubcommand = "";
         for (int i=0; i<tree.getChildCount(); i++) {
@@ -44,7 +43,7 @@ public class Jsh {
         rawCommands.add(lastSubcommand);
         for (String rawCommand : rawCommands) {
             String spaceRegex = "[^\\s\"']+|\"([^\"]*)\"|'([^']*)'";
-            ArrayList<String> tokens = new ArrayList<String>();          
+            ArrayList<String> tokens = new ArrayList<String>();           // Holds the seperated cmd tokens.
             Pattern regex = Pattern.compile(spaceRegex);
             Matcher regexMatcher = regex.matcher(rawCommand);
             String nonQuote;
@@ -66,13 +65,13 @@ public class Jsh {
                     tokens.addAll(globbingResult);
                 }
             }
-            call.eval(null, output, tokens.get(0), this.currentDirectory, (ArrayList<String>)tokens.subList(1, tokens.size()));         
+            String appName = tokens.get(0);
+            ArrayList<String> appArgs = new ArrayList<String>(tokens.subList(1, tokens.size()));
+            call.eval(null, System.out, currentDirectory, appName, appArgs);
         }
-
     }
 
     public static void main(String[] args) {
-        Jsh obj = new Jsh();
         if (args.length > 0) {
             if (args.length != 2) {
                 System.out.println("jsh: wrong number of arguments");
@@ -82,7 +81,7 @@ public class Jsh {
                 System.out.println("jsh: " + args[0] + ": unexpected argument");
             }
             try {
-                obj.eval(args[1], System.out);
+                eval(args[1], System.out);
             } catch (Exception e) {
                 System.out.println("jsh: " + e.getMessage());
             }
@@ -90,11 +89,11 @@ public class Jsh {
             Scanner input = new Scanner(System.in);
             try {
                 while (true) {
-                    String prompt = System.getProperty("user.dir") + "> ";
+                    String prompt = currentDirectory + "> ";
                     System.out.print(prompt);
                     try {
                         String cmdline = input.nextLine();
-                        obj.eval(cmdline, System.out);
+                        eval(cmdline, System.out);
                     } catch (Exception e) {
                         System.out.println("jsh: " + e.getMessage());
                     }
@@ -104,5 +103,4 @@ public class Jsh {
             }
         }
     }
-    
 }
