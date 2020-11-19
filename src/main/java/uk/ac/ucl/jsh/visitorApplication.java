@@ -20,6 +20,13 @@ public class visitorApplication implements baseVisitor {
 
     public visitorApplication() { }
 
+    // Use this when you want to print line.seperator
+    private void printLineSeperator(OutputStreamWriter writer) throws IOException {
+
+        writer.write(System.getProperty("line.seperator"));
+        writer.flush();
+    }
+
     public void visit(Visitable.Cd app) throws IOException{
         if (app.appArgs.isEmpty()) {
             throw new RuntimeException("cd: missing argument");
@@ -46,7 +53,8 @@ public class visitorApplication implements baseVisitor {
     }
 
 
-    public void visit(Visitable.Echo app) throws IOException{
+    public void visit(Visitable.Echo app) throws IOException {
+        /*
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         boolean atLeastOnePrinted = false;
         for (String arg : app.appArgs) {
@@ -59,6 +67,28 @@ public class visitorApplication implements baseVisitor {
             writer.write(System.getProperty("line.separator"));
             writer.flush();
         }
+        */
+
+        OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
+        Stream<String> args = app.appArgs.stream();
+        
+        args.forEach(arg -> echoPrint(writer, arg));
+
+        if (args.count() > 0) {
+            printLineSeperator(writer);
+        }
+    }
+
+    // Auxiliary method for ECHO to print arg onto outputstream.
+    private void echoPrint(OutputStreamWriter writer, String arg) {
+
+        try {
+            writer.write(arg);
+            writer.write(" ");
+            writer.flush();
+        } catch (IOException e) {
+            throw new RuntimeException("echo: unable to print args.");
+        }       
     }
 
     public void visit(Visitable.Head app) throws IOException{
@@ -196,7 +226,7 @@ public class visitorApplication implements baseVisitor {
         }
         try {
             Stream<File> streamOfFiles = Stream.of(currDir.listFiles()).filter(f -> !f.getName().startsWith("."));
-            streamOfFiles.forEach(f -> ls_write_file(writer, f));
+            streamOfFiles.forEach(f -> lsWriteFile(writer, f));
             
             if (streamOfFiles.count() > 0) {
                 writer.write(System.getProperty("line.separator"));
@@ -207,7 +237,8 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
-    private void ls_write_file(OutputStreamWriter writer, File f) {
+    // Auxiliary method for LS to print argument f onto outputstream.
+    private void lsWriteFile(OutputStreamWriter writer, File f) {
 
         try {
             writer.write(f.getName());
@@ -215,7 +246,7 @@ public class visitorApplication implements baseVisitor {
             writer.flush();
         }
         catch (IOException e) {
-            throw new RuntimeException("ls: unable to write directories.");
+            throw new RuntimeException("ls: unable to write files.");
         }
     }
 
