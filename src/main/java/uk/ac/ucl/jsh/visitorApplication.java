@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.*;
 
 
 
@@ -182,7 +183,8 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
-    public void visit(Visitable.Ls app) throws IOException{
+    public void visit(Visitable.Ls app) throws IOException {
+
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         File currDir;
         if (app.appArgs.isEmpty()) {
@@ -193,22 +195,27 @@ public class visitorApplication implements baseVisitor {
             throw new RuntimeException("ls: too many arguments");
         }
         try {
-            File[] listOfFiles = currDir.listFiles();
-            boolean atLeastOnePrinted = false;
-            for (File file : listOfFiles) {
-                if (!file.getName().startsWith(".")) {
-                    writer.write(file.getName());
-                    writer.write("\t");
-                    writer.flush();
-                    atLeastOnePrinted = true;
-                }
-            }
-            if (atLeastOnePrinted) {
+            Stream<File> streamOfFiles = Stream.of(currDir.listFiles()).filter(f -> !f.getName().startsWith("."));
+            streamOfFiles.forEach(f -> ls_write_file(writer, f));
+            
+            if (streamOfFiles.count() > 0) {
                 writer.write(System.getProperty("line.separator"));
                 writer.flush();
             }
         } catch (NullPointerException e) {
             throw new RuntimeException("ls: no such directory");
+        }
+    }
+
+    private void ls_write_file(OutputStreamWriter writer, File f) {
+
+        try {
+            writer.write(f.getName());
+            writer.write("\t");
+            writer.flush();
+        }
+        catch (IOException e) {
+            throw new RuntimeException("ls: unable to write directories.");
         }
     }
 
