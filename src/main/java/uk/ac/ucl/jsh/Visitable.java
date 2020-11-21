@@ -179,17 +179,28 @@ public interface Visitable {
         }
     }
 
+<<<<<<< HEAD
     public class Cut implements Visitable {
+=======
+    public class Find implements Visitable {
+>>>>>>> 32a98dac6366c8024bfb2a77f3eae087cf1ee95b
 
         public InputStream input;
         public OutputStream output;
         public String currentDirectory;
         public ArrayList<String> appArgs;
 
+<<<<<<< HEAD
         public Cut(InputStream input, OutputStream output, ArrayList<String> args, String thisDirectory) {
 
             this.input = input;
             this.output = output;
+=======
+        public Find(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+
+            this.input = inputstream;
+            this.output = outputstream;
+>>>>>>> 32a98dac6366c8024bfb2a77f3eae087cf1ee95b
             this.currentDirectory = thisDirectory;
             this.appArgs = args;
         }
@@ -198,6 +209,11 @@ public interface Visitable {
 
             visitor.visit(this);
         }
+<<<<<<< HEAD
     }
 
+=======
+
+    }
+>>>>>>> 32a98dac6366c8024bfb2a77f3eae087cf1ee95b
 }
