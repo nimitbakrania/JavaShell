@@ -44,7 +44,7 @@ public class visitorApplication implements baseVisitor {
 
     public void visit(Visitable.Pwd app) throws IOException{
 
-        if(app.appArgs.isEmpty()){
+        if(!app.appArgs.isEmpty()){
             throw new RuntimeException("pwd: too many arguments");
         }
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
