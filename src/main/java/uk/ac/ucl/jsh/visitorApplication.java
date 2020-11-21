@@ -381,7 +381,7 @@ public class visitorApplication implements baseVisitor {
                         byte[] bytes = line.getBytes(charset);
                         byte[] bytesToPrint = new byte[args.length];
                         for (int i = 0; i != args.length; ++i) {
-                            bytesToPrint[i] = bytes[Integer.parseInt(args[i])];
+                            bytesToPrint[i] = bytes[Integer.parseInt(args[i]) - 1];
                         }
                         writer.write(new String(bytesToPrint, charset));
                         writer.write(System.getProperty("line.separator"));
@@ -394,6 +394,7 @@ public class visitorApplication implements baseVisitor {
                 throw new RuntimeException("cut: file does not exist.");
             }
         }
+
         else if (args[0].length() == 3) {
             // taking intervals  of bytes eg 1-3,5-6
             if (file.exists()) {
@@ -412,7 +413,7 @@ public class visitorApplication implements baseVisitor {
                         int counter = 0;
                         for (int i = 0; i != args.length; ++i) {
                             for (int j = Character.getNumericValue(args[i].charAt(0)); j != Character.getNumericValue(args[i].charAt(2)); ++j) {
-                                bytesToPrint[counter++] = bytes[j];
+                                bytesToPrint[counter++] = bytes[j-1];
                             }
                         }
                         writer.write(new String(bytesToPrint, charset));
