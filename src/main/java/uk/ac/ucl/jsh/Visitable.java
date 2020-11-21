@@ -179,4 +179,25 @@ public interface Visitable {
         }
     }
 
+    public class Cut implements Visitable {
+
+        public InputStream input;
+        public OutputStream output;
+        public String currentDirectory;
+        public ArrayList<String> appArgs;
+
+        public Cut(InputStream input, OutputStream output, ArrayList<String> args, String thisDirectory) {
+
+            this.input = input;
+            this.output = output;
+            this.currentDirectory = thisDirectory;
+            this.appArgs = args;
+        }
+
+        public void accept(baseVisitor visitor) throws IOException {
+
+            visitor.visit(this);
+        }
+    }
+
 }

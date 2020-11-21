@@ -290,4 +290,73 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
+    public void visit(Visitable.Cut app)  {
+
+        if (!app.appArgs.get(0).equals("-b") || app.appArgs.size() > 2) {
+            throw new RuntimeException("cut: incorrect option input.");
+        }
+
+        OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8); 
+        String[] args = app.appArgs.get(1).split(",");
+        File file = new File(app.currentDirectory + File.separator + app.appArgs.get(2));
+
+        if (!args[0].contains("-")) {
+            // individual bytes
+            if (file.exists()) {
+                Charset charset = StandardCharsets.UTF_8;
+                Path filePath = Paths.get(app.currentDirectory + File.separator + app.appArgs.get(2));
+                try (BufferedReader reader = Files.newBufferedReader(filePath, charset)) {
+                    String line = null;
+                    while ((line = reader.readLine()) != null) {
+                        byte[] bytes = line.getBytes(charset);
+                        byte[] bytesToPrint = new byte[args.length];
+                        for (int i = 0; i != args.length; ++i) {
+                            bytesToPrint[i] = bytes[Integer.parseInt(args[i])];
+                        }
+                        writer.write(new String(bytesToPrint, charset));
+                        writer.write(System.getProperty("line.separator"));
+                        writer.flush();
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException("cut: cannot open " + app.appArgs.get(2));
+                }
+            } else {
+                throw new RuntimeException("cut: file does not exist.");
+            }
+        }
+        else if (args[0].length() == 3) {
+            // taking intervals  of bytes eg 1-3,5-6
+            if (file.exists()) {
+                int length = 0;
+                for (int i = 0; i != args.length; ++i) {
+                    length += (Character.getNumericValue(args[i].charAt(2)) - Character.getNumericValue(args[i].charAt(0)));
+                }
+
+                Charset charset = StandardCharsets.UTF_8;
+                Path filePath = Paths.get(app.currentDirectory + File.separator + app.appArgs.get(2));
+                try (BufferedReader reader = Files.newBufferedReader(filePath, charset)) {
+                    String line = null;
+                    while ((line = reader.readLine()) != null) {
+                        byte[] bytes = line.getBytes(charset);
+                        byte[] bytesToPrint = new byte[length];
+                        int counter = 0;
+                        for (int i = 0; i != args.length; ++i) {
+                            for (int j = Character.getNumericValue(args[i].charAt(0)); j != Character.getNumericValue(args[i].charAt(2)); ++j) {
+                                bytesToPrint[counter++] = bytes[j];
+                            }
+                        }
+                        writer.write(new String(bytesToPrint, charset));
+                        writer.write(System.getProperty("line.separator"));
+                        writer.flush();
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException("cut: cannot open " + app.appArgs.get(2));
+                }
+            } else {
+                throw new RuntimeException("cut: file does not exist.");
+            }
+        }
+
+    }
+
 }
