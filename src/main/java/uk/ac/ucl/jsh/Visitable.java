@@ -179,4 +179,25 @@ public interface Visitable {
         }
     }
 
+    public class Find implements Visitable {
+
+        public InputStream input;
+        public OutputStream output;
+        public String currentDirectory;
+        public ArrayList<String> appArgs;
+
+        public Find(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+
+            this.input = inputstream;
+            this.output = outputstream;
+            this.currentDirectory = thisDirectory;
+            this.appArgs = args;
+        }
+
+        public void accept(baseVisitor visitor) throws IOException {
+
+            visitor.visit(this);
+        }
+
+    }
 }
