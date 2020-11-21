@@ -36,7 +36,7 @@ public class Factory {
                 app = new UnsafeDecorator(new Visitable.Grep(in, out, appArgs, currentDirectory));
                 break;
             case "cut":
-                app = new UnsafeDecorator(new Visitable.Cut(in, out, appArgs, currentDirectory));
+            app = new UnsafeDecorator(new Visitable.Cut(in, out, appArgs, currentDirectory));
                 break;
             default:
                 throw new RuntimeException(application + ": unknown application");
