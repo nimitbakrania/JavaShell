@@ -322,23 +322,24 @@ public class visitorApplication implements baseVisitor {
             }
         }
     }
-    
-    public void visit(Visitable.Find app) throws IOException{
+        public void visit(Visitable.Find app) throws IOException{
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         Path rootDirectory;
-        Pattern findPattern = Pattern.compile(app.appArgs.get(app.appArgs.size() - 1));
-        if (app.appArgs.size() != 2 || app.appArgs.size() != 3){
+        Pattern findPattern;
+        if (app.appArgs.size() != 2 && app.appArgs.size() != 3){
             throw new RuntimeException("Find: Wrong number of arguments");
         }
-        if (app.appArgs.get(app.appArgs.size() - 2) != "-name"){
-            throw new RuntimeException("Find: Wrong arguments");
+        if (!((app.appArgs.get(app.appArgs.size() - 2)).equals("-name"))){
+            throw new RuntimeException("Find: Wrong argument " + app.appArgs.get(app.appArgs.size()-2));
         }
         if (app.appArgs.size() == 2){
             rootDirectory = Paths.get(app.currentDirectory);
         }
         else{
-            rootDirectory = Paths.get(app.appArgs.get(2));
+            rootDirectory = Paths.get(app.appArgs.get(0));
         }
+        String regexString = app.appArgs.get(app.appArgs.size()-1).replaceAll("\\*", ".*");
+        findPattern = Pattern.compile(regexString);
         findRecurse(writer, rootDirectory, findPattern);
     }
 
@@ -349,9 +350,10 @@ public class visitorApplication implements baseVisitor {
             if (currFile.isDirectory()){
                 findRecurse(writer, currFile.toPath(), findPattern);
             }
-            else if (matcher.find()){
+            else if (matcher.matches()){
                 writer.write(currFile.getPath());
                 writer.write(System.getProperty("line.separator"));
+                writer.flush();
             }
         }
     }
