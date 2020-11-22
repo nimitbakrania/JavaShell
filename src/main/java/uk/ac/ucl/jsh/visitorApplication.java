@@ -21,13 +21,6 @@ public class visitorApplication implements baseVisitor {
 
     public visitorApplication() { }
 
-    // Use this when you want to print line.seperator
-    private void printLineSeperator(OutputStreamWriter writer) throws IOException {
-
-        writer.write(System.getProperty("line.seperator"));
-        writer.flush();
-    }
-
     public void visit(Visitable.Cd app) throws IOException{
         if (app.appArgs.isEmpty()) {
             throw new RuntimeException("cd: missing argument");
@@ -62,7 +55,8 @@ public class visitorApplication implements baseVisitor {
         args.forEach(arg -> echoPrint(writer, arg));
 
         if (args.count() > 0) {
-            printLineSeperator(writer);
+            writer.write(System.getProperty("line.separator"));
+            writer.flush();
         }
     }
 
@@ -79,6 +73,7 @@ public class visitorApplication implements baseVisitor {
     }
 
     public void visit(Visitable.Head app) throws IOException {
+
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         if (app.appArgs.isEmpty()) {
             throw new RuntimeException("head: missing arguments");
@@ -90,7 +85,7 @@ public class visitorApplication implements baseVisitor {
             throw new RuntimeException("head: wrong argument " + app.appArgs.get(0));
         }
         int headLines = 10;
-        String headArg;
+        String headArg = "";
         if (app.appArgs.size() == 2 || app.appArgs.size() == 3) {
             try {
                 headLines = Integer.parseInt(app.appArgs.get(1));
@@ -140,7 +135,8 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
-    public void visit(Visitable.Tail app) throws IOException{
+    public void visit(Visitable.Tail app) throws IOException {
+        
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         if (app.appArgs.isEmpty()) {
             throw new RuntimeException("tail: missing arguments");
@@ -360,29 +356,55 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
-    public void visit(Visitable.Cut app)  {
+    /* This function assumes you cant have multiple different options. Eg 1,2,3 OR 5-6,7-8 OR -5,6-. Not 
+       1,2,4-5.
+    */
+    public void visit(Visitable.Cut app) {
 
-        if (!app.appArgs.get(0).equals("-b") || app.appArgs.size() > 2) {
-            throw new RuntimeException("cut: incorrect option input.");
+        if (app.appArgs.isEmpty()) {
+            throw new RuntimeException("cut: not enough arguments.");
+        }
+        System.out.println(app.appArgs.get(0));
+        if (!app.appArgs.get(0).equals("-b")) { // cut -b 1,2,3 Dockerfile
+            throw new RuntimeException("cut: incorrect option input " + app.appArgs.get(0));
         }
 
-        OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8); 
-        String[] args = app.appArgs.get(1).split(",");
-        File file = new File(app.currentDirectory + File.separator + app.appArgs.get(2));
+        if (app.appArgs.size() > 3) {
+            throw new RuntimeException("cut: too many arguments.");
+        }
 
-        if (!args[0].contains("-")) {
-            // individual bytes
-            if (file.exists()) {
-                Charset charset = StandardCharsets.UTF_8;
-                Path filePath = Paths.get(app.currentDirectory + File.separator + app.appArgs.get(2));
+        if (app.appArgs.size() < 3) {
+            throw new RuntimeException("cut: too few arguments.");
+        }
+
+        Charset charset = StandardCharsets.UTF_8;
+        OutputStreamWriter writer = new OutputStreamWriter(app.output, charset);
+        String[] args = app.appArgs.get(1).split(",");
+
+        for (int i = 0; i != args.length; ++i) {
+            if (!Pattern.matches("[0-9]*-*[0-9]*", args[i])) {
+                // Check arguments are 1, 4-7, -5 or 6-.
+                throw new RuntimeException("cut: invalid arguments.");
+            }
+        }
+
+        File file = new File(app.currentDirectory + File.separator + app.appArgs.get(2));
+        Path filePath = Paths.get(app.currentDirectory + File.separator + app.appArgs.get(2));
+
+        if (file.exists()) {
+            if (!args[0].contains("-")) {
                 try (BufferedReader reader = Files.newBufferedReader(filePath, charset)) {
+                    // Reads in file line by line. Extracts relevant bytes from bytes. Outputs relevant bytes and continues.
                     String line = null;
                     while ((line = reader.readLine()) != null) {
                         byte[] bytes = line.getBytes(charset);
                         byte[] bytesToPrint = new byte[args.length];
+                            
                         for (int i = 0; i != args.length; ++i) {
+                            // bytes is offset by 1. Eg first byte is at index 0 in bytes. So -1 to get first byte.
                             bytesToPrint[i] = bytes[Integer.parseInt(args[i]) - 1];
                         }
+                            
                         writer.write(new String(bytesToPrint, charset));
                         writer.write(System.getProperty("line.separator"));
                         writer.flush();
@@ -390,43 +412,83 @@ public class visitorApplication implements baseVisitor {
                 } catch (IOException e) {
                     throw new RuntimeException("cut: cannot open " + app.appArgs.get(2));
                 }
-            } else {
-                throw new RuntimeException("cut: file does not exist.");
             }
-        }
-
-        else if (args[0].length() == 3) {
-            // taking intervals  of bytes eg 1-3,5-6
-            if (file.exists()) {
-                int length = 0;
-                for (int i = 0; i != args.length; ++i) {
-                    length += (Character.getNumericValue(args[i].charAt(2)) - Character.getNumericValue(args[i].charAt(0)));
-                }
-
-                Charset charset = StandardCharsets.UTF_8;
-                Path filePath = Paths.get(app.currentDirectory + File.separator + app.appArgs.get(2));
-                try (BufferedReader reader = Files.newBufferedReader(filePath, charset)) {
-                    String line = null;
-                    while ((line = reader.readLine()) != null) {
-                        byte[] bytes = line.getBytes(charset);
-                        byte[] bytesToPrint = new byte[length];
-                        int counter = 0;
-                        for (int i = 0; i != args.length; ++i) {
-                            for (int j = Character.getNumericValue(args[i].charAt(0)); j != Character.getNumericValue(args[i].charAt(2)); ++j) {
-                                bytesToPrint[counter++] = bytes[j-1];
+            else {
+                if (args[0].length() == 3) {
+                    // option is of format [0-9]-[0-9].
+                    // calculate length of bytesToPrint
+                    int length = 0;
+                    for (int i = 0; i != args.length; ++i) {
+                        length += (Character.getNumericValue(args[i].charAt(2)) - Character.getNumericValue(args[i].charAt(0)));
+                    }
+    
+                    try (BufferedReader reader = Files.newBufferedReader(filePath, charset)) {
+                        String line = null;
+                        while ((line = reader.readLine()) != null) {
+                            byte[] bytes = line.getBytes(charset);
+                            byte[] bytesToPrint = new byte[length];
+                            int counter = 0;
+                            for (int i = 0; i != args.length; ++i) {
+                                // for each interval in args
+                                for (int j = Character.getNumericValue(args[i].charAt(0)) - 1; j != Character.getNumericValue(args[i].charAt(2)); ++j) {
+                                    // loop from start to end of interval
+                                    bytesToPrint[counter++] = bytes[j];
+                                }
                             }
+                            writer.write(new String(bytesToPrint, charset));
+                            writer.write(System.getProperty("line.separator"));
+                            writer.flush();
                         }
-                        writer.write(new String(bytesToPrint, charset));
-                        writer.write(System.getProperty("line.separator"));
-                        writer.flush();
+                    } catch (IOException e) {
+                        throw new RuntimeException("cut: cannot open " + app.appArgs.get(2));
                     }
-                } catch (IOException e) {
-                    throw new RuntimeException("cut: cannot open " + app.appArgs.get(2));
+                    } 
+                else {
+                    // options are of the form -3,6-...
+                    ArrayList<Integer> to = new ArrayList<>();
+                    ArrayList<Integer> from = new ArrayList<>();
+                    for (int i = 0; i != args.length; ++i) {
+                        if (args[i].charAt(0) == '-') {
+                            // of the form -[0-9].
+                            to.add(Character.getNumericValue(args[i].charAt(1)));
+                        }
+                        else {
+                            from.add(Character.getNumericValue(args[i].charAt(0)));
+                        }
+                    }
+    
+                    try (BufferedReader reader = Files.newBufferedReader(filePath, charset)) {
+                        String line = null;
+                        while ((line = reader.readLine()) != null) {
+                            byte[] bytes = line.getBytes(charset);
+                            byte[] bytesToPrint = new byte[bytes.length];         // Assume at most we print all bytes in line.
+                            
+                            int counter = 0;
+                            for (int i = 0; i != to.size(); ++i) {
+                                // Extract bytes to. Eg -5 will get first 4 bytes
+                                for (int j = 0; j != to.get(i); ++j) {
+                                    // dont offset this since it starts at same point. 
+                                    bytesToPrint[counter++] = bytes[j];
+                                }
+                            }
+    
+                            for (int i = 0; i != from.size(); ++i) {
+                                // Extract bytes from. Eg 5- will get bytes 5 to end.
+                                for (int j = from.get(i); j != bytes.length; ++j) {
+                                    // offset this since 5th byte would be at index 4.
+                                    bytesToPrint[counter++] = bytes[j-1];
+                                }
+                            }
+    
+                            writer.write(new String(bytesToPrint, charset));
+                            writer.write(System.getProperty("line.separator"));
+                            writer.flush();
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException("cut: cannot open " + app.appArgs.get(2));
+                    }
                 }
-            } else {
-                throw new RuntimeException("cut: file does not exist.");
-            }
+            } 
         }
-
     }
 }

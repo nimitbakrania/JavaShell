@@ -18,8 +18,8 @@ public class Jsh {
         ArrayList<ArrayList<String>> lines = parser.parse(cmdline, currentDirectory);
         for (ArrayList<String> line : lines) {
             String appName = line.get(0);
-            ArrayList<String> appArgs = (ArrayList<String>) line.subList(1, line.size());
-            call.eval(null, System.out, currentDirectory, appName, appArgs);
+            ArrayList<String> appArgs = new ArrayList<String>(line.subList(1, line.size()));
+            call.eval(null, output, currentDirectory, appName, appArgs);
         }
     }
 
