@@ -24,6 +24,15 @@ public class JshTest {
     }
 
     @Test
+    public void testEchoNoArgs() throws Exception {
+
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        Jsh.eval("echo", out);
+
+    }
+
+    @Test
     public void testEchoAppMultipleArgs() throws Exception {
 
         PipedInputStream in = new PipedInputStream();
@@ -32,6 +41,12 @@ public class JshTest {
         Scanner scn = new Scanner(in);
         assertEquals(scn.next(), "foo bar foobar");
         scn.close();
+    }
+
+    @Test 
+    public void testLs() throws Exception {
+
+        
     }
 
     @Test

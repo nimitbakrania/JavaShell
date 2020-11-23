@@ -16,7 +16,6 @@ import java.util.regex.Pattern;
 import java.util.stream.*;
 
 
-
 public class visitorApplication implements baseVisitor {
 
     public visitorApplication() { }
@@ -51,10 +50,10 @@ public class visitorApplication implements baseVisitor {
 
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         Stream<String> args = app.appArgs.stream();
-        
+
         args.forEach(arg -> echoPrint(writer, arg));
 
-        if (args.count() > 0) {
+        if (args.collect(Collectors.toList()).size() > 0) {
             writer.write(System.getProperty("line.separator"));
             writer.flush();
         }
@@ -218,18 +217,22 @@ public class visitorApplication implements baseVisitor {
 
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         File currDir;
+        
         if (app.appArgs.isEmpty()) {
             currDir = new File(app.currentDirectory);
-        } else if (app.appArgs.size() == 1) {
+        } 
+        else if (app.appArgs.size() == 1) {
             currDir = new File(app.appArgs.get(0));
-        } else {
+        } 
+        else {
             throw new RuntimeException("ls: too many arguments");
         }
+        
         try {
             Stream<File> streamOfFiles = Stream.of(currDir.listFiles()).filter(f -> !f.getName().startsWith("."));
             streamOfFiles.forEach(f -> lsWriteFile(writer, f));
             
-            if (streamOfFiles.count() > 0) {
+            if (streamOfFiles.collect(Collectors.toList()).size() > 0) {
                 writer.write(System.getProperty("line.separator"));
                 writer.flush();
             }
@@ -322,24 +325,23 @@ public class visitorApplication implements baseVisitor {
             }
         }
     }
-        public void visit(Visitable.Find app) throws IOException{
+    
+    public void visit(Visitable.Find app) throws IOException{
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         Path rootDirectory;
-        Pattern findPattern;
-        if (app.appArgs.size() != 2 && app.appArgs.size() != 3){
+        Pattern findPattern = Pattern.compile(app.appArgs.get(app.appArgs.size() - 1));
+        if (app.appArgs.size() != 2 || app.appArgs.size() != 3){
             throw new RuntimeException("Find: Wrong number of arguments");
         }
-        if (!((app.appArgs.get(app.appArgs.size() - 2)).equals("-name"))){
-            throw new RuntimeException("Find: Wrong argument " + app.appArgs.get(app.appArgs.size()-2));
+        if (app.appArgs.get(app.appArgs.size() - 2) != "-name"){
+            throw new RuntimeException("Find: Wrong arguments");
         }
         if (app.appArgs.size() == 2){
             rootDirectory = Paths.get(app.currentDirectory);
         }
         else{
-            rootDirectory = Paths.get(app.appArgs.get(0));
+            rootDirectory = Paths.get(app.appArgs.get(2));
         }
-        String regexString = app.appArgs.get(app.appArgs.size()-1).replaceAll("\\*", ".*");
-        findPattern = Pattern.compile(regexString);
         findRecurse(writer, rootDirectory, findPattern);
     }
 
@@ -350,10 +352,9 @@ public class visitorApplication implements baseVisitor {
             if (currFile.isDirectory()){
                 findRecurse(writer, currFile.toPath(), findPattern);
             }
-            else if (matcher.matches()){
+            else if (matcher.find()){
                 writer.write(currFile.getPath());
                 writer.write(System.getProperty("line.separator"));
-                writer.flush();
             }
         }
     }

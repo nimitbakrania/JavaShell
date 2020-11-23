@@ -39,7 +39,7 @@ public class Factory {
                 app = new UnsafeDecorator(new Visitable.Cut(in, out, appArgs, currentDirectory));
                 break;
             case "find":
-            app = new UnsafeDecorator(new Visitable.Find(in, out, appArgs, currentDirectory));
+                app = new UnsafeDecorator(new Visitable.Find(in, out, appArgs, currentDirectory));
                 break;
             default:
                 throw new RuntimeException(application + ": unknown application");
