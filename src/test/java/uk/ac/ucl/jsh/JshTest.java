@@ -9,16 +9,15 @@ import java.util.Scanner;
 
 public class JshTest {
 
-    private PipedInputStream in = new PipedInputStream();
-    private PipedOutputStream out = new PipedOutputStream(in);
-
     public JshTest() {
     }
 
     @Test
     public void testEchoAppOneArg() throws Exception {
 
-        Jsh.eval("echo foo", this.out);
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);        
+        Jsh.eval("echo foo", out);
         Scanner scn = new Scanner(in);
         assertEquals(scn.next(), "foo");
         scn.close();
@@ -27,7 +26,12 @@ public class JshTest {
     @Test
     public void testEchoAppMultipleArgs() throws Exception {
 
-        
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);    
+        Jsh.eval("echo foo bar foobar", out);
+        Scanner scn = new Scanner(in);
+        assertEquals(scn.next(), "foo bar foobar");
+        scn.close();
     }
 
     @Test
