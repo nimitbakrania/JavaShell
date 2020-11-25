@@ -30,7 +30,7 @@ public class Jsh {
                 return;
             }
             if (!args[0].equals("-c")) {
-                System.out.println("jsh: " + args[0] + ": unexpected argument");
+                System.out.println("jsh: " + args[0] + ": unexpected arguments");
             }
             try {
                 eval(args[1], System.out);

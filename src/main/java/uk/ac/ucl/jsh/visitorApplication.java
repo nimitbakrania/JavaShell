@@ -53,7 +53,7 @@ public class visitorApplication implements baseVisitor {
 
         args.forEach(arg -> echoPrint(writer, arg));
 
-        if (args.collect(Collectors.toList()).size() > 0) {
+        if (app.appArgs.size() > 0) {
             writer.write(System.getProperty("line.separator"));
             writer.flush();
         }
@@ -229,10 +229,11 @@ public class visitorApplication implements baseVisitor {
         }
         
         try {
+            long size = Stream.of(currDir.listFiles()).filter(f -> !f.getName().startsWith(".")).count();
             Stream<File> streamOfFiles = Stream.of(currDir.listFiles()).filter(f -> !f.getName().startsWith("."));
             streamOfFiles.forEach(f -> lsWriteFile(writer, f));
-            
-            if (streamOfFiles.collect(Collectors.toList()).size() > 0) {
+
+            if (size > 0) {
                 writer.write(System.getProperty("line.separator"));
                 writer.flush();
             }
@@ -364,10 +365,11 @@ public class visitorApplication implements baseVisitor {
     */
     public void visit(Visitable.Cut app) {
 
-        if (app.appArgs.isEmpty()) {
-            throw new RuntimeException("cut: not enough arguments.");
+        if (app.appArgs.size() < 3) {
+            throw new RuntimeException("cut: too few arguments.");
         }
         System.out.println(app.appArgs.get(0));
+
         if (!app.appArgs.get(0).equals("-b")) { // cut -b 1,2,3 Dockerfile
             throw new RuntimeException("cut: incorrect option input " + app.appArgs.get(0));
         }
@@ -375,11 +377,7 @@ public class visitorApplication implements baseVisitor {
         if (app.appArgs.size() > 3) {
             throw new RuntimeException("cut: too many arguments.");
         }
-
-        if (app.appArgs.size() < 3) {
-            throw new RuntimeException("cut: too few arguments.");
-        }
-
+        
         Charset charset = StandardCharsets.UTF_8;
         OutputStreamWriter writer = new OutputStreamWriter(app.output, charset);
         String[] args = app.appArgs.get(1).split(",");
@@ -416,6 +414,7 @@ public class visitorApplication implements baseVisitor {
                     throw new RuntimeException("cut: cannot open " + app.appArgs.get(2));
                 }
             }
+            
             else {
                 if (args[0].length() == 3) {
                     // option is of format [0-9]-[0-9].
@@ -445,7 +444,8 @@ public class visitorApplication implements baseVisitor {
                     } catch (IOException e) {
                         throw new RuntimeException("cut: cannot open " + app.appArgs.get(2));
                     }
-                    } 
+                } 
+                
                 else {
                     // options are of the form -3,6-...
                     ArrayList<Integer> to = new ArrayList<>();
