@@ -379,11 +379,6 @@ public class visitorApplication implements baseVisitor {
                     // option is of format [0-9]-[0-9].
                     // calculate length of bytesToPrint
                     int length = 0;
-                    try {
-                        writer.write("got here!");
-                    } catch (IOException e) {
-                        throw RuntimeError("unable to print");
-                    }
                     for (int i = 0; i != args.length; ++i) {
                         length += (Character.getNumericValue(args[i].charAt(2)) - Character.getNumericValue(args[i].charAt(0)));
                     }
@@ -402,12 +397,12 @@ public class visitorApplication implements baseVisitor {
                             int counter = 0;
                             for (int i = 0; i != args.length; ++i) {
                                 // for each interval in args
-                                for (int j = Character.getNumericValue(args[i].charAt(0)) - 1; j != Character.getNumericValue(args[i].charAt(2)); ++j) {
-                                    writer.write(j);
+                                for (int j = Character.getNumericValue(args[i].charAt(0)); j != Character.getNumericValue(args[i].charAt(2)); ++j) {
                                     // loop from start to end of interval
-                                    bytesToPrint[counter++] = bytes[j];
+                                    bytesToPrint[counter++] = bytes[j-1];
                                 }
                             }
+
                             writer.write(new String(bytesToPrint, charset));
                             writer.write(System.getProperty("line.separator"));
                             writer.flush();
