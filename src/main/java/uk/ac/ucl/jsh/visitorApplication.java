@@ -360,11 +360,16 @@ public class visitorApplication implements baseVisitor {
                             // empty line
                             continue;
                         }
-                            
-                        for (int i = 0; i != args.length; ++i) {
-                            // bytes is offset by 1. Eg first byte is at index 0 in bytes. So -1 to get first byte.
-                            bytesToPrint[i] = bytes[Integer.parseInt(args[i]) - 1];
+                        
+                        try {
+                            for (int i = 0; i != args.length; ++i) {
+                                // bytes is offset by 1. Eg first byte is at index 0 in bytes. So -1 to get first byte.
+                                bytesToPrint[i] = bytes[Integer.parseInt(args[i]) - 1];
+                            }
+                        } catch (IndexOutOfBoundsException e) {
+                            throw new RuntimeException("cut: byte index given is too large. Lines have less bytes.");
                         }
+                        
                         writer.write(new String(bytesToPrint, charset));
                         writer.write(System.getProperty("line.separator"));
                         writer.flush();
@@ -395,12 +400,16 @@ public class visitorApplication implements baseVisitor {
                             }
 
                             int counter = 0;
-                            for (int i = 0; i != args.length; ++i) {
-                                // for each interval in args
-                                for (int j = Character.getNumericValue(args[i].charAt(0)); j != Character.getNumericValue(args[i].charAt(2)); ++j) {
-                                    // loop from start to end of interval
-                                    bytesToPrint[counter++] = bytes[j-1];
+                            try {
+                                for (int i = 0; i != args.length; ++i) {
+                                    // for each interval in args
+                                    for (int j = Character.getNumericValue(args[i].charAt(0)); j != Character.getNumericValue(args[i].charAt(2)); ++j) {
+                                        // loop from start to end of interval
+                                        bytesToPrint[counter++] = bytes[j-1];
+                                    }
                                 }
+                            } catch (IndexOutOfBoundsException e) {
+                                throw new RuntimeException("cut: byte index given is too large. Lines have less bytes.");
                             }
 
                             writer.write(new String(bytesToPrint, charset));
@@ -437,20 +446,24 @@ public class visitorApplication implements baseVisitor {
                             }
 
                             int counter = 0;
-                            for (int i = 0; i != to.size(); ++i) {
-                                // Extract bytes to. Eg -5 will get first 4 bytes
-                                for (int j = 0; j != to.get(i); ++j) {
-                                    // dont offset this since it starts at same point. 
-                                    bytesToPrint[counter++] = bytes[j];
+                            try {
+                                for (int i = 0; i != to.size(); ++i) {
+                                    // Extract bytes to. Eg -5 will get first 4 bytes
+                                    for (int j = 0; j != to.get(i); ++j) {
+                                        // dont offset this since it starts at same point. 
+                                        bytesToPrint[counter++] = bytes[j];
+                                    }
                                 }
-                            }
-    
-                            for (int i = 0; i != from.size(); ++i) {
-                                // Extract bytes from. Eg 5- will get bytes 5 to end.
-                                for (int j = from.get(i); j != bytes.length; ++j) {
-                                    // offset this since 5th byte would be at index 4.
-                                    bytesToPrint[counter++] = bytes[j-1];
+        
+                                for (int i = 0; i != from.size(); ++i) {
+                                    // Extract bytes from. Eg 5- will get bytes 5 to end.
+                                    for (int j = from.get(i); j != bytes.length; ++j) {
+                                        // offset this since 5th byte would be at index 4.
+                                        bytesToPrint[counter++] = bytes[j-1];
+                                    }
                                 }
+                            } catch (IndexOutOfBoundsException e) {
+                                throw new RuntimeException("cut: byte index given is too large. Lines have less bytes.");
                             }
     
                             writer.write(new String(bytesToPrint, charset));
@@ -462,6 +475,9 @@ public class visitorApplication implements baseVisitor {
                     }
                 }
             } 
+        }
+        else {
+            throw new RuntimeException("cut: file input does not exist.");
         }
     }
     
