@@ -1,6 +1,10 @@
 package uk.ac.ucl.jsh;
 
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -14,6 +18,17 @@ public class pwdTest {
     Valid: no args
     Invalid: any args
     */
+
+    @Rule
+    public TemporaryFolder TempFolder = new TemporaryFolder();
+
+    @Before
+    public void EnterTempFolder() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        Jsh.eval("cd" + TempFolder.getRoot(), out);
+    }
+
     @Test
     public void regularTest() throws IOException{
         PipedInputStream in = new PipedInputStream();
@@ -21,7 +36,7 @@ public class pwdTest {
         out = new PipedOutputStream(in);
         Jsh.eval("pwd", out);
         Scanner scn = new Scanner(in);
-        assertEquals("C:\\Users\\jpopo\\OneDrive\\Desktop\\Software Engineering\\jsh-team-18", scn.nextLine());
+        assertEquals(TempFolder.getRoot().getAbsolutePath(), scn.nextLine());
         scn.close();
     }
 
@@ -31,7 +46,7 @@ public class pwdTest {
         PipedOutputStream out;
         out = new PipedOutputStream(in);
         try{
-            Jsh.eval("pwd src\\main\\java\\uk\\ac\\ucl\\jsh\\TestFiles\\abc.txt src\\main\\java\\uk\\ac\\ucl\\jsh\\TestFiles\\a.txt", out);
+            Jsh.eval("pwd src", out);
         }
         catch(IOException e){
             assertEquals("pwd: too many arguments", e.toString());

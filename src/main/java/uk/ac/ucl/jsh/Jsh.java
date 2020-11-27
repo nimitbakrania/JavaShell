@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class Jsh {
 
-    private static String currentDirectory = System.getProperty("user.dir");
+    public static String currentDirectory = System.getProperty("user.dir");
 
 
     public static void eval(String cmdline, OutputStream output) throws IOException {
