@@ -16,7 +16,7 @@ public class EchoTest {
         PipedOutputStream out = new PipedOutputStream(in);        
         Jsh.eval("echo foo", out);
         Scanner scn = new Scanner(in);
-        assertEquals(scn.next(), "foo");
+        assertEquals("foo", scn.next());
         scn.close();
     }
 
@@ -26,7 +26,9 @@ public class EchoTest {
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
         Jsh.eval("echo", out);
-
+        Scanner scan = new Scanner(in);
+        assertEquals(scan.next(), "");
+        scan.close();
     }
 
     @Test
@@ -36,7 +38,9 @@ public class EchoTest {
         PipedOutputStream out = new PipedOutputStream(in);    
         Jsh.eval("echo foo bar foobar", out);
         Scanner scn = new Scanner(in);
-        assertEquals(scn.next(), "foo bar foobar");
+        assertEquals("foo", scn.next());
+        assertEquals("bar", scn.next());
+        assertEquals("foobar", scn.next());
         scn.close();
     }
 

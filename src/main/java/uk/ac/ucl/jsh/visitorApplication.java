@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.*;
+import java.util.List;
 
 
 public class visitorApplication implements baseVisitor {
@@ -27,6 +28,7 @@ public class visitorApplication implements baseVisitor {
             throw new RuntimeException("cd: too many arguments");
         }
         String dirString = app.appArgs.get(0);
+        
         File dir = new File(app.currentDirectory, dirString);
         if (!dir.exists() || !dir.isDirectory()) {
             throw new RuntimeException("cd: " + dirString + " is not an existing directory");
@@ -322,7 +324,6 @@ public class visitorApplication implements baseVisitor {
         if (app.appArgs.size() < 3) {
             throw new RuntimeException("cut: too few arguments.");
         }
-        System.out.println(app.appArgs.get(0));
 
         if (!app.appArgs.get(0).equals("-b")) { // cut -b 1,2,3 Dockerfile
             throw new RuntimeException("cut: incorrect option input " + app.appArgs.get(0));
@@ -354,12 +355,16 @@ public class visitorApplication implements baseVisitor {
                     while ((line = reader.readLine()) != null) {
                         byte[] bytes = line.getBytes(charset);
                         byte[] bytesToPrint = new byte[args.length];
+
+                        if (bytes.length == 0) {
+                            // empty line
+                            continue;
+                        }
                             
                         for (int i = 0; i != args.length; ++i) {
                             // bytes is offset by 1. Eg first byte is at index 0 in bytes. So -1 to get first byte.
                             bytesToPrint[i] = bytes[Integer.parseInt(args[i]) - 1];
                         }
-                            
                         writer.write(new String(bytesToPrint, charset));
                         writer.write(System.getProperty("line.separator"));
                         writer.flush();
@@ -374,6 +379,11 @@ public class visitorApplication implements baseVisitor {
                     // option is of format [0-9]-[0-9].
                     // calculate length of bytesToPrint
                     int length = 0;
+                    try {
+                        writer.write("got here!");
+                    } catch (IOException e) {
+                        throw RuntimeError("unable to print");
+                    }
                     for (int i = 0; i != args.length; ++i) {
                         length += (Character.getNumericValue(args[i].charAt(2)) - Character.getNumericValue(args[i].charAt(0)));
                     }
@@ -383,10 +393,17 @@ public class visitorApplication implements baseVisitor {
                         while ((line = reader.readLine()) != null) {
                             byte[] bytes = line.getBytes(charset);
                             byte[] bytesToPrint = new byte[length];
+
+                            if (bytes.length == 0) {
+                                // empty line.
+                                continue;
+                            }
+
                             int counter = 0;
                             for (int i = 0; i != args.length; ++i) {
                                 // for each interval in args
                                 for (int j = Character.getNumericValue(args[i].charAt(0)) - 1; j != Character.getNumericValue(args[i].charAt(2)); ++j) {
+                                    writer.write(j);
                                     // loop from start to end of interval
                                     bytesToPrint[counter++] = bytes[j];
                                 }
@@ -420,6 +437,10 @@ public class visitorApplication implements baseVisitor {
                             byte[] bytes = line.getBytes(charset);
                             byte[] bytesToPrint = new byte[bytes.length];         // Assume at most we print all bytes in line.
                             
+                            if (bytes.length == 0) {
+                                continue;
+                            }
+
                             int counter = 0;
                             for (int i = 0; i != to.size(); ++i) {
                                 // Extract bytes to. Eg -5 will get first 4 bytes
