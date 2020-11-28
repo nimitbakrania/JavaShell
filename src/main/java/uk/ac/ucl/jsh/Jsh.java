@@ -8,7 +8,8 @@ import java.util.ArrayList;
 
 public class Jsh {
 
-    public static String currentDirectory = System.getProperty("user.dir");
+    private static String currentDirectory = System.getProperty("user.dir");
+    final private static String homeDirectory = System.getProperty("user.dir");
 
 
     public static void eval(String cmdline, OutputStream output) throws IOException {
@@ -21,6 +22,19 @@ public class Jsh {
             ArrayList<String> appArgs = new ArrayList<String>(line.subList(1, line.size()));
             call.eval(null, output, currentDirectory, appName, appArgs);
         }
+    }
+
+    public static String getHomeDirectory() {
+        return homeDirectory;
+    }
+
+
+    public static String getCurrentDirectory() {
+        return currentDirectory;
+    }
+    
+    public static void setCurrentDirectory(String dir) {
+        Jsh.currentDirectory = dir;
     }
 
     public static void main(String[] args) {

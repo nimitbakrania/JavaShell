@@ -13,4 +13,6 @@ public interface baseVisitor {
     public void visit(Visitable.Grep app) throws IOException;
     public void visit(Visitable.Cut app) throws IOException;
     public void visit(Visitable.Find app) throws IOException;
+    public void visit(Visitable.Uniq app) throws IOException;
+    public void visit(Visitable.Sort app) throws IOException;
 }
