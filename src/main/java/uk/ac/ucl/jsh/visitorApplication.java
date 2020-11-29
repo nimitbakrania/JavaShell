@@ -36,11 +36,12 @@ public class visitorApplication implements baseVisitor {
             String currentDirectory = Jsh.getCurrentDirectory();
             String dirString = app.appArgs.get(0);
             File dir = new File(currentDirectory, dirString);
-
+            if (dirString.charAt(0) == '/'){
+                dir = new File(dirString);
+            }
             if (!dir.exists() || !dir.isDirectory()) {
                 throw new RuntimeException("cd: " + dirString + " is not an existing directory");
             }
-
             currentDirectory = dir.getCanonicalPath();
             Jsh.setCurrentDirectory(currentDirectory);
         }
