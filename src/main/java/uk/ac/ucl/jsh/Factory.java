@@ -10,6 +10,11 @@ public class Factory {
 
     public UnsafeDecorator mkApplication(InputStream in, OutputStream out, String currentDirectory, String application, ArrayList<String> appArgs) {
         UnsafeDecorator app;
+        boolean flag = false;
+        if (application.charAt(0) == '_'){
+            flag = true;
+            application = application.substring(1);
+        }
         switch (application) {
             case "cd":
                 app = new UnsafeDecorator(new Visitable.Cd(in, out, appArgs, currentDirectory));
