@@ -41,6 +41,12 @@ public class Factory {
             case "find":
                 app = new UnsafeDecorator(new Visitable.Find(in, out, appArgs, currentDirectory));
                 break;
+            case "uniq":
+                app = new UnsafeDecorator(new Visitable.Uniq(in, out, appArgs, currentDirectory));
+                break;
+            case "sort":
+                app = new UnsafeDecorator(new Visitable.Uniq(in, out, appArgs, currentDirectory));
+                break;
             default:
                 throw new RuntimeException(application + ": unknown application");
             }

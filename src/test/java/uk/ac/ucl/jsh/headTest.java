@@ -27,9 +27,7 @@ public class headTest {
 
     @Before
     public void EnterTempFolder() throws IOException{
-        PipedInputStream in = new PipedInputStream();
-        PipedOutputStream out = new PipedOutputStream(in);
-        Jsh.eval("cd" + TempFolder.getRoot(), out);
+        Jsh.setCurrentDirectory(TempFolder.getRoot().toString());
     }
 
     @Test
@@ -37,6 +35,7 @@ public class headTest {
         File tempFile = TempFolder.newFile("Test1.txt");
         FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
         tempFileWriter.write("Hello\nhello world");
+        tempFileWriter.close();
         
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
@@ -45,10 +44,8 @@ public class headTest {
             Jsh.eval("head Test.txt", out);
         }
         catch(IOException e){
-            tempFileWriter.close();
             assertEquals("head: Test.txt does not exist", e.toString());
         }
-        tempFileWriter.close();
     }
 
     @Test
@@ -56,10 +53,12 @@ public class headTest {
         File tempFile = TempFolder.newFile("Test.txt");
         FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
         tempFileWriter.write("Hello\nhello world");
+        tempFileWriter.close();
         
         File tempFile2 = TempFolder.newFile("Test2.txt");
         FileWriter tempFileWriter2 = new FileWriter(tempFile2, StandardCharsets.UTF_8);
         tempFileWriter2.write("Hello\nhello");
+        tempFileWriter2.close();
 
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
@@ -68,12 +67,8 @@ public class headTest {
             Jsh.eval("head -n 15 Test.txt Test2.txt", out);
         }
         catch(IOException e){
-            tempFileWriter.close();
-            tempFileWriter2.close();
             assertEquals("head: too many arguments", e.toString());
         }
-        tempFileWriter.close();
-        tempFileWriter2.close();
     }
 
     @Test
@@ -81,6 +76,7 @@ public class headTest {
         File tempFile = TempFolder.newFile("Test.txt");
         FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
         tempFileWriter.write("Hello\nhello world");
+        tempFileWriter.close();
 
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
@@ -89,10 +85,8 @@ public class headTest {
             Jsh.eval("head n 15 Test.txt", out);
         }
         catch(IOException e){
-            tempFileWriter.close();
             assertEquals("head: wrong argument n", e.toString());
         }
-        tempFileWriter.close();
     }
 
     @Test
@@ -100,6 +94,7 @@ public class headTest {
         File tempFile = TempFolder.newFile("Test.txt");
         FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
         tempFileWriter.write("Hello\nhello world");
+        tempFileWriter.close();
         
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
@@ -108,10 +103,8 @@ public class headTest {
             Jsh.eval("head -n ab Test.txt", out);
         }
         catch(IOException e){
-            tempFileWriter.close();
             assertEquals("head: wrong argument ab", e.toString());
         }
-        tempFileWriter.close();
     }
 
     @Test
@@ -119,6 +112,7 @@ public class headTest {
         File tempFile = TempFolder.newFile("Test.txt");
         FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
         tempFileWriter.write("Hello\nhello world");
+        tempFileWriter.close();
 
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
@@ -127,10 +121,8 @@ public class headTest {
             Jsh.eval("head -n -10 Test.txt", out);
         }
         catch(IOException e){
-            tempFileWriter.close();
             assertEquals("head: wrong argument -10", e.toString());
         }
-        tempFileWriter.close();
     }
 
     @Test
@@ -138,17 +130,18 @@ public class headTest {
         File tempFile = TempFolder.newFile("Test.txt");
         FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
         tempFileWriter.write("Hello\nhello world\nJava\nTests\nExample\nTesting Head");
+        tempFileWriter.close();
 
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
         Jsh.eval("head -n 3 Test.txt", out);
         Scanner scn = new Scanner(in);
+        System.out.println(scn.hasNextLine());
         assertEquals("Hello", scn.nextLine());
         assertEquals("hello world", scn.nextLine());
         assertEquals("Java", scn.nextLine());
         scn.close();
-        tempFileWriter.close();
     }
 
     @Test
@@ -156,11 +149,12 @@ public class headTest {
         File tempFile = TempFolder.newFile("Test.txt");
         FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
         tempFileWriter.write("Hello\nhello world\nJava\nTests\nExample\nTesting Head\nLorem\nipsum\ndolor\nsit\namet\nconsectetuer\nadipiscing\nelit");
+        tempFileWriter.close();
 
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
-        Jsh.eval("head src\\main\\java\\uk\\ac\\ucl\\jsh\\TestFiles\\a.txt", out);
+        Jsh.eval("head Test.txt", out);
         Scanner scn = new Scanner(in);
         assertEquals("Hello", scn.nextLine());
         assertEquals("hello world", scn.nextLine());
@@ -173,7 +167,6 @@ public class headTest {
         assertEquals("dolor", scn.nextLine());
         assertEquals("sit", scn.nextLine());
         scn.close();
-        tempFileWriter.close();
     }
 
 

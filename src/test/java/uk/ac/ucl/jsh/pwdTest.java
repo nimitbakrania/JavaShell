@@ -1,5 +1,6 @@
 package uk.ac.ucl.jsh;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,9 +25,12 @@ public class pwdTest {
 
     @Before
     public void EnterTempFolder() throws IOException{
-        PipedInputStream in = new PipedInputStream();
-        PipedOutputStream out = new PipedOutputStream(in);
-        Jsh.eval("cd" + TempFolder.getRoot(), out);
+        Jsh.setCurrentDirectory(TempFolder.getRoot().toString());
+    }
+
+    @After
+    public void deleteTempFolder(){
+        TempFolder.delete();
     }
 
     @Test
@@ -34,9 +38,10 @@ public class pwdTest {
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
+
         Jsh.eval("pwd", out);
         Scanner scn = new Scanner(in);
-        assertEquals(TempFolder.getRoot().getAbsolutePath(), scn.nextLine());
+        assertEquals(TempFolder.getRoot().toString(), scn.nextLine());
         scn.close();
     }
 
@@ -45,6 +50,7 @@ public class pwdTest {
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
+        
         try{
             Jsh.eval("pwd src", out);
         }
