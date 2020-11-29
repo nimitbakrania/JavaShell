@@ -23,12 +23,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="13b7c8ac-a7e8-4bd7-87a6-256106346e74" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/test/java/uk/ac/ucl/jsh/cdTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ucl/jsh/Factory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ucl/jsh/Factory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ucl/jsh/Jsh.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ucl/jsh/Jsh.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ucl/jsh/Visitable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ucl/jsh/Visitable.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ucl/jsh/baseVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ucl/jsh/baseVisitor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ucl/jsh/visitorApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ucl/jsh/visitorApplication.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
