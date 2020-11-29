@@ -31,7 +31,7 @@ public class LsTest {
 
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
-        Jsh.eval("cd " + folder.getRoot().getAbsolutePath(), out);
+        Jsh.setCurrentDirectory(folder.getRoot().getAbsolutePath());
     }
 
     @Test
