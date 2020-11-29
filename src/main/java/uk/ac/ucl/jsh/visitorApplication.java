@@ -611,7 +611,7 @@ public class visitorApplication implements baseVisitor {
         } else if (app.appArgs.size() == 1) {
             headArg = app.appArgs.get(0);
         }
-        if (app.appArgs.size() == 2 && reverse != "r") {
+        if (app.appArgs.size() == 2 && reverse != "-r") {
             throw new RuntimeException("sort: wrong argument " + String.valueOf(reverse));
         }
         String sortFile = app.currentDirectory + File.separator + app.appArgs.get(0);
@@ -645,6 +645,10 @@ public class visitorApplication implements baseVisitor {
                 }
             });
             }
+        }
+        catch(IOException e)
+        {
+            throw new RuntimeException("sort: cannot open " + app.appArgs.get(0));
         }
     }   
 }
