@@ -1,5 +1,6 @@
 package uk.ac.ucl.jsh;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,19 +24,21 @@ public class grepTest {
 
     @Before
     public void EnterTempFolder() throws IOException{
-        PipedInputStream in = new PipedInputStream();
-        PipedOutputStream out = new PipedOutputStream(in);
-        Jsh.eval("cd" + TempFolder.getRoot(), out);
+        Jsh.setCurrentDirectory(TempFolder.getRoot().toString());
     }
-    //piped
-    //piped
-    //eval cd
+
+    @After
+    public void deleteTempFolder(){
+        TempFolder.delete();
+    }
+
 
     @Test
     public void invalidFileName() throws IOException{
         File tempFile = TempFolder.newFile("Test1.txt");
         FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
         tempFileWriter.write("Hello\nhello world");
+        tempFileWriter.close();
 
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
@@ -44,10 +47,8 @@ public class grepTest {
             Jsh.eval("grep 'hello world' Test.txt", out);
         }
         catch(IOException e){
-            tempFileWriter.close();
             assertEquals("grep: wrong file argument", e.toString());
         }
-        tempFileWriter.close();
     }
 
     @Test
@@ -55,15 +56,15 @@ public class grepTest {
         File tempFile = TempFolder.newFile("Test.txt");
         FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
         tempFileWriter.write("Hello\nhello world hello everybody\nJava");
+        tempFileWriter.close();
 
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
         Jsh.eval("grep 'hello world' Test.txt", out);
         Scanner scn = new Scanner(in);
-        assertEquals(scn.nextLine(), "Nullam dictum felis eu pede mollis pretium. Integer tincidunt. hello world Cras dapibus.");
+        assertEquals(scn.nextLine(), "hello world hello everybody");
         scn.close();
-        tempFileWriter.close();
     }
 
     @Test
@@ -84,10 +85,12 @@ public class grepTest {
         File tempFile = TempFolder.newFile("Test.txt");
         FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
         tempFileWriter.write("Hello\nhello world hello everybody\nJava");
+        tempFileWriter.close();
         
         File tempFile2 = TempFolder.newFile("Test2.txt");
         FileWriter tempFileWriter2 = new FileWriter(tempFile2, StandardCharsets.UTF_8);
         tempFileWriter2.write("Hello\nhello world tempfile2\nhello world Java");
+        tempFileWriter2.close();
 
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
@@ -98,8 +101,6 @@ public class grepTest {
         assertEquals(scn.nextLine(), "Test2.txt:hello world tempfile2");
         assertEquals(scn.nextLine(), "Test2.txt:hello world Java");
         scn.close();
-        tempFileWriter.close();
-        tempFileWriter2.close();
     }
 
 }

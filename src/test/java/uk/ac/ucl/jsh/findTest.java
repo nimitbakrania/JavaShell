@@ -1,5 +1,6 @@
 package uk.ac.ucl.jsh;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -8,6 +9,7 @@ import org.junit.rules.TemporaryFolder;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
@@ -25,10 +27,14 @@ public class findTest {
 
     @Before
     public void EnterTempFolder() throws IOException{
-        PipedInputStream in = new PipedInputStream();
-        PipedOutputStream out = new PipedOutputStream(in);
-        Jsh.eval("cd" + TempFolder.getRoot(), out);
+        Jsh.setCurrentDirectory(TempFolder.getRoot().toString());
     }
+
+    @After
+    public void deleteTempFolder(){
+        TempFolder.delete();
+    }
+
     @Test
     public void invalidArgsNumName() throws IOException{
         File tempFile = TempFolder.newFile("Test.txt");
@@ -77,11 +83,15 @@ public class findTest {
     public void threeArgsTest() throws IOException{
         File tempFolder2 = TempFolder.newFolder("Test");
         File tempFile = new File(tempFolder2, "Test.txt");
-
+        FileWriter writer = new FileWriter(tempFile);
+        writer.write("hello");
+        writer.close();
+        
+        String cmdline = "find '" + tempFolder2.getAbsolutePath().toString() + "' -name Test.txt";
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
-        Jsh.eval("find \\Test -name Test.txt", out);
+        Jsh.eval(cmdline, out);
         Scanner scn = new Scanner(in);
         assertEquals(tempFile.getAbsolutePath(), scn.nextLine());
         scn.close();
@@ -90,16 +100,22 @@ public class findTest {
     @Test
     public void asteriskTest() throws IOException{
         File tempFile = TempFolder.newFile("Test.txt");
+        FileWriter writer1 = new FileWriter(tempFile);
+        writer1.write("hello");
+        writer1.close();
         File tempFolder2 = TempFolder.newFolder("Test");
         File tempFile2 = new File(tempFolder2, "Test2.txt");
-
+        FileWriter writer2 = new FileWriter(tempFile2);
+        writer2.write("world");
+        writer2.close();
+        
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
-        Jsh.eval("find -name T*.txt", out);
+        Jsh.eval("find -name 'T*.txt'", out);
         Scanner scn = new Scanner(in);
-        assertEquals(tempFile.getAbsolutePath(), scn.nextLine());
         assertEquals(tempFile2.getAbsolutePath(), scn.nextLine());
+        assertEquals(tempFile.getAbsolutePath(), scn.nextLine());
         scn.close();
     }
 }
