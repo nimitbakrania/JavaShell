@@ -73,7 +73,7 @@ public class sortTest {
         }
         catch(RuntimeException expected)
         {
-            assertTrue(expected.getMessage().equals("sort: wrong argument " + "-t");
+            assertTrue(expected.getMessage().equals("sort: wrong argument " + "-t"));
         }
     }
 

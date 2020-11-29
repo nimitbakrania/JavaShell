@@ -19,7 +19,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.*;
-import java.util.List;
 
 public class visitorApplication implements baseVisitor {
 
@@ -328,7 +327,7 @@ public class visitorApplication implements baseVisitor {
 
     /*
      * This function assumes you cant have multiple different options. Eg 1,2,3 OR
-     * 5-6,7-8 OR -5,6-. Not 1,2,4-5.
+     * 5-6,7-8 OR -5,6-. Not 1,2,4-5. 
      */
     public void visit(Visitable.Cut app) {
 

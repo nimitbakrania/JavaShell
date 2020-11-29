@@ -27,7 +27,7 @@ public class EchoTest {
         PipedOutputStream out = new PipedOutputStream(in);
         Jsh.eval("echo", out);
         Scanner scan = new Scanner(in);
-        assertEquals(scan.next(), "");
+        assertNull(scan.next());
         scan.close();
     }
 
