@@ -8,6 +8,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
+import java.io.OutputStream;
+import java.util.Scanner;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -29,8 +34,16 @@ public class OurParser {
 
         setCmdline(cmdline);
         ArrayList<String> rawCommands = getCommands();
-        ArrayList<ArrayList<String>> ret = new ArrayList<ArrayList<String>>();
         
+        
+        for (int i = 0; i != rawCommands.size(); ++i) {
+            if (checkCmdSubstitution(rawCommands.get(i))) {
+                String newCmd = cmdSubstitution(rawCommands.get(i));
+                rawCommands.set(i, newCmd);
+            }
+        }
+        
+        ArrayList<ArrayList<String>> ret = new ArrayList<ArrayList<String>>();
         for (String command : rawCommands) {
             ret.add(splitIn2Tokens(command, currentDirectory));
         }
@@ -91,4 +104,84 @@ public class OurParser {
         return ret;
     }
     
+    /* Checks to see if CMD uses command substitution. 
+    */
+    private boolean checkCmdSubstitution(String cmd) {
+
+        int singleQuoteSeen = 0;
+        for (int i = 0; i != cmd.length(); ++i) {
+            String charAt = Character.toString(cmd.charAt(i));
+            if (charAt.equals("'")) {
+                if (singleQuoteSeen == 0) {
+                    // left ' seen. 
+                    singleQuoteSeen = 1;
+                }
+                else {
+                    // right ' seen.
+                    singleQuoteSeen = 0;
+                }
+            }
+
+            else if (charAt.equals("`")) {
+                // ` is seen. We need to check if it is encased in single quotes.
+                // we do this by checking singleQuoteSeen. if it is 0 then it isn't encased in single quotes.
+                if (singleQuoteSeen == 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /* Executes command substitution. It extracts the subcommand encased in `. It first 
+       executes the subcommand. It gets the output of the subcommand and replaces the subcommand
+       with the output in cmd. 
+    */
+    private String cmdSubstitution(String cmd) {
+
+        int startIndex = -1;
+        int endIndex = -1;
+        String subCommand = "";
+        int counter = 0;      // 0 when you have seen both left and right ` or none.
+
+        for (int i = 0; i != cmd.length(); ++i) {
+            if (cmd.charAt(i) == '`') {
+                if (counter == 0) {
+                    // seeing the left `.
+                    counter = 1;
+                    startIndex = i;
+                }
+                else {
+                    counter = 0;
+                    endIndex = i;
+                }
+            }
+
+            else if (counter == 1) {
+                // you've seen left ` so it is the sub command.
+                subCommand += cmd.charAt(i);
+            }
+        }
+
+        File file = new File(Jsh.getCurrentDirectory() + System.getProperty("file.separator") + "cmdSubContents.txt");
+        try {
+            OutputStream out = new FileOutputStream(file);
+            Jsh.eval(subCommand, out);
+            out.close();
+
+            String cmdOut = "";
+            Scanner scan = new Scanner(file);
+            while (scan.hasNextLine()) {
+                cmdOut += scan.nextLine() + " ";
+            }
+            scan.close();
+            file.delete();
+            return cmd.substring(0, startIndex) + cmdOut + cmd.substring(endIndex, cmd.length()); 
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("Command substitution: file not found.");
+        } catch (IOException e) {
+            throw new RuntimeException("Command substitution: unable to write to file.");
+        }
+        
+    }
 }

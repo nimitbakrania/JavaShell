@@ -219,7 +219,7 @@ public class visitorApplication implements baseVisitor {
         } else {
             throw new RuntimeException("ls: too many arguments");
         }
-
+        
         try {
             long size = Stream.of(currDir.listFiles()).filter(f -> !f.getName().startsWith(".")).count();
             Stream<File> streamOfFiles = Stream.of(currDir.listFiles()).filter(f -> !f.getName().startsWith("."));

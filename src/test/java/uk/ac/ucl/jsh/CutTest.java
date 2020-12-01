@@ -31,9 +31,7 @@ public class CutTest {
                       "ulla bibendum ornare tortor, in dignissim diam. Vivamus rutrum facilisis nibh eu congue. Pellentesque laoreet leo massa.\n");           // 1 byte per character
         writer.close();
 
-        PipedInputStream in = new PipedInputStream();
-        PipedOutputStream out = new PipedOutputStream(in);
-        Jsh.eval("cd " + folder.getRoot().getAbsolutePath(), out);
+        Jsh.setCurrentDirectory(folder.getRoot().getAbsolutePath());
     }
 
     @Test 
@@ -98,23 +96,17 @@ public class CutTest {
     }
 
     @Test
-    public void testCutWithoutDashInInterval() throws IOException {
-
-
-    }
-
-    @Test
     public void testCutWithIndividualBytes() throws IOException {
 
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
         Scanner scan = new Scanner(in);
         Jsh.eval("cut -b 4,5 test1.txt", out); // get bytes 4,5
-        assertEquals("em", scan.next());
-        assertEquals("s ", scan.next());
-        assertEquals("ea", scan.next());
-        assertEquals("am", scan.next());
-        assertEquals("a ", scan.next());
+        assertEquals("em", scan.nextLine());
+        assertEquals("s ", scan.nextLine());
+        assertEquals("ea", scan.nextLine());
+        assertEquals("am", scan.nextLine());
+        assertEquals("a ", scan.nextLine());
         scan.close();
     }
 
@@ -125,11 +117,11 @@ public class CutTest {
         PipedOutputStream out = new PipedOutputStream(in);
         Scanner scan = new Scanner(in);
         Jsh.eval("cut -b 1-2,7-9 test1.txt", out);    // get bytes 1,7,8
-        assertEquals("Lip", scan.next());
-        assertEquals("Del", scan.next());
-        assertEquals("A a", scan.next());
-        assertEquals("Eet", scan.next());
-        assertEquals("ube", scan.next());
+        assertEquals("Lip", scan.nextLine());
+        assertEquals("Del", scan.nextLine());
+        assertEquals("A a", scan.nextLine());
+        assertEquals("Eet", scan.nextLine());
+        assertEquals("uib", scan.nextLine());
         scan.close();
     }
 
@@ -140,11 +132,11 @@ public class CutTest {
         PipedOutputStream out = new PipedOutputStream(in);
         Scanner scan = new Scanner(in);
         Jsh.eval("cut -b -4,7- test1.txt", out); // get first 4 bytes then from 7th byte to the end.
-        assertEquals("Lorepsum dolor sit mi", scan.next());
-        assertEquals("Duiselit enim, maximus quis orci sit amet, sollicitudin bibendum eros.", scan.next());
-        assertEquals("Aene ac lorem et justo malesuada hendrerit.", scan.next());
-        assertEquals("Etiaet erat leo. Ut fringilla quam nisi, at laoreet lacus volutpat sit amet.", scan.next());
-        assertEquals("ullaibendum ornare tortor, in dignissim diam. Vivamus rutrum facilisis nibh eu congue. Pellentesque laoreet leo massa.", scan.next());
+        assertEquals("Loreipsum dolor sit mi", scan.nextLine());
+        assertEquals("Duiselit enim, maximus quis orci sit amet, sollicitudin bibendum eros.", scan.nextLine());
+        assertEquals("Aene ac lorem et justo malesuada hendrerit.", scan.nextLine());
+        assertEquals("Etiaet erat leo. Ut fringilla quam nisi, at laoreet lacus volutpat sit amet.", scan.nextLine());
+        assertEquals("ullaibendum ornare tortor, in dignissim diam. Vivamus rutrum facilisis nibh eu congue. Pellentesque laoreet leo massa.", scan.nextLine());
         scan.close();
     }
 }

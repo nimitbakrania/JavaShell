@@ -17,6 +17,5 @@ public class UnsafeDecorator {
         {
             System.err.println(e.getMessage());
         }
-
     }
 }

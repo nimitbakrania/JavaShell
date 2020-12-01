@@ -20,17 +20,17 @@ public class LsTest {
     @Before
     public void goIntoTempfolder() throws IOException {
 
+        String path = folder.getRoot().getAbsolutePath() + System.getProperty("file.separator") + "dir1";
+        File file = new File(path);
+        file.mkdir();
         // for lsWithGivenDirectory
-        File folder1 = folder.newFolder("dir1");
-        File file1 = new File(folder1, "test1.txt");
-        File file2 = new File(folder1, "test2.txt");
+        File file1 = new File(path, "test1.txt");
+        File file2 = new File(path, "test2.txt");
 
         // for testLs
         File file3 = folder.newFile("test3.txt");
         File file4 = folder.newFile("test4.txt");
 
-        PipedInputStream in = new PipedInputStream();
-        PipedOutputStream out = new PipedOutputStream(in);
         Jsh.setCurrentDirectory(folder.getRoot().getAbsolutePath());
     }
 
@@ -41,8 +41,8 @@ public class LsTest {
         PipedOutputStream out = new PipedOutputStream(in);
         Jsh.eval("ls", out);
         Scanner scan = new Scanner(in);
-        assertEquals("dir1", scan.next());
         assertEquals("test3.txt", scan.next());
+        assertEquals("dir1", scan.next());
         assertEquals("test4.txt", scan.next());
         scan.close();
     }
