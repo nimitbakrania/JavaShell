@@ -45,7 +45,7 @@ public class Factory {
                 app = new UnsafeDecorator(new Visitable.Uniq(in, out, appArgs, currentDirectory));
                 break;
             case "sort":
-                app = new UnsafeDecorator(new Visitable.Uniq(in, out, appArgs, currentDirectory));
+                app = new UnsafeDecorator(new Visitable.Sort(in, out, appArgs, currentDirectory));
                 break;
             default:
                 throw new RuntimeException(application + ": unknown application");

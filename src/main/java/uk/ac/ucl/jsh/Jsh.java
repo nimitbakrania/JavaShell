@@ -20,7 +20,14 @@ public class Jsh {
         for (ArrayList<String> line : lines) {
             String appName = line.get(0);
             ArrayList<String> appArgs = new ArrayList<String>(line.subList(1, line.size()));
-            call.eval(null, output, currentDirectory, appName, appArgs);
+            if(appArgs.contains(">") || appArgs.contains("<"))      
+            {
+                call.eval2(null, output, currentDirectory, appName, appArgs);
+            }
+            else    
+            {
+                call.eval(null, output, currentDirectory, appName, appArgs);
+            }
         }
     }
 
