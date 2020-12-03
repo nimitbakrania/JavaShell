@@ -58,6 +58,9 @@ public class visitorApplication implements baseVisitor {
         writer.flush();
     }
 
+    /* Prints the arguments to the command line.
+       @Params = APP, contains the app arguments as a public variable.
+    */
     public void visit(Visitable.Echo app) throws IOException {
 
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
@@ -66,15 +69,14 @@ public class visitorApplication implements baseVisitor {
         args.forEach(arg -> echoPrint(writer, arg));
 
         if (app.appArgs.size() > 0) {
+            // check if anything was printed if so print a newline.
             writer.write(System.getProperty("line.separator"));
             writer.flush();
         }
     }
 
     // Auxiliary method for ECHO to print arg onto outputstream.
-    private void echoPrint(OutputStreamWriter writer, String arg) { // JULIAN COMMENT - The reason the program made you
-                                                                    // add the try/except is because you forgot to throw
-                                                                    // IOException
+    private void echoPrint(OutputStreamWriter writer, String arg) { 
 
         try {
             writer.write(arg);
@@ -207,6 +209,10 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
+    /* Prints all the files and folders in the current directory if no argument is given.
+       If argument is given then it prints all files/folders in given directory. 
+       @Params = APP which contains information such as arguments and current directory
+    */
     public void visit(Visitable.Ls app) throws IOException {
 
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
@@ -215,12 +221,18 @@ public class visitorApplication implements baseVisitor {
         if (app.appArgs.isEmpty()) {
             currDir = new File(app.currentDirectory);
         } else if (app.appArgs.size() == 1) {
-            currDir = new File(app.appArgs.get(0));
+            if (app.appArgs.get(0).charAt(0) == '/') {
+                currDir = new File(app.appArgs.get(0));
+            }
+            else {
+                currDir = new File(app.currentDirectory, app.appArgs.get(0));
+            }
         } else {
             throw new RuntimeException("ls: too many arguments");
         }
         
         try {
+            // filter in all the files/folders that dont start with ".". Then print each one of them.
             long size = Stream.of(currDir.listFiles()).filter(f -> !f.getName().startsWith(".")).count();
             Stream<File> streamOfFiles = Stream.of(currDir.listFiles()).filter(f -> !f.getName().startsWith("."));
             streamOfFiles.forEach(f -> lsWriteFile(writer, f));
@@ -326,20 +338,19 @@ public class visitorApplication implements baseVisitor {
         });
     }
 
-    /*
+    /* Takes specified bytes from each line in a text file then outputs it. 
      * This function assumes you cant have multiple different options. Eg 1,2,3 OR
      * 5-6,7-8 OR -5,6-. Not 1,2,4-5. 
+     * @Params = APP contains info about arguments and currentDirectory.
      */
     public void visit(Visitable.Cut app) {
 
         if (app.appArgs.size() < 3) {
             throw new RuntimeException("cut: too few arguments.");
         }
-
-        if (!app.appArgs.get(0).equals("-b")) { // cut -b 1,2,3 Dockerfile
+        if (!app.appArgs.get(0).equals("-b")) { 
             throw new RuntimeException("cut: incorrect option input " + app.appArgs.get(0));
         }
-
         if (app.appArgs.size() > 3) {
             throw new RuntimeException("cut: too many arguments.");
         }
@@ -357,131 +368,52 @@ public class visitorApplication implements baseVisitor {
 
         File file = new File(app.currentDirectory + File.separator + app.appArgs.get(2));
         Path filePath = Paths.get(app.currentDirectory + File.separator + app.appArgs.get(2));
-
         if (file.exists()) {
             if (!args[0].contains("-")) {
-                try (BufferedReader reader = Files.newBufferedReader(filePath, charset)) {
-                    // Reads in file line by line. Extracts relevant bytes from bytes. Outputs
-                    // relevant bytes and continues.
-                    String line = null;
-                    while ((line = reader.readLine()) != null) {
-                        byte[] bytes = line.getBytes(charset);
-                        byte[] bytesToPrint = new byte[args.length];
-
-                        if (bytes.length == 0) {
-                            // empty line
-                            continue;
-                        }
-                        
-                        try {
-                            for (int i = 0; i != args.length; ++i) {
-                                // bytes is offset by 1. Eg first byte is at index 0 in bytes. So -1 to get first byte.
-                                bytesToPrint[i] = bytes[Integer.parseInt(args[i]) - 1];
-                            }
-                        } catch (IndexOutOfBoundsException e) {
-                            throw new RuntimeException("cut: byte index given is too large. Lines have less bytes.");
-                        }
-                        
-                        writer.write(new String(bytesToPrint, charset));
-                        writer.write(System.getProperty("line.separator"));
-                        writer.flush();
-                    }
+                // of the format 1,2,3.
+                try {
+                    BufferedReader reader =  Files.newBufferedReader(filePath, charset);
+                    reader.lines().forEach(line -> cutSingleBytes(line, writer, args, charset));
                 } catch (IOException e) {
                     throw new RuntimeException("cut: cannot open " + app.appArgs.get(2));
                 }
             }
             
             else {
-                if (args[0].length() == 3) {
-                    // option is of format [0-9]-[0-9].
+                if (Pattern.matches("[0-9]+-[0-9]+", args[0])) {
+                    // option is of format [0-9]+-[0-9]+.
                     // calculate length of bytesToPrint
                     int length = 0;
                     for (int i = 0; i != args.length; ++i) {
-                        length += (Character.getNumericValue(args[i].charAt(2))
-                                - Character.getNumericValue(args[i].charAt(0)));
+                        int index = args[i].indexOf("-");
+                        length += Integer.parseInt(args[i].substring(index + 1,args[i].length())) - Integer.parseInt(args[i].substring(0,index));
                     }
+                    final int lengthFinal = length; // to make it work with streams. length isnt updated after this point anyway.
 
-                    try (BufferedReader reader = Files.newBufferedReader(filePath, charset)) {
-                        String line = null;
-                        while ((line = reader.readLine()) != null) {
-                            byte[] bytes = line.getBytes(charset);
-                            byte[] bytesToPrint = new byte[length];
-
-                            if (bytes.length == 0) {
-                                // empty line.
-                                continue;
-                            }
-
-                            int counter = 0;
-                            try {
-                                for (int i = 0; i != args.length; ++i) {
-                                    // for each interval in args
-                                    for (int j = Character.getNumericValue(args[i].charAt(0)); j != Character.getNumericValue(args[i].charAt(2)); ++j) {
-                                        // loop from start to end of interval
-                                        bytesToPrint[counter++] = bytes[j-1];
-                                    }
-                                }
-                            } catch (IndexOutOfBoundsException e) {
-                                throw new RuntimeException("cut: byte index given is too large. Lines have less bytes.");
-                            }
-
-                            writer.write(new String(bytesToPrint, charset));
-                            writer.write(System.getProperty("line.separator"));
-                            writer.flush();
-                        }
+                    try  {
+                        BufferedReader reader = Files.newBufferedReader(filePath, charset);
+                        reader.lines().forEach(line -> cutIntervals(line, writer, args, charset, lengthFinal));
                     } catch (IOException e) {
                         throw new RuntimeException("cut: cannot open " + app.appArgs.get(2));
                     }
                 } 
                 
                 else {
-                    // options are of the form -3,6-...
+                    // options are of the form -3,6- etc
                     ArrayList<Integer> to = new ArrayList<>();
                     ArrayList<Integer> from = new ArrayList<>();
                     for (int i = 0; i != args.length; ++i) {
                         if (args[i].charAt(0) == '-') {
                             // of the form -[0-9].
-                            to.add(Character.getNumericValue(args[i].charAt(1)));
+                            to.add(Integer.parseInt(args[i].substring(1, args[i].length())));
                         } else {
-                            from.add(Character.getNumericValue(args[i].charAt(0)));
+                            from.add(Integer.parseInt(args[i].substring(0, args[i].length() - 1)));
                         }
                     }
 
-                    try (BufferedReader reader = Files.newBufferedReader(filePath, charset)) {
-                        String line = null;
-                        while ((line = reader.readLine()) != null) {
-                            byte[] bytes = line.getBytes(charset);
-                            byte[] bytesToPrint = new byte[bytes.length];         // Assume at most we print all bytes in line.
-                            
-                            if (bytes.length == 0) {
-                                continue;
-                            }
-
-                            int counter = 0;
-                            try {
-                                for (int i = 0; i != to.size(); ++i) {
-                                    // Extract bytes to. Eg -5 will get first 4 bytes
-                                    for (int j = 0; j != to.get(i); ++j) {
-                                        // dont offset this since it starts at same point. 
-                                        bytesToPrint[counter++] = bytes[j];
-                                    }
-                                }
-        
-                                for (int i = 0; i != from.size(); ++i) {
-                                    // Extract bytes from. Eg 5- will get bytes 5 to end.
-                                    for (int j = from.get(i); j != bytes.length; ++j) {
-                                        // offset this since 5th byte would be at index 4.
-                                        bytesToPrint[counter++] = bytes[j-1];
-                                    }
-                                }
-                            } catch (IndexOutOfBoundsException e) {
-                                throw new RuntimeException("cut: byte index given is too large. Lines have less bytes.");
-                            }
-
-                            writer.write(new String(bytesToPrint, charset));
-                            writer.write(System.getProperty("line.separator"));
-                            writer.flush();
-                        }
+                    try {
+                        BufferedReader reader = Files.newBufferedReader(filePath, charset);
+                        reader.lines().forEach(line -> cutHalfIntervals(line, writer, to, from, charset));
                     } catch (IOException e) {
                         throw new RuntimeException("cut: cannot open " + app.appArgs.get(2));
                     }
@@ -491,6 +423,112 @@ public class visitorApplication implements baseVisitor {
         else {
             throw new RuntimeException("cut: file input does not exist.");
         }
+    }
+
+    /* Auxiliary method for Cut. It works for input of the format 1,2,3 etc. The algorithm takes each line,
+       converts it to bytes then extracts the bytes that we need and stores them in BYTESTOPRINT. Finally it outputs
+       BYTESTOPRINT as a string.
+       @params = line is the line we are looking at in file.
+                 writer is used to write to output
+                 args contains the bytes to extract. e.g. it may be ["1","3"]
+                 charset is the charset of the file we are reading it. It is UTF_8.
+    */
+    private void cutSingleBytes(String line, OutputStreamWriter writer, String[] args, Charset charset) {
+
+        byte[] bytes = line.getBytes(charset);
+        byte[] bytesToPrint = new byte[args.length];
+
+        if (bytes.length == 0) {
+            // empty line
+            return;
+        }
+                        
+        try {
+            for (int i = 0; i != args.length; ++i) {
+                // bytes is offset by 1. Eg first byte is at index 0 in bytes. So -1 to get first byte.
+                bytesToPrint[i] = bytes[Integer.parseInt(args[i]) - 1];
+            }
+        } catch (IndexOutOfBoundsException e) {
+            throw new RuntimeException("cut: byte index given is too large. Lines have less bytes.");
+        }
+    
+        lineOutputWriter(new String(bytesToPrint, charset), writer, "cut");
+    }
+
+    /* Auxiliary method for Cut. It works for input of the format 1-3,6-7.. etc. The algorithm takes each line,
+       converts it to bytes then extracts the bytes that we need and stores them in BYTESTOPRINT. Finally it outputs
+       BYTESTOPRINT as a string.
+       @params = line is the line we are looking at in file.
+                 writer is used to write to output
+                 args contains the bytes to extract. e.g. it may be ["1","3"]
+                 charset is the charset of the file we are reading it. It is UTF_8.
+                 length is the length of the BYTESTOPRINT array that is precalculated.
+    */
+    private void cutIntervals(String line, OutputStreamWriter writer, String[] args, Charset charset, int length) {
+
+        byte[] bytes = line.getBytes(charset);
+        byte[] bytesToPrint = new byte[length];
+
+        if (bytes.length == 0) {
+            // empty line.
+            return;
+        }
+
+        int counter = 0;
+        try {
+            for (int i = 0; i != args.length; ++i) {
+                // for each interval in args
+                for (int j = Character.getNumericValue(args[i].charAt(0)); j != Character.getNumericValue(args[i].charAt(2)); ++j) {
+                    // loop from start to end of interval
+                    bytesToPrint[counter++] = bytes[j-1];
+                }
+            }
+        } catch (IndexOutOfBoundsException e) {
+            throw new RuntimeException("cut: byte index given is too large. Lines have less bytes.");
+        }
+
+        lineOutputWriter(new String(bytesToPrint, charset), writer, "cut");
+    }
+
+    /* Auxiliary method for Cut. It works for input of the format 1,2,3 etc. The algorithm takes each line,
+       converts it to bytes then extracts the bytes that we need and stores them in BYTESTOPRINT. Finally it outputs
+       BYTESTOPRINT as a string.
+       @params = line is the line we are looking at in file.
+                 writer is used to write to output
+                 args contains the bytes to extract. e.g. it may be ["1","3"]
+                 charset is the charset of the file we are reading it. It is UTF_8.
+    */
+    private void cutHalfIntervals(String line, OutputStreamWriter writer, ArrayList<Integer> to, ArrayList<Integer> from, Charset charset) {
+
+        byte[] bytes = line.getBytes(charset);
+        byte[] bytesToPrint = new byte[bytes.length];         // Assume at most we print all bytes in line.
+                            
+        if (bytes.length == 0) {
+            return;
+        }
+
+        int counter = 0;
+        try {
+            for (int i = 0; i != to.size(); ++i) {
+                // Extract bytes to. Eg -5 will get first 4 bytes
+                for (int j = 0; j != to.get(i); ++j) {
+                    // dont offset this since it starts at same point. 
+                    bytesToPrint[counter++] = bytes[j];
+                }
+            }
+        
+            for (int i = 0; i != from.size(); ++i) {
+                // Extract bytes from. Eg 5- will get bytes 5 to end.
+                for (int j = from.get(i); j != bytes.length; ++j) {
+                    // offset this since 5th byte would be at index 4.
+                    bytesToPrint[counter++] = bytes[j-1];
+                    }
+                }
+        } catch (IndexOutOfBoundsException e) {
+            throw new RuntimeException("cut: byte index given is too large. Lines have less bytes.");
+        }
+
+        lineOutputWriter(new String(bytesToPrint, charset), writer, "cut");
     }
 
     private void lineOutputWriter(String line, OutputStreamWriter writer, String appname) {

@@ -30,11 +30,18 @@ public class OurParser {
         this.currCmdline = cmdline;
     }
     
+    /* Handles calling relevant functions to parse input. First we seperate the commands up using getCommands.
+       Next we check if any commands use command substitution. If they do we execute it and replace the backquoted
+       command with the output from it. Finally we loop through each command and split it into tokens and store it as an
+       ArrayList<String>. Each ArrayList is added to ret and returned.
+       @params = cmdline is the commandline that we need to parse.
+                 currentDirectory is the current directory that jsh is in.
+       @returns = an arraylist of an arraylist<string>. it contains each command that has been split into tokens.
+    */
     public ArrayList<ArrayList<String>> parse(String cmdline, String currentDirectory) throws IOException {
 
         setCmdline(cmdline);
         ArrayList<String> rawCommands = getCommands();
-        
         
         for (int i = 0; i != rawCommands.size(); ++i) {
             if (checkCmdSubstitution(rawCommands.get(i))) {
@@ -51,7 +58,9 @@ public class OurParser {
         return ret;
     }
 
-    
+    /* Splits the commands on ";". 
+       @returns = arraylist of commands.
+    */
     private ArrayList<String> getCommands() {
 
         CharStream parserInput = CharStreams.fromString(this.currCmdline); 
@@ -74,6 +83,10 @@ public class OurParser {
         return rawCommands;
     }
 
+    /* Splits the commands into tokens and adds them into an arraylist which it then returns
+       @params = rawCommand is the untokenized command. 
+                 currentDirectory is the directory that jsh is currently in.
+    */
     private ArrayList<String> splitIn2Tokens(String rawCommand, String currentDirectory) throws IOException {
 
         String spaceRegex = "[^\\s\"']+|\"([^\"]*)\"|'([^']*)'";
@@ -104,11 +117,13 @@ public class OurParser {
         return ret;
     }
     
-    /* Checks to see if CMD uses command substitution. 
+    /* Checks to see if CMD uses command substitution by looping to see 2 backquotes.
+       @returns = true if command substitution is found.
     */
     private boolean checkCmdSubstitution(String cmd) {
 
         int singleQuoteSeen = 0;
+        int backQuoteSeen = 0;          // Only work if you see 2 backquotes.
         for (int i = 0; i != cmd.length(); ++i) {
             String charAt = Character.toString(cmd.charAt(i));
             if (charAt.equals("'")) {
@@ -121,11 +136,11 @@ public class OurParser {
                     singleQuoteSeen = 0;
                 }
             }
-
             else if (charAt.equals("`")) {
+                backQuoteSeen += 1;
                 // ` is seen. We need to check if it is encased in single quotes.
                 // we do this by checking singleQuoteSeen. if it is 0 then it isn't encased in single quotes.
-                if (singleQuoteSeen == 0) {
+                if ((singleQuoteSeen == 0) && (backQuoteSeen % 2 == 0)) {
                     return true;
                 }
             }
@@ -134,8 +149,7 @@ public class OurParser {
     }
 
     /* Executes command substitution. It extracts the subcommand encased in `. It first 
-       executes the subcommand. It gets the output of the subcommand and replaces the subcommand
-       with the output in cmd. 
+       executes the subcommand. It gets the output of the subcommand and returns it. 
     */
     private String cmdSubstitution(String cmd) {
 
@@ -145,6 +159,7 @@ public class OurParser {
         int counter = 0;      // 0 when you have seen both left and right ` or none.
 
         for (int i = 0; i != cmd.length(); ++i) {
+            // Extracting the subcommand from cmd.
             if (cmd.charAt(i) == '`') {
                 if (counter == 0) {
                     // seeing the left `.
@@ -156,15 +171,15 @@ public class OurParser {
                     endIndex = i;
                 }
             }
-
             else if (counter == 1) {
                 // you've seen left ` so it is the sub command.
                 subCommand += cmd.charAt(i);
             }
         }
 
-        File file = new File(Jsh.getCurrentDirectory() + System.getProperty("file.separator") + "cmdSubContents.txt");
         try {
+            // write output to file then read that file and return the conents.
+            File file = File.createTempFile("temp", null);
             OutputStream out = new FileOutputStream(file);
             Jsh.eval(subCommand, out);
             out.close();
@@ -176,12 +191,9 @@ public class OurParser {
             }
             scan.close();
             file.delete();
-            return cmd.substring(0, startIndex) + cmdOut + cmd.substring(endIndex, cmd.length()); 
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException("Command substitution: file not found.");
+            return cmd.substring(0, startIndex) + cmdOut + cmd.substring(endIndex + 1, cmd.length()); 
         } catch (IOException e) {
             throw new RuntimeException("Command substitution: unable to write to file.");
         }
-        
     }
 }

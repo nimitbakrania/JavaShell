@@ -7,11 +7,19 @@ import java.util.ArrayList;
 public class Call implements Command {
 
     private visitorApplication visitor = new visitorApplication();
+    private Factory factory = new Factory();
 
+    /* Uses factory design pattern to create the object of the app that we are interested in.
+      Then uses visitor design pattern to call accept on that type of app object. 
+      @Params = in is inputstream
+                out is where we are writign to
+                currentDirectory is the directory that jsh is currently in.
+                app is the name of the application that is being evaluated.
+                appArgs contains the arguments that were given to APP.
+    */
     public void eval(InputStream in, OutputStream out, String currentDirectory, String app, ArrayList<String> appArgs) {
 
-        Factory factory = new Factory();
-        UnsafeDecorator application = factory.mkApplication(in, out, currentDirectory, app, appArgs);
+        UnsafeDecorator application = this.factory.mkApplication(in, out, currentDirectory, app, appArgs);
         application.accept(visitor);
     }
     

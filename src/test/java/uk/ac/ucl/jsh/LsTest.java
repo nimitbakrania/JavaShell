@@ -11,6 +11,9 @@ import java.io.PipedOutputStream;
 import java.util.Scanner;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
 
 public class LsTest {
     
@@ -20,12 +23,10 @@ public class LsTest {
     @Before
     public void goIntoTempfolder() throws IOException {
 
-        String path = folder.getRoot().getAbsolutePath() + System.getProperty("file.separator") + "dir1";
-        File file = new File(path);
-        file.mkdir();
         // for lsWithGivenDirectory
-        File file1 = new File(path, "test1.txt");
-        File file2 = new File(path, "test2.txt");
+        File dir1 = folder.newFolder("dir1");
+        File test1 = new File(dir1, "test1.txt");
+        folder.newFile("dir1" + System.getProperty("file.separator") + "test1.txt");
 
         // for testLs
         File file3 = folder.newFile("test3.txt");
@@ -52,10 +53,21 @@ public class LsTest {
 
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
-        Jsh.eval("ls dir1", out);
         Scanner scan = new Scanner(in);
+        Jsh.eval("ls dir1", out);
         assertEquals("test1.txt", scan.next());
-        assertEquals("text2.txt", scan.next());
+        scan.close();
+    }
+
+    @Test
+    public void testLsWithAbsolutePath() throws IOException {
+
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        Scanner scan = new Scanner(in);
+        String path = folder.getRoot().getAbsolutePath() + System.getProperty("file.separator") + "dir1";
+        Jsh.eval("ls " + path, out);
+        assertEquals("test1.txt", scan.next());
         scan.close();
     }
 
@@ -69,7 +81,6 @@ public class LsTest {
         } catch (RuntimeException expected) {
             assertTrue(expected.getMessage().contains("ls: too many arguments"));
         }
-
     }
 
     @Test
