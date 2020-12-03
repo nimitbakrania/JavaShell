@@ -53,9 +53,7 @@ public class visitorApplication implements baseVisitor {
             throw new RuntimeException("pwd: too many arguments");
         }
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
-        writer.write(app.currentDirectory.toString());
-        writer.write(System.getProperty("line.separator"));
-        writer.flush();
+        lineOutputWriter(Jsh.getCurrentDirectory(), writer, "pwd");
     }
 
     /* Prints the arguments to the command line.
@@ -265,7 +263,7 @@ public class visitorApplication implements baseVisitor {
         }
         Pattern grepPattern = Pattern.compile(app.appArgs.get(0));
         if (app.appArgs.size() == 1) {
-            BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(System.in));
+            BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
             standardInputBuffer.lines().filter(line -> grepPattern.matcher(line).find())
                     .forEach(line -> lineOutputWriter(line, writer, "grep"));
         } else {
