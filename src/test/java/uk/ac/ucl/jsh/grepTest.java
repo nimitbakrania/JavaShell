@@ -32,6 +32,27 @@ public class grepTest {
         TempFolder.delete();
     }
 
+    @Test
+    public void stdinTest() throws IOException{
+        File tempFile = TempFolder.newFile("Test1.txt");
+        File tempFile2 = TempFolder.newFile("Test2.txt");
+        File tempFile3 = TempFolder.newFile("Test3.txt");
+        File tempFile4 = TempFolder.newFile("Other1.txt");
+        File tempFile5 = TempFolder.newFile("Other2.txt");
+
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        Jsh.eval("find -name '*.txt' | grep Test", out);
+        Scanner scn = new Scanner(in);
+        System.out.println(scn.hasNextLine());
+        assertEquals(tempFile.getAbsolutePath(), scn.nextLine());
+        assertEquals(tempFile2.getAbsolutePath(), scn.nextLine());
+        assertEquals(tempFile3.getAbsolutePath(), scn.nextLine());
+        scn.close();
+
+    } 
+
 
     @Test
     public void invalidFileName() throws IOException{
@@ -44,7 +65,7 @@ public class grepTest {
         PipedOutputStream out;
         out = new PipedOutputStream(in);
         try{
-            Jsh.eval("grep 'hello world' Test.txt", out);
+            Jsh.eval("_grep 'hello world' Test.txt", out);
         }
         catch(IOException e){
             assertEquals("grep: wrong file argument", e.toString());
@@ -61,7 +82,7 @@ public class grepTest {
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
-        Jsh.eval("grep 'hello world' Test.txt", out);
+        Jsh.eval("_grep 'hello world' Test.txt", out);
         Scanner scn = new Scanner(in);
         assertEquals(scn.nextLine(), "hello world hello everybody");
         scn.close();
@@ -73,7 +94,7 @@ public class grepTest {
         PipedOutputStream out;
         out = new PipedOutputStream(in);
         try{
-            Jsh.eval("grep", out);
+            Jsh.eval("_grep", out);
         }
         catch(IOException e){
             assertEquals("grep: no arguments given", e.toString());
@@ -95,7 +116,7 @@ public class grepTest {
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
-        Jsh.eval("grep 'hello world' Test.txt Test2.txt", out);
+        Jsh.eval("_grep 'hello world' Test.txt Test2.txt", out);
         Scanner scn = new Scanner(in);
         assertEquals(scn.nextLine(), "Test.txt:hello world hello everybody");
         assertEquals(scn.nextLine(), "Test2.txt:hello world tempfile2");
