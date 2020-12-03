@@ -36,7 +36,29 @@ public class tailTest{
             writer.close();
         }
     }
+    
+    @Test
+    public void stdinTest() throws IOException{
+        String oldDir = Jsh.getCurrentDirectory();
+        Jsh.setCurrentDirectory(folder.getRoot().toString());
+        File tempFile = folder.newFile("Test1.txt");
+        File tempFile2 = folder.newFile("Test2.txt");
+        File tempFile3 = folder.newFile("Test3.txt");
+        File tempFile4 = folder.newFile("Test4.txt");
+        File tempFile5 = folder.newFile("Test5.txt");
 
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        Jsh.eval("find -name '*.txt' | tail -n 3", out);
+        Scanner scn = new Scanner(in);
+        System.out.println(scn.hasNextLine());
+        assertEquals(tempFile3.getAbsolutePath(), scn.nextLine());
+        assertEquals(tempFile4.getAbsolutePath(), scn.nextLine());
+        assertEquals(tempFile5.getAbsolutePath(), scn.nextLine());
+        scn.close();
+        Jsh.setCurrentDirectory(oldDir);
+    } 
 
     @Test
     public void tailTestNoArgs() throws Exception {
