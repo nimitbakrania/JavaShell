@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.*;
+import java.io.InputStream;
 
 public class visitorApplication implements baseVisitor {
 
@@ -343,8 +344,15 @@ public class visitorApplication implements baseVisitor {
      */
     public void visit(Visitable.Cut app) {
 
+        int inputStreamUsed = 0;           // Set this to 1 if file isnt supplied and input stream is not null
         if (app.appArgs.size() < 3) {
-            throw new RuntimeException("cut: too few arguments.");
+            if (app.input != null) {
+                inputStreamUsed = 1;
+            }
+            else {
+                // input stream is null and no file specified. Throw exception.
+                throw new RuntimeException("cut: too few arguments.");
+            }
         }
         if (!app.appArgs.get(0).equals("-b")) { 
             throw new RuntimeException("cut: incorrect option input " + app.appArgs.get(0));
@@ -364,63 +372,87 @@ public class visitorApplication implements baseVisitor {
             }
         }
 
-        File file = new File(app.currentDirectory + File.separator + app.appArgs.get(2));
-        Path filePath = Paths.get(app.currentDirectory + File.separator + app.appArgs.get(2));
-        if (file.exists()) {
-            if (!args[0].contains("-")) {
-                // of the format 1,2,3.
+        File file = null;
+        Path filePath = null;
+        if (inputStreamUsed == 0) {
+            // we are using app args
+            file = new File(app.currentDirectory + File.separator + app.appArgs.get(2));
+            filePath = Paths.get(app.currentDirectory + File.separator + app.appArgs.get(2));
+        }
+        if (!args[0].contains("-")) {
+            // of the format 1,2,3.
+            try {
+                BufferedReader reader = initReader(inputStreamUsed, charset, filePath, file, app.input);
+                reader.lines().forEach(line -> cutSingleBytes(line, writer, args, charset));
+            } catch (IOException e) {
+                throw new RuntimeException("cut: cannot open " + app.appArgs.get(2));
+            }
+        }
+            
+        else {
+            if (Pattern.matches("[0-9]+-[0-9]+", args[0])) {
+                // option is of format [0-9]+-[0-9]+.
+                // calculate length of bytesToPrint
+                int length = 0;
+                for (int i = 0; i != args.length; ++i) {
+                    int index = args[i].indexOf("-");
+                    length += Integer.parseInt(args[i].substring(index + 1,args[i].length())) - Integer.parseInt(args[i].substring(0,index));
+                }
+                final int lengthFinal = length; // to make it work with streams. length isnt updated after this point anyway.
+
+                try  {
+                    BufferedReader reader = initReader(inputStreamUsed, charset, filePath, file, app.input);
+                    reader.lines().forEach(line -> cutIntervals(line, writer, args, charset, lengthFinal));
+                } catch (IOException e) {
+                    throw new RuntimeException("cut: cannot open " + app.appArgs.get(2));
+                }
+            } 
+                
+            else {
+                // options are of the form -3,6- etc
+                ArrayList<Integer> to = new ArrayList<>();
+                ArrayList<Integer> from = new ArrayList<>();
+                for (int i = 0; i != args.length; ++i) {
+                    if (args[i].charAt(0) == '-') {
+                        // of the form -[0-9].
+                        to.add(Integer.parseInt(args[i].substring(1, args[i].length())));
+                    } else {
+                        from.add(Integer.parseInt(args[i].substring(0, args[i].length() - 1)));
+                    }
+                }
+
                 try {
-                    BufferedReader reader =  Files.newBufferedReader(filePath, charset);
-                    reader.lines().forEach(line -> cutSingleBytes(line, writer, args, charset));
+                    BufferedReader reader = initReader(inputStreamUsed, charset, filePath, file, app.input);
+                    reader.lines().forEach(line -> cutHalfIntervals(line, writer, to, from, charset));
                 } catch (IOException e) {
                     throw new RuntimeException("cut: cannot open " + app.appArgs.get(2));
                 }
             }
-            
-            else {
-                if (Pattern.matches("[0-9]+-[0-9]+", args[0])) {
-                    // option is of format [0-9]+-[0-9]+.
-                    // calculate length of bytesToPrint
-                    int length = 0;
-                    for (int i = 0; i != args.length; ++i) {
-                        int index = args[i].indexOf("-");
-                        length += Integer.parseInt(args[i].substring(index + 1,args[i].length())) - Integer.parseInt(args[i].substring(0,index));
-                    }
-                    final int lengthFinal = length; // to make it work with streams. length isnt updated after this point anyway.
+        }
+    }
 
-                    try  {
-                        BufferedReader reader = Files.newBufferedReader(filePath, charset);
-                        reader.lines().forEach(line -> cutIntervals(line, writer, args, charset, lengthFinal));
-                    } catch (IOException e) {
-                        throw new RuntimeException("cut: cannot open " + app.appArgs.get(2));
-                    }
-                } 
-                
-                else {
-                    // options are of the form -3,6- etc
-                    ArrayList<Integer> to = new ArrayList<>();
-                    ArrayList<Integer> from = new ArrayList<>();
-                    for (int i = 0; i != args.length; ++i) {
-                        if (args[i].charAt(0) == '-') {
-                            // of the form -[0-9].
-                            to.add(Integer.parseInt(args[i].substring(1, args[i].length())));
-                        } else {
-                            from.add(Integer.parseInt(args[i].substring(0, args[i].length() - 1)));
-                        }
-                    }
+    /* Auxiliary method for Cut. It was made to allow cut with work with both standard input and supplied file argument. It checks if
+       the flag specifing that appArgs < 3 && input != null is raised. If it isn't then we are using the supplied File file. Else
+       we make a BufferedReader object using the inputstream and return it.
+       @params = inputStreamUsed is a flag. It is 1 if we are using inputstream else 0.
+                 charset is UTF-8
+                 filePath is Path object specifing path to file. If we are using inputstream it is null
+                 file is File object. it is null if we are using input stream.
+                 input is null if we are using File file otherwise it is initialized.
+       @returns = bufferedreader that will be used to read each line.
+    */
+    private BufferedReader initReader(int inputStreamUsed, Charset charset, Path filePath, File file, InputStream input) throws IOException {
 
-                    try {
-                        BufferedReader reader = Files.newBufferedReader(filePath, charset);
-                        reader.lines().forEach(line -> cutHalfIntervals(line, writer, to, from, charset));
-                    } catch (IOException e) {
-                        throw new RuntimeException("cut: cannot open " + app.appArgs.get(2));
-                    }
-                }
+        if (inputStreamUsed == 0) {
+            // using appArgs
+            if (file.exists()) {
+                return Files.newBufferedReader(filePath, charset);
+            } else {
+                throw new RuntimeException("cut: file input does not exist.");
             }
         }
-        else {
-            throw new RuntimeException("cut: file input does not exist.");
-        }
+        
+        return new BufferedReader(new InputStreamReader(input));
     }
 
     /* Auxiliary method for Cut. It works for input of the format 1,2,3 etc. The algorithm takes each line,
