@@ -31,6 +31,27 @@ public class headTest {
     }
 
     @Test
+    public void stdinTest() throws IOException{
+        File tempFile = TempFolder.newFile("Test1.txt");
+        File tempFile2 = TempFolder.newFile("Test2.txt");
+        File tempFile3 = TempFolder.newFile("Test3.txt");
+        File tempFile4 = TempFolder.newFile("Test4.txt");
+        File tempFile5 = TempFolder.newFile("Test5.txt");
+
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        Jsh.eval("find -name '*.txt' | head -n 3", out);
+        Scanner scn = new Scanner(in);
+        System.out.println(scn.hasNextLine());
+        assertEquals(tempFile.getAbsolutePath(), scn.nextLine());
+        assertEquals(tempFile2.getAbsolutePath(), scn.nextLine());
+        assertEquals(tempFile3.getAbsolutePath(), scn.nextLine());
+        scn.close();
+
+    } 
+
+    @Test
     public void invalidFileName() throws IOException{
         File tempFile = TempFolder.newFile("Test1.txt");
         FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
@@ -41,7 +62,7 @@ public class headTest {
         PipedOutputStream out;
         out = new PipedOutputStream(in);
         try{
-            Jsh.eval("head Test.txt", out);
+            Jsh.eval("_head Test.txt", out);
         }
         catch(IOException e){
             assertEquals("head: Test.txt does not exist", e.toString());
@@ -64,7 +85,7 @@ public class headTest {
         PipedOutputStream out;
         out = new PipedOutputStream(in);
         try{
-            Jsh.eval("head -n 15 Test.txt Test2.txt", out);
+            Jsh.eval("_head -n 15 Test.txt Test2.txt", out);
         }
         catch(IOException e){
             assertEquals("head: too many arguments", e.toString());
@@ -82,7 +103,7 @@ public class headTest {
         PipedOutputStream out;
         out = new PipedOutputStream(in);
         try{
-            Jsh.eval("head n 15 Test.txt", out);
+            Jsh.eval("_head n 15 Test.txt", out);
         }
         catch(IOException e){
             assertEquals("head: wrong argument n", e.toString());
@@ -100,7 +121,7 @@ public class headTest {
         PipedOutputStream out;
         out = new PipedOutputStream(in);
         try{
-            Jsh.eval("head -n ab Test.txt", out);
+            Jsh.eval("_head -n ab Test.txt", out);
         }
         catch(IOException e){
             assertEquals("head: wrong argument ab", e.toString());
@@ -118,7 +139,7 @@ public class headTest {
         PipedOutputStream out;
         out = new PipedOutputStream(in);
         try{
-            Jsh.eval("head -n -10 Test.txt", out);
+            Jsh.eval("_head -n -10 Test.txt", out);
         }
         catch(IOException e){
             assertEquals("head: wrong argument -10", e.toString());

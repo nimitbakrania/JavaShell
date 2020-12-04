@@ -184,7 +184,9 @@ public class visitorApplication implements baseVisitor {
     public void visit(Visitable.Cat app) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         if (app.appArgs.isEmpty()) {
-            throw new RuntimeException("cat: missing arguments");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(app.input));
+            reader.lines().forEach(line -> lineOutputWriter(line, writer, "cat"));
+            writer.close();
         } else {
             for (String arg : app.appArgs) {
                 Charset encoding = StandardCharsets.UTF_8;
@@ -192,12 +194,8 @@ public class visitorApplication implements baseVisitor {
                 if (currFile.exists()) {
                     Path filePath = Paths.get(app.currentDirectory + File.separator + arg);
                     try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
-                        String line = null;
-                        while ((line = reader.readLine()) != null) {
-                            writer.write(String.valueOf(line));
-                            writer.write(System.getProperty("line.separator"));
-                            writer.flush();
-                        }
+                        reader.lines().forEach(line -> lineOutputWriter(line, writer, "cat"));
+                        writer.close();
                     } catch (IOException e) {
                         throw new RuntimeException("cat: cannot open " + arg);
                     }
