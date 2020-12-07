@@ -253,7 +253,7 @@ public class visitorApplication implements baseVisitor {
         }
         Pattern grepPattern = Pattern.compile(app.appArgs.get(0));
         if (app.appArgs.size() == 1) {
-            BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(System.in));
+            BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
             standardInputBuffer.lines().filter(line -> grepPattern.matcher(line).find())
                     .forEach(line -> lineOutputWriter(line, writer, "grep"));
         } else {
