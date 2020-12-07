@@ -24,6 +24,9 @@ public class Jsh {
             if (appArgs.contains("|")){
                 pipe.eval(null, output, currentDirectory, appName, appArgs);
             }
+            else if (appArgs.contains(">") || appArgs.contains("<")){
+                redirect.eval(null, output, currentDirectory, appName, appArgs);
+            }
             else{
                 call.eval(null, output, currentDirectory, appName, appArgs);
             }
