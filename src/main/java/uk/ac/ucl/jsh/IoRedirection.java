@@ -12,7 +12,50 @@ import java.util.ArrayList;
 public class IoRedirection implements Command {
 
     private Call call = new Call();
-
+    
+    public void eval(InputStream in, OutputStream output, String currentDirectory, String app, ArrayList<String> appArgs) throws IOException {
+        ArrayList<String> appArgs1 = appArgs;
+        if (appArgs.contains("<")){
+            int index1 = appArgs.indexOf("<");
+            appArgs1 = new ArrayList<String>(appArgs.subList(0, index1));
+            File inputFile = new File(currentDirectory, appArgs.get(index1 + 1));
+            in = new FileInputStream(inputFile);
+            if (appArgs.contains(">")){
+                int index2 = appArgs.indexOf(">");
+                File outputFile = new File(currentDirectory, appArgs.get(index2 + 1));
+                output = new FileOutputStream(outputFile);
+                if (appArgs1.size() > index2 + 2){
+                    in.close();
+                    output.close();
+                    throw new RuntimeException("redirection: too many arguments after redirection symbol");
+                }
+            }
+            else{
+                if (appArgs1.size() > index1 + 2){
+                    in.close();
+                    throw new RuntimeException("redirection: too many arguments after redirection symbol");
+                }
+            }
+        }
+        else if(appArgs.contains(">")){
+            int index1 = appArgs.indexOf(">");
+            appArgs1 = new ArrayList<String>(appArgs.subList(0, index1));
+            File outputFile = new File(currentDirectory, appArgs.get(index1 + 1));
+            output = new FileOutputStream(outputFile);
+            if (appArgs1.size() > index1 + 2){
+                output.close();
+                throw new RuntimeException("redirection: too many arguments after redirection symbol");
+            }
+        }
+        if (appArgs1.contains(">") || appArgs1.contains("<")){
+            throw new RuntimeException("redirection: too many redirection symbols");
+        }
+        call.eval(in, output, currentDirectory, app, appArgs1);
+        in.close();
+        output.close();
+    }
+    
+    /*
     @Override
     public void eval(InputStream in, OutputStream output, String currentDirectory, String app,
             ArrayList<String> appArgs) throws IOException {
@@ -79,4 +122,5 @@ public class IoRedirection implements Command {
             }
         }
     }
+    */
 }
