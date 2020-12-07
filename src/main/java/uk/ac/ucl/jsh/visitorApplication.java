@@ -496,7 +496,7 @@ public class visitorApplication implements baseVisitor {
 
         byte[] bytes = line.getBytes(charset);
         byte[] bytesToPrint = new byte[length];
-
+        
         if (bytes.length == 0) {
             // empty line.
             return;
@@ -506,7 +506,8 @@ public class visitorApplication implements baseVisitor {
         try {
             for (int i = 0; i != args.length; ++i) {
                 // for each interval in args
-                for (int j = Character.getNumericValue(args[i].charAt(0)); j != Character.getNumericValue(args[i].charAt(2)); ++j) {
+                int index = args[i].indexOf("-");
+                for (int j =  Integer.parseInt(args[i].substring(0,index)); j != Integer.parseInt(args[i].substring(index + 1,args[i].length())); ++j) {
                     // loop from start to end of interval
                     bytesToPrint[counter++] = bytes[j-1];
                 }

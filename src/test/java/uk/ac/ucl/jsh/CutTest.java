@@ -13,6 +13,9 @@ import java.util.Scanner;
 import java.io.IOException;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.OutputStreamWriter;
+import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
 
 public class CutTest {
 
@@ -23,7 +26,7 @@ public class CutTest {
     public void setUpDummyData() throws IOException {
 
         File testFile = folder.newFile("test1.txt");
-        FileWriter writer = new FileWriter(testFile);
+        OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(testFile), StandardCharsets.UTF_8);
         writer.write("Lorem ipsum dolor sit mi.\n" +
                       "Duis velit enim, maximus quis orci sit amet, sollicitudin bibendum eros.\n" +
                       "Aenean ac lorem et justo malesuada hendrerit.\n" + 
@@ -40,7 +43,7 @@ public class CutTest {
         try {
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("cut -f 1,2 test1.txt", out);
+            Jsh.eval("_cut -f 1,2 test1.txt", out);
         } catch (RuntimeException expected) {
             assertTrue(expected.getMessage().contains("cut: incorrect option input -f"));
         }
@@ -52,7 +55,7 @@ public class CutTest {
         try {
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("cut -b 1 2 3 test1.txt", out);
+            Jsh.eval("_cut -b 1 2 3 test1.txt", out);
         } catch (RuntimeException expected) {
             assertTrue(expected.getMessage().contains("cut: too many arguments."));
         }
@@ -64,7 +67,7 @@ public class CutTest {
         try {
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("cut -b test1.txt", out);
+            Jsh.eval("_cut -b test1.txt", out);
         } catch (RuntimeException expected) {
             assertTrue(expected.getMessage().contains("cut: too few arguments."));
         }
@@ -76,7 +79,7 @@ public class CutTest {
         try {
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("cut -b a-b test1.txt", out);
+            Jsh.eval("_cut -b a-b test1.txt", out);
         } catch (RuntimeException expected) {
             assertTrue(expected.getMessage().contains("cut: invalid arguments."));
         }
@@ -88,7 +91,7 @@ public class CutTest {
         try {
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("cut -b a-b fake.txt", out);
+            Jsh.eval("_cut -b a-b fake.txt", out);
         } catch (RuntimeException expected) {
             assertTrue(expected.getMessage().contains("cut: file input does not exist."));
         }
@@ -133,7 +136,7 @@ public class CutTest {
         PipedOutputStream out = new PipedOutputStream(in);
         Scanner scan = new Scanner(in);
         Jsh.eval("cut -b -4,7- test1.txt", out); // get first 4 bytes then from 7th byte to the end.
-        assertEquals("Loreipsum dolor sit mi.\n".getBytes(), scan.nextLine().getBytes());
+        assertEquals("Loreipsum dolor sit mi".getBytes(), scan.nextLine().getBytes());
         assertEquals("Duiselit enim, maximus quis orci sit amet, sollicitudin bibendum eros.", scan.nextLine());
         assertEquals("Aene ac lorem et justo malesuada hendrerit.", scan.nextLine());
         assertEquals("Etiaet erat leo. Ut fringilla quam nisi, at laoreet lacus volutpat sit amet.", scan.nextLine());

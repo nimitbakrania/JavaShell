@@ -77,7 +77,7 @@ public class LsTest {
         try {
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("ls foo bar foobar", out);
+            Jsh.eval("_ls foo bar foobar", out);
         } catch (RuntimeException expected) {
             assertTrue(expected.getMessage().contains("ls: too many arguments"));
         }
@@ -89,7 +89,7 @@ public class LsTest {
         try {
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("ls fakeDirectory", out);
+            Jsh.eval("_ls fakeDirectory", out);
         } catch (RuntimeException expected) {
             assertTrue(expected.getMessage().equals("ls: no such directory"));
         }
