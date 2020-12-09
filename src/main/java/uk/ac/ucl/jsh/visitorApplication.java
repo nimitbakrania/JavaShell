@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.*;
@@ -650,6 +651,7 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
+    /*
     public void visit(Visitable.Uniq app) throws IOException {
 
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
@@ -711,7 +713,7 @@ public class visitorApplication implements baseVisitor {
             }
         }
     }
-
+    */
     public void uniqhelper(String filename) throws IOException
     {
         File inputFile = new File("tester.txt");
@@ -772,9 +774,6 @@ public class visitorApplication implements baseVisitor {
 
     public void visit(Visitable.Sort app) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(app.output);
-        if (app.appArgs.isEmpty()) {
-            throw new RuntimeException("sort: missing arguments");
-        }
         if (app.appArgs.size() > 2) {
             throw new RuntimeException("sort: too many arguments");
         }
@@ -782,19 +781,31 @@ public class visitorApplication implements baseVisitor {
         String headArg = "";
         if (app.appArgs.size() == 2) {
             try {
-                reverse = app.appArgs.get(1);
+                reverse = app.appArgs.get(0);
+                headArg = app.appArgs.get(1);
             } catch (Exception e) {
-                throw new RuntimeException("sort: wrong argument " + app.appArgs.get(1));
+                throw new RuntimeException("sort: wrong argument here1" + app.appArgs.get(1));
             }
         } else if (app.appArgs.size() == 1) {
             headArg = app.appArgs.get(0);
         }
-        if (app.appArgs.size() == 2 && reverse != "-r") {
-            throw new RuntimeException("sort: wrong argument " + String.valueOf(reverse));
+        if ((app.appArgs.size() == 2) && !app.appArgs.get(0).equals("-r")) {
+            throw new RuntimeException("sort: wrong argument " + app.appArgs.get(0));
         }
-        String sortFile = app.currentDirectory + File.separator + app.appArgs.get(0);
+        String sortFile = app.currentDirectory + File.separator + headArg;
         try(Stream<String> lines = Files.lines(Paths.get(sortFile)))
         {   
+            if(app.appArgs.isEmpty() || (app.appArgs.size()==1 && app.appArgs.get(0).equals("-r")))
+            {
+                if(app.input != null){
+                    BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
+                    standardInputBuffer.lines().sorted().forEach((line) -> lineOutputWriter(line, writer, "sort"));
+                }
+                else{
+                    throw new RuntimeException("sort: error with stdin");
+                }
+                
+            }
             if(app.appArgs.size()==1)
             {
                 lines.sorted().forEach(s -> {
@@ -824,10 +835,115 @@ public class visitorApplication implements baseVisitor {
             });
             }
         }
-        catch(IOException e)
-        {
-            throw new RuntimeException("sort: cannot open " + app.appArgs.get(0));
+    }
+    
+    public void visit(Visitable.Uniq app) throws IOException {
+        OutputStreamWriter writer = new OutputStreamWriter(app.output);
+        if (app.appArgs.size() > 2) {
+            throw new RuntimeException("uniq: too many arguments");
         }
-    }   
+        String reverse ="";
+        String headArg = "";
+        if (app.appArgs.size() == 2) {
+            try {
+                reverse = app.appArgs.get(0);
+                headArg = app.appArgs.get(1);
+            } catch (Exception e) {
+                throw new RuntimeException("uniq: wrong argument here1" + app.appArgs.get(1));
+            }
+        } else if (app.appArgs.size() == 1) {
+            headArg = app.appArgs.get(0);
+        }
+        if ((app.appArgs.size() == 2) && !app.appArgs.get(0).equals("-i")) {
+            throw new RuntimeException("uniq: wrong argument " + app.appArgs.get(0));
+        }
+        String sortFile = app.currentDirectory + File.separator + headArg;
+        try(Stream<String> lines = Files.lines(Paths.get(sortFile)))
+        {   
+            if(app.appArgs.isEmpty() || (app.appArgs.size()==1 && app.appArgs.get(0).equals("-i")))
+            {
+                if(app.input != null){
+                    LinkedList<String> previous = new LinkedList<String>();
+                    previous.add("");
+                    BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
+                    if(app.appArgs.size()==1 && app.appArgs.get(0).equals("-i")){
+                        standardInputBuffer.lines().forEach((line) -> {
+                            if (!line.toLowerCase().equals(previous.getLast().toLowerCase())) {
+                                lineOutputWriter(line, writer, "uniq");
+                                previous.add(line);
+                            }
+                        });
+                    }
+                    else{
+                        standardInputBuffer.lines().forEach((line) -> {
+                            if (!line.equals(previous.getLast())) {
+                                lineOutputWriter(line, writer, "uniq");
+                                previous.add(line);
+                            }
+                        });
+                    }
+                }
+                else{
+                    throw new RuntimeException("uniq: error with stdin");
+                }
+            }
+            if(app.appArgs.size()==1)
+            {
+                File file = File.createTempFile("temp", ".txt");
+                File headFile = new File(app.currentDirectory + File.separator + headArg);
+                FileWriter fw = new FileWriter(file.getName(),false);
+                LinkedList<String> previous = new LinkedList<String>();
+                previous.add("");
+                lines.forEach(s -> {
+                try{
+                    if(!s.equals(previous.getLast())){
+                        writer.write(s);
+                        writer.write(System.getProperty("line.separator"));
+                        writer.flush();
+                        fw.write(s);
+                        fw.write(System.getProperty("line.separator"));
+                        fw.flush();
+                        previous.add(s);
+                    }
+                }
+                catch(IOException e)
+                {
+                    throw new RuntimeException("uniq: cannot open " + app.appArgs.get(0));
+                }
+                });
+                fw.close();
+                headFile.delete();
+                Boolean t = file.renameTo(headFile);
+            }
+            else if(app.appArgs.size()==2)
+            {
+                File file = File.createTempFile("temp", ".txt");
+                File headFile = new File(app.currentDirectory + File.separator + headArg);
+                FileWriter fw = new FileWriter(file.getName(),false);
+                LinkedList<String> previous = new LinkedList<String>();
+                previous.add("");
+                lines.forEach(s -> {
+                try{
+                    if(!s.toLowerCase().equals(previous.getLast().toLowerCase())){
+                        writer.write(s);
+                        writer.write(System.getProperty("line.separator"));
+                        writer.flush();
+                        fw.write(s);
+                        fw.write(System.getProperty("line.separator"));
+                        fw.flush();
+                        previous.add(s);
+                    }
+                }
+                catch(IOException e)
+                {
+                    throw new RuntimeException("uniq: cannot open " + app.appArgs.get(0));
+                }
+                });
+                fw.close();
+                headFile.delete();
+                Boolean t = file.renameTo(headFile);
+            }
+        }
+    }
 }
 
