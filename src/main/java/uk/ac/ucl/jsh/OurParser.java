@@ -151,40 +151,18 @@ public class OurParser {
         return false;
     }
 
-    /* Executes command substitution. It extracts the subcommand encased in `. It first 
-       executes the subcommand. It gets the output of the subcommand and returns it. 
+    /* Executes command substitution. The algoritm is outlined here:
+       1) Loop through and split the cmd by ;. ; incased in backquotes is not split. E.g. `echo foo;echo bar` is 1 sub command not 2.
+       2) For each command check if they have command substitution. If not add them to ret and continue.
+       2.1) If yes, extract subcommand while storing indexes of backquotes. Execute subcommand using executeCmdSubstitution.
+       2.2) Add the returned command from executeCmdSubstitution into ret.
+       3) Concat all the commands in ret and return them.
+       @params = cmd : commandline with command substitution.
+       @returns = string of commands without command substitution
     */
     private String cmdSubstitution(String cmd) {
 
-        // first go thru cmd and split on ;
-        // next go thru each command and execute command substitution if applicable.
-        // concat and return
-
-        ArrayList<String> commands = new ArrayList<>();
-        int flagBackQuote = 0;                           // change this to 1 when inside quotes. 0 outside.
-        int startIndex = 0;
-        int endIndex = -1;
-        for (int i = 0; i != cmd.length(); ++i) {
-            if (cmd.charAt(i) == '`') {
-                if (flagBackQuote == 0) {
-                    // going into ` scope.
-                    flagBackQuote = 1;
-                }
-                else {
-                    flagBackQuote = 0;
-                }
-            }
-            else if ((cmd.charAt(i) == ';') && (flagBackQuote == 0)) {
-                // seen a ; that isnt inside `.
-                endIndex = i;
-                commands.add(cmd.substring(startIndex, endIndex));
-                startIndex = i + 1;
-            }
-            if (i == cmd.length() - 1) {
-                // reached the end of cmd.
-                commands.add(cmd.substring(startIndex, i + 1));
-            }
-        }
+        ArrayList<String> commands = splitCommands(cmd);
 
         ArrayList<String> ret = new ArrayList<>();
         for (int i = 0; i != commands.size(); ++i) {
@@ -195,8 +173,8 @@ public class OurParser {
                 continue;
             }
             
-            startIndex = -1;                      // now holds index of lhs `.
-            endIndex = -1;                        // holds index of rhs `.
+            int startIndex = -1;                      // now holds index of lhs `.
+            int endIndex = -1;                        // holds index of rhs `.
             String subCommand = "";
             int counter = 0;
 
@@ -230,6 +208,49 @@ public class OurParser {
         return concatArrayList(ret);
     }
 
+    /* Auxiliary method for cmdSubstitution. Just loops thru and extracts each command and adds it to
+       commands. 
+       @params = cmd : commandline with command stubstitution
+       @returns = arraylist of commands.
+    */
+    private ArrayList<String> splitCommands(String cmd) {
+
+        ArrayList<String> commands = new ArrayList<>();
+        int flagBackQuote = 0;                           // change this to 1 when inside quotes. 0 outside.
+        int startIndex = 0;
+        int endIndex = -1;
+        for (int i = 0; i != cmd.length(); ++i) {
+            if (cmd.charAt(i) == '`') {
+                if (flagBackQuote == 0) {
+                    // going into ` scope.
+                    flagBackQuote = 1;
+                }
+                else {
+                    flagBackQuote = 0;
+                }
+            }
+            else if ((cmd.charAt(i) == ';') && (flagBackQuote == 0)) {
+                // seen a ; that isnt inside `.
+                endIndex = i;
+                commands.add(cmd.substring(startIndex, endIndex));
+                startIndex = i + 1;
+            }
+            if (i == cmd.length() - 1) {
+                // reached the end of cmd.
+                commands.add(cmd.substring(startIndex, i + 1));
+            }
+        }
+        return commands;
+    }
+
+    /* Executes the subcommand and stores its output into a temporary file. It then reads the temporary file 
+       and puts its content into cmd. The backquoted subcommand is replaced by output.
+       @params = startIndex : index of first `.
+                 endIndex : index of second `.
+                 cmd : string with command substitution.
+                 subCommand : command encased with `.
+       @returns = cmd but with the command substitution part replaced with the output of subCommand.
+    */
     private String executeCmdSubstitution(int startIndex, int endIndex, String cmd, String subCommand) {
 
         try {
@@ -253,6 +274,11 @@ public class OurParser {
         }
     }
 
+    /* Auxiliary method for cmdSubstitution. Loops through and concatenates each  
+       string in array together. It then returns this string.
+       @params = array : array of strings
+       @returns = all the strings in array concatenated together 
+    */
     private String concatArrayList(ArrayList<String> array) {
 
         String ret = "";
