@@ -190,24 +190,25 @@ public class visitorApplication implements baseVisitor {
         if (app.appArgs.isEmpty()) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(app.input));
             reader.lines().forEach(line -> lineOutputWriter(line, writer, "cat"));
-            writer.close();
         } else {
+            Charset encoding = StandardCharsets.UTF_8;
             for (String arg : app.appArgs) {
-                Charset encoding = StandardCharsets.UTF_8;
-                File currFile = new File(app.currentDirectory + File.separator + arg);
+                File currFile = new File(app.currentDirectory, arg);
                 if (currFile.exists()) {
-                    Path filePath = Paths.get(app.currentDirectory + File.separator + arg);
+                    Path filePath = currFile.toPath();
                     try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
                         reader.lines().forEach(line -> lineOutputWriter(line, writer, "cat"));
-                        writer.close();
                     } catch (IOException e) {
+                        writer.close();
                         throw new RuntimeException("cat: cannot open " + arg);
                     }
                 } else {
+                    writer.close();
                     throw new RuntimeException("cat: file does not exist");
                 }
             }
         }
+        writer.close();
     }
 
     /* Prints all the files and folders in the current directory if no argument is given.
