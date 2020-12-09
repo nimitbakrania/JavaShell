@@ -17,6 +17,7 @@ public class Jsh {
         OurParser parser = new OurParser();
         Call call = new Call();
         Pipe pipe = new Pipe();
+        IoRedirection redirect = new IoRedirection();
         ArrayList<ArrayList<String>> lines = parser.parse(cmdline, currentDirectory);
         for (ArrayList<String> line : lines) {
             String appName = line.get(0);

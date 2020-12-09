@@ -136,7 +136,7 @@ public class CutTest {
         PipedOutputStream out = new PipedOutputStream(in);
         Scanner scan = new Scanner(in);
         Jsh.eval("cut -b -4,7- test1.txt", out); // get first 4 bytes then from 7th byte to the end.
-        assertEquals("Loreipsum dolor sit mi".getBytes(), scan.nextLine().getBytes());
+        assertEquals("Loreipsum dolor sit mi.", scan.nextLine());
         assertEquals("Duiselit enim, maximus quis orci sit amet, sollicitudin bibendum eros.", scan.nextLine());
         assertEquals("Aene ac lorem et justo malesuada hendrerit.", scan.nextLine());
         assertEquals("Etiaet erat leo. Ut fringilla quam nisi, at laoreet lacus volutpat sit amet.", scan.nextLine());

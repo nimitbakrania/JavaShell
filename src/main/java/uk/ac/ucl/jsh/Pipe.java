@@ -10,9 +10,6 @@ import java.io.IOException;
 
 public class Pipe implements Command{
     private Call call = new Call();
-
-public class Pipe implements Command{
-    private Call call = new Call();
     private IoRedirection redirect = new IoRedirection();
 
     public void eval(InputStream in, OutputStream out, String currentDirectory, String app1, ArrayList<String> appArgs) throws IOException {

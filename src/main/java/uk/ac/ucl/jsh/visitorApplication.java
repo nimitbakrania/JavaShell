@@ -394,7 +394,7 @@ public class visitorApplication implements baseVisitor {
                 int length = 0;
                 for (int i = 0; i != args.length; ++i) {
                     int index = args[i].indexOf("-");
-                    length += Integer.parseInt(args[i].substring(index + 1,args[i].length())) - Integer.parseInt(args[i].substring(0,index));
+                    length += Integer.parseInt(args[i].substring(index + 1,args[i].length())) - Integer.parseInt(args[i].substring(0,index)) + 1;
                 }
                 final int lengthFinal = length; // to make it work with streams. length isnt updated after this point anyway.
 
@@ -507,7 +507,7 @@ public class visitorApplication implements baseVisitor {
             for (int i = 0; i != args.length; ++i) {
                 // for each interval in args
                 int index = args[i].indexOf("-");
-                for (int j =  Integer.parseInt(args[i].substring(0,index)); j != Integer.parseInt(args[i].substring(index + 1,args[i].length())); ++j) {
+                for (int j =  Integer.parseInt(args[i].substring(0,index)); j != (Integer.parseInt(args[i].substring(index + 1,args[i].length())) + 1); ++j) {
                     // loop from start to end of interval
                     bytesToPrint[counter++] = bytes[j-1];
                 }
@@ -531,9 +531,46 @@ public class visitorApplication implements baseVisitor {
 
         byte[] bytes = line.getBytes(charset);
         byte[] bytesToPrint = new byte[bytes.length];         // Assume at most we print all bytes in line.
-                            
         if (bytes.length == 0) {
             return;
+        }
+        
+        int highest = -1;
+        int indexOfHighest = -1;
+        if (to.size() > 1) {
+            // you have overlapping ranges take the highest element. 
+            for (int i = 0; i != to.size(); ++i) {
+                if (highest <= to.get(i)) {
+                    highest = to.get(i);
+                    indexOfHighest = i;
+                }
+            }
+            // make it so the only element is the highest.
+            ArrayList<Integer> temp = new ArrayList<>();
+            temp.add(to.get(indexOfHighest));
+            to = temp;
+        }
+
+        int lowest = 1000000000;        // large number so it always is reset to lwoest at start.
+        int indexOfLowest = -1;
+        if (from.size() > 1) {
+            // you have overlapping ranges. Take the lowest to.
+            for (int i = 0; i != from.size(); ++i) {
+                if (lowest >= from.get(i)) {
+                    lowest = from.get(i);
+                    indexOfLowest = i;
+                }
+            }
+            // make it so the only element is the lowest.
+            ArrayList<Integer> temp = new ArrayList<>();
+            temp.add(from.get(indexOfLowest));
+            from = temp;
+        }
+        if ((to.size() == 1) && (from.size() == 1)) {
+            if (to.get(0) > from.get(0)) {
+                // check if ranges from to and from overlap. E.g. -5,3- overlap so you would just output entire line.
+                lineOutputWriter(new String(bytes, charset), writer, "cut");
+            }
         }
 
         int counter = 0;
@@ -548,16 +585,39 @@ public class visitorApplication implements baseVisitor {
         
             for (int i = 0; i != from.size(); ++i) {
                 // Extract bytes from. Eg 5- will get bytes 5 to end.
-                for (int j = from.get(i); j != bytes.length; ++j) {
+                for (int j = from.get(i) - 1; j != bytes.length; ++j) {
                     // offset this since 5th byte would be at index 4.
-                    bytesToPrint[counter++] = bytes[j-1];
+                    bytesToPrint[counter++] = bytes[j];
                     }
-                }
+            }
         } catch (IndexOutOfBoundsException e) {
             throw new RuntimeException("cut: byte index given is too large. Lines have less bytes.");
         }
 
+        bytesToPrint = removeEmptyBytes(bytesToPrint);
         lineOutputWriter(new String(bytesToPrint, charset), writer, "cut");
+    }
+
+    /* Auxiliary method for cut. It removes any leftover null elements in bytesToPrint.
+       @params = bytesToPrint, byte array that contains all the bytes that we want to output. 
+       @returns = ret, contains all the bytes in bytesToPrint but removed any null entries.
+    */
+    private byte[] removeEmptyBytes(byte[] bytesToPrint) {
+
+        List<Byte> temp = new ArrayList<Byte>();
+        for (byte elem : bytesToPrint) {
+            if (elem != 0) {
+                // not null
+                temp.add(elem);
+            }
+        }
+
+        byte[] ret = new byte[temp.size()];
+        for (int i = 0; i != temp.size(); ++i) {
+            ret[i] = temp.get(i);
+        }
+
+        return ret;
     }
 
     private void lineOutputWriter(String line, OutputStreamWriter writer, String appname) {
