@@ -65,10 +65,11 @@ public class visitorApplication implements baseVisitor {
 
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         Stream<String> args = app.appArgs.stream();
+        int size = app.appArgs.size();
 
-        args.forEach(arg -> echoPrint(writer, arg));
+        args.forEach(arg -> echoPrint(writer, arg, size));
 
-        if (app.appArgs.size() > 0) {
+        if (size > 0) {
             // check if anything was printed if so print a newline.
             writer.write(System.getProperty("line.separator"));
             writer.flush();
@@ -76,11 +77,13 @@ public class visitorApplication implements baseVisitor {
     }
 
     // Auxiliary method for ECHO to print arg onto outputstream.
-    private void echoPrint(OutputStreamWriter writer, String arg) { 
+    private void echoPrint(OutputStreamWriter writer, String arg, int size) { 
 
         try {
             writer.write(arg);
-            writer.write(" ");
+            if (size > 1) {
+                writer.write(" ");
+            }
             writer.flush();
         } catch (IOException e) {
             throw new RuntimeException("echo: unable to print args.");

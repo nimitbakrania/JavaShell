@@ -40,6 +40,9 @@ public class OurParser {
     */
     public ArrayList<ArrayList<String>> parse(String cmdline, String currentDirectory) throws IOException {
 
+        if (checkCmdSubstitution(cmdline)) {
+            cmdline = cmdSubstitution(cmdline);
+        }
         setCmdline(cmdline);
         ArrayList<String> rawCommands = getCommands();
         
@@ -137,7 +140,7 @@ public class OurParser {
                 }
             }
             else if (charAt.equals("`")) {
-                backQuoteSeen += 1;
+                backQuoteSeen++;
                 // ` is seen. We need to check if it is encased in single quotes.
                 // we do this by checking singleQuoteSeen. if it is 0 then it isn't encased in single quotes.
                 if ((singleQuoteSeen == 0) && (backQuoteSeen % 2 == 0)) {
@@ -153,29 +156,81 @@ public class OurParser {
     */
     private String cmdSubstitution(String cmd) {
 
-        int startIndex = -1;
-        int endIndex = -1;
-        String subCommand = "";
-        int counter = 0;      // 0 when you have seen both left and right ` or none.
+        // first go thru cmd and split on ;
+        // next go thru each command and execute command substitution if applicable.
+        // concat and return
 
+        ArrayList<String> commands = new ArrayList<>();
+        int flagBackQuote = 0;                           // change this to 1 when inside quotes. 0 outside.
+        int startIndex = 0;
+        int endIndex = -1;
         for (int i = 0; i != cmd.length(); ++i) {
-            // Extracting the subcommand from cmd.
             if (cmd.charAt(i) == '`') {
-                if (counter == 0) {
-                    // seeing the left `.
-                    counter = 1;
-                    startIndex = i;
+                if (flagBackQuote == 0) {
+                    // going into ` scope.
+                    flagBackQuote = 1;
                 }
                 else {
-                    counter = 0;
-                    endIndex = i;
+                    flagBackQuote = 0;
                 }
             }
-            else if (counter == 1) {
-                // you've seen left ` so it is the sub command.
-                subCommand += cmd.charAt(i);
+            else if ((cmd.charAt(i) == ';') && (flagBackQuote == 0)) {
+                // seen a ; that isnt inside `.
+                endIndex = i;
+                commands.add(cmd.substring(startIndex, endIndex));
+                startIndex = i + 1;
+            }
+            if (i == cmd.length() - 1) {
+                // reached the end of cmd.
+                commands.add(cmd.substring(startIndex, i + 1));
             }
         }
+
+        ArrayList<String> ret = new ArrayList<>();
+        for (int i = 0; i != commands.size(); ++i) {
+            String curCommand = commands.get(i);
+            if (!checkCmdSubstitution(curCommand)) {
+                // this command doesnt have substitution.
+                ret.add(curCommand);
+                continue;
+            }
+            
+            startIndex = -1;                      // now holds index of lhs `.
+            endIndex = -1;                        // holds index of rhs `.
+            String subCommand = "";
+            int counter = 0;
+
+            if (curCommand.charAt(0) == ' ') {
+                // remove whitespace at start.
+                curCommand = curCommand.substring(1, curCommand.length());
+            }
+
+            for (int j = 0; j != curCommand.length(); ++j) {
+                // Extracting the subcommand from cmd.
+                if (curCommand.charAt(j) == '`') {
+                    if (counter == 0) {
+                        // seeing the left `.
+                        counter = 1;
+                        startIndex = j;
+                    }
+                    else {
+                        counter = 0;
+                        endIndex = j;
+                    }
+                }
+                else if (counter == 1) {
+                    // we are inside ` `.
+                    subCommand += curCommand.charAt(j);
+                }
+            }
+
+            ret.add(executeCmdSubstitution(startIndex, endIndex, curCommand, subCommand));  // replace the backquoted part with the OUTPUT of subCommand.
+        }
+
+        return concatArrayList(ret);
+    }
+
+    private String executeCmdSubstitution(int startIndex, int endIndex, String cmd, String subCommand) {
 
         try {
             // write output to file then read that file and return the conents.
@@ -189,11 +244,29 @@ public class OurParser {
             while (scan.hasNextLine()) {
                 cmdOut += scan.nextLine() + " ";
             }
+            cmdOut = cmdOut.substring(0, cmdOut.length() - 1);
             scan.close();
             file.delete();
             return cmd.substring(0, startIndex) + cmdOut + cmd.substring(endIndex + 1, cmd.length()); 
         } catch (IOException e) {
             throw new RuntimeException("Command substitution: unable to write to file.");
         }
+    }
+
+    private String concatArrayList(ArrayList<String> array) {
+
+        String ret = "";
+        for (int i = 0; i != array.size(); ++i) {
+            ret += array.get(i);
+            if (i == array.size() - 1) {
+                // reached last element.
+                continue;
+            }
+            else {
+                // add semi colon at the end of each command.
+                ret += ";";
+            }
+        }
+        return ret;
     }
 }
