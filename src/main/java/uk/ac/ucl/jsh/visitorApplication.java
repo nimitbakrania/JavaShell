@@ -303,6 +303,7 @@ public class visitorApplication implements baseVisitor {
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         Path rootDirectory;
         Pattern findPattern;
+        String CallCommand = null;
         if (app.appArgs.size() != 2 && app.appArgs.size() != 3) {
             throw new RuntimeException("find: Wrong number of arguments");
         }
@@ -310,27 +311,46 @@ public class visitorApplication implements baseVisitor {
             throw new RuntimeException("find: Wrong argument " + app.appArgs.get(app.appArgs.size() - 2));
         }
         if (app.appArgs.size() == 2) {
-            rootDirectory = Paths.get(app.currentDirectory);
+            rootDirectory = Path.of(app.currentDirectory);
         } else {
-            rootDirectory = Paths.get(app.appArgs.get(0));
+            CallCommand = app.appArgs.get(0);
+            try{
+                if (CallCommand.charAt(0) == '/'){
+                    rootDirectory = Path.of(app.appArgs.get(0));
+                }
+                else{
+                    rootDirectory = Path.of(app.currentDirectory, app.appArgs.get(0));
+                }
+            }
+            catch (Exception e){
+                throw new RuntimeException("find: specified path does not exist");
+            }
         }
         String regexString = app.appArgs.get(app.appArgs.size() - 1).replaceAll("\\*", ".*");
         findPattern = Pattern.compile(regexString);
-        findRecurse(writer, rootDirectory, findPattern);
+        findRecurse(writer, rootDirectory, rootDirectory, CallCommand, findPattern);
     }
 
-    private void findRecurse(OutputStreamWriter writer, Path currDirectory, Pattern findPattern) throws IOException {
+    private void findRecurse(OutputStreamWriter writer, Path currDirectory, Path rootDirectory, String CallCommand, Pattern findPattern) throws IOException {
         File[] listOfFiles = currDirectory.toFile().listFiles();
         Stream<File> FileStream = Stream.of(listOfFiles);
         FileStream.forEach(file -> {
             if (file.isDirectory()) {
                 try {
-                    findRecurse(writer, file.toPath(), findPattern);
+                    findRecurse(writer, file.toPath(), rootDirectory, CallCommand, findPattern);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             } else if (findPattern.matcher(file.getName()).matches()) {
-                lineOutputWriter(file.getPath(), writer, "find");
+                if (CallCommand == null){
+                    lineOutputWriter("./".concat(rootDirectory.toUri().relativize(file.toURI()).toString()), writer, "find");
+                }
+                else if(CallCommand.charAt(0) == '/'){
+                    lineOutputWriter(file.toURI().normalize().toString(), writer, "find");
+                }
+                else{
+                    lineOutputWriter(Path.of(Jsh.getCurrentDirectory()).toUri().relativize(file.toURI()).toString(), writer, "find");
+                }
             }
         });
     }
