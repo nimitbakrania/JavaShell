@@ -117,6 +117,9 @@ public class visitorApplication implements baseVisitor {
             throw new RuntimeException("head: wrong argument " + String.valueOf(headLines));
         }
         if (app.appArgs.size() == 2 || app.appArgs.isEmpty()) {
+            if (app.input == null){
+                throw new RuntimeException("head: no input stream given");
+            }
             BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
             standardInputBuffer.lines().limit(headLines).forEach((line) -> lineOutputWriter(line, writer, "head"));
         } else if (app.appArgs.size() == 3 || app.appArgs.size() == 1) {
@@ -162,6 +165,9 @@ public class visitorApplication implements baseVisitor {
             throw new RuntimeException("tail: wrong argument " + String.valueOf(tailLines));
         }
         if (app.appArgs.size() == 2 || app.appArgs.isEmpty()) {
+            if (app.input == null){
+                throw new RuntimeException("tail: no input stream given");
+            }
             BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
             List<String> readerList = standardInputBuffer.lines().collect(Collectors.toList());
             readerList.stream().skip(((readerList.size() - tailLines) < 0) ? 0 : (readerList.size() - tailLines))
@@ -188,6 +194,9 @@ public class visitorApplication implements baseVisitor {
     public void visit(Visitable.Cat app) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         if (app.appArgs.isEmpty()) {
+            if (app.input == null){
+                throw new RuntimeException("cat: no input stream given");
+            }
             BufferedReader reader = new BufferedReader(new InputStreamReader(app.input));
             reader.lines().forEach(line -> lineOutputWriter(line, writer, "cat"));
         } else {
@@ -208,7 +217,6 @@ public class visitorApplication implements baseVisitor {
                 }
             }
         }
-        writer.close();
     }
 
     /* Prints all the files and folders in the current directory if no argument is given.
@@ -267,6 +275,9 @@ public class visitorApplication implements baseVisitor {
         }
         Pattern grepPattern = Pattern.compile(app.appArgs.get(0));
         if (app.appArgs.size() == 1) {
+            if (app.input == null){
+                throw new RuntimeException("grep: no input stream given");
+            }
             BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
             standardInputBuffer.lines().filter(line -> grepPattern.matcher(line).find())
                     .forEach(line -> lineOutputWriter(line, writer, "grep"));
