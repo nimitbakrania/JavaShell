@@ -49,6 +49,12 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
+    /**
+     * Prints the current directory which the user is working in
+     * @param app takes in a generalised form app which has the properties InputStream input, OutputStream output, String currDirectory, ArrayList<String> appArgs.
+     * @return nothing, as any values obtained are written to the OutputStream specified by the user.
+     * @exception RuntimeException if the number of arguments are wrong. 
+     */
     public void visit(Visitable.Pwd app) throws IOException {
 
         if (!app.appArgs.isEmpty()) {
@@ -90,6 +96,16 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
+    /**
+     * Head prints the first n lines of the given input, if no number is specified with the -n marker it defaults to 10.
+     * If there are fewer lines than n it prints every line. There are two cases for the input method.
+     * If 0 args or 2 args (-n number), it uses the InputStream. If 1 arg (file) or 3 args (-n number file),
+     * it uses the file specified.
+     * @param app takes in a generalised form app which has the properties InputStream input, OutputStream output, String currDirectory, ArrayList<String> appArgs.
+     * @return nothing, as any values obtained are written to the OutputStream specified by the user.
+     * @exception RuntimeException if the number of arguments are wrong, the input stream is null, or the files specified dont exist, cant open, or are folders.
+     *                             Also if the arg before the number is not -n, or the number arg is negative or not an integer. 
+     */ 
     public void visit(Visitable.Head app) throws IOException {
 
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
@@ -138,6 +154,16 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
+    /**
+     * Tail prints the last n lines of the given input, if no number is specified with the -n marker it defaults to 10.
+     * If there are fewer lines than n it prints every line. There are two cases for the input method.
+     * If 0 args or 2 args (-n number), it uses the InputStream. If 1 arg (file) or 3 args (-n number file),
+     * it uses the file specified.
+     * @param app takes in a generalised form app which has the properties InputStream input, OutputStream output, String currDirectory, ArrayList<String> appArgs.
+     * @return nothing, as any values obtained are written to the OutputStream specified by the user.
+     * @exception RuntimeException if the number of arguments are wrong, the input stream is null, or the files specified dont exist, cant open, or are folders.
+     *                             Also if the arg before the number is not -n, or the number arg is negative or not an integer. 
+     */
     public void visit(Visitable.Tail app) throws IOException {
 
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
@@ -268,6 +294,14 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
+    /**
+     * Grep takes either 1 appArg and an InputStream, or 2 appArgs, the second being a file name. 
+     * Goes through the method of input and gets all lines containing the text in the first arg, 
+     * outputs to specified OutputStream.
+     * @param app takes in a generalised form app which has the properties InputStream input, OutputStream output, String currDirectory, ArrayList<String> appArgs.
+     * @return nothing, as any values obtained are written to the OutputStream specified by the user.
+     * @exception RuntimeException if the number of arguments are wrong, the input stream is null, or the files specified dont exist, cant open, or are folders. 
+     */
     public void visit(Visitable.Grep app) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         if (app.appArgs.isEmpty()) {
@@ -315,6 +349,15 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
+    /**
+     * Find takes either 3 appArgs and uses a specified directory, or 2 appArgs and uses the current directory.
+     * It goes through the directory, and all sub-directories, and finds any files with the name given in arg 2.
+     * If there is a * in the name, it will match any string to that *. Outputs the relative path to all matching files.
+     * The visit function for find is used to work out the arguments for the recursive function, which works out which files to output.
+     * @param app takes in a generalised form app which has the properties InputStream input, OutputStream output, String currDirectory, ArrayList<String> appArgs.
+     * @return nothing, as any values obtained are written to the OutputStream specified by the user.
+     * @exception RuntimeException if the number of arguments are wrong, -name is not supplied before the search string, or the directory given doesn't exist. 
+     */
     public void visit(Visitable.Find app) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         Path rootDirectory;
@@ -347,6 +390,16 @@ public class visitorApplication implements baseVisitor {
         findRecurse(writer, rootDirectory, rootDirectory, CallCommand, findPattern);
     }
 
+    /**
+     * findRecurse is the main function for find, which matches and outputs the relative paths of all files which match the input string.
+     * It recursively looks through all the subfolders to match any file to the string.
+     * @param writer is the area to write any outputs to.
+     * @param currDirectory tells the recursive function which directory it is currently in.
+     * @param rootDirectory tells the function where it came from in order to make the paths relative.
+     * @param callCommand is the original command used to specify which directory to look in. If null it knows to prefix the output with "./", if char 0 is '/' it knows to use absolute pathing.
+     * @param findPattern is the regex pattern specified in the appArgs which we are matching all the files to.
+     * @return nothing, as any values obtained are written to the OutputStream specified by the user.
+     */
     private void findRecurse(OutputStreamWriter writer, Path currDirectory, Path rootDirectory, String CallCommand, Pattern findPattern) throws IOException {
         File[] listOfFiles = currDirectory.toFile().listFiles();
         Stream<File> FileStream = Stream.of(listOfFiles);
@@ -656,6 +709,14 @@ public class visitorApplication implements baseVisitor {
         return ret;
     }
 
+    /**
+     * lineOutputWriter is an abstracted function which uses the generalised form of how the visit functions usually write to the OutputStream.
+     * @param line is the line which is being written to the OutputStream.
+     * @param writer is the OutputStreamWriter which we use to write to the OutputStream.
+     * @param appname is the name of the function we are writing for, so that if an error occurs writing the data then the error message will be correct.
+     * @return nothing, as all inputs are written to the OutputStream specified by the user.
+     * @exception RuntimeException if the line cannot be written to the OutputStream.
+     */
     private void lineOutputWriter(String line, OutputStreamWriter writer, String appname) {
         try {
             writer.write(line);
