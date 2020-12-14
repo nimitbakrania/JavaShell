@@ -362,7 +362,7 @@ public class visitorApplication implements baseVisitor {
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         Path rootDirectory;
         Pattern findPattern;
-        String CallCommand = null;
+        String callCommand = null;
         if (app.appArgs.size() != 2 && app.appArgs.size() != 3) {
             throw new RuntimeException("find: Wrong number of arguments");
         }
@@ -372,9 +372,9 @@ public class visitorApplication implements baseVisitor {
         if (app.appArgs.size() == 2) {
             rootDirectory = Path.of(app.currentDirectory);
         } else {
-            CallCommand = app.appArgs.get(0);
+            callCommand = app.appArgs.get(0);
             try{
-                if (CallCommand.charAt(0) == '/'){
+                if (callCommand.charAt(0) == '/'){
                     rootDirectory = Path.of(app.appArgs.get(0));
                 }
                 else{
@@ -387,7 +387,7 @@ public class visitorApplication implements baseVisitor {
         }
         String regexString = app.appArgs.get(app.appArgs.size() - 1).replaceAll("\\*", ".*");
         findPattern = Pattern.compile(regexString);
-        findRecurse(writer, rootDirectory, rootDirectory, CallCommand, findPattern);
+        findRecurse(writer, rootDirectory, rootDirectory, callCommand, findPattern);
     }
 
     /**
@@ -400,21 +400,21 @@ public class visitorApplication implements baseVisitor {
      * @param findPattern is the regex pattern specified in the appArgs which we are matching all the files to.
      * @return nothing, as any values obtained are written to the OutputStream specified by the user.
      */
-    private void findRecurse(OutputStreamWriter writer, Path currDirectory, Path rootDirectory, String CallCommand, Pattern findPattern) throws IOException {
+    private void findRecurse(OutputStreamWriter writer, Path currDirectory, Path rootDirectory, String callCommand, Pattern findPattern) throws IOException {
         File[] listOfFiles = currDirectory.toFile().listFiles();
         Stream<File> FileStream = Stream.of(listOfFiles);
         FileStream.forEach(file -> {
             if (file.isDirectory()) {
                 try {
-                    findRecurse(writer, file.toPath(), rootDirectory, CallCommand, findPattern);
+                    findRecurse(writer, file.toPath(), rootDirectory, callCommand, findPattern);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             } else if (findPattern.matcher(file.getName()).matches()) {
-                if (CallCommand == null){
+                if (callCommand == null){
                     lineOutputWriter("./".concat(rootDirectory.toUri().relativize(file.toURI()).toString()), writer, "find");
                 }
-                else if(CallCommand.charAt(0) == '/'){
+                else if(callCommand.charAt(0) == '/'){
                     lineOutputWriter(file.toURI().normalize().toString(), writer, "find");
                 }
                 else{
