@@ -37,8 +37,42 @@ public class CommandSubstitutionTest {
         PipedOutputStream out = new PipedOutputStream(in);
         Scanner scan = new Scanner(in);
         Jsh.eval("echo `cat test1.txt`", out);
-        assertEquals("this is a string to test with foobar ", scan.nextLine());
+        assertEquals("this is a string to test with foobar", scan.nextLine());
         scan.close();
     }
     
+    @Test
+    public void testCommandSubstitutionWithSeq() throws IOException {
+
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        Scanner scan = new Scanner(in);
+        Jsh.eval("echo `cat test1.txt`; echo foo", out);
+        assertEquals("this is a string to test with foobar", scan.nextLine());
+        assertEquals("foo", scan.nextLine());
+        scan.close();
+    }
+
+    @Test
+    public void testCommandSubstitutionWithSemicolonInsideQuotes() throws IOException {
+        
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        Scanner scan = new Scanner(in);
+        Jsh.eval("echo `echo foo; cat test1.txt`", out);
+        assertEquals("foo this is a string to test with foobar", scan.nextLine());
+        scan.close();
+    }
+
+ 
+    @Test
+    public void testCommandSubstitutionWithSingleQuotes() throws IOException {
+
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        Scanner scan = new Scanner(in);
+        Jsh.eval("echo '`echo foo`'", out);
+        assertEquals("`echo foo`", scan.nextLine());
+        scan.close();
+    }
 }

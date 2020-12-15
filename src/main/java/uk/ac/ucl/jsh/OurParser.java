@@ -52,12 +52,11 @@ public class OurParser {
                 rawCommands.set(i, newCmd);
             }
         }
-        
+
         ArrayList<ArrayList<String>> ret = new ArrayList<ArrayList<String>>();
         for (String command : rawCommands) {
             ret.add(splitIn2Tokens(command, currentDirectory));
         }
-
         return ret;
     }
 
@@ -100,8 +99,10 @@ public class OurParser {
         while (regexMatcher.find()) {
             if (regexMatcher.group(1) != null || regexMatcher.group(2) != null) {
                 String quoted = regexMatcher.group(0).trim();
+                System.out.println(quoted);
                 tokens.add(quoted.substring(1,quoted.length()-1));
             } else {
+                // globbing done here
                 nonQuote = regexMatcher.group().trim();
                 ArrayList<String> globbingResult = new ArrayList<String>();
                 Path dir = Paths.get(currentDirectory);
@@ -116,8 +117,7 @@ public class OurParser {
             }
         }
 
-        ArrayList<String> ret = new ArrayList<String>(tokens.subList(0, tokens.size()));
-        return ret;
+        return tokens;
     }
     
     /* Checks to see if CMD uses command substitution by looping to see 2 backquotes.
