@@ -729,127 +729,13 @@ public class visitorApplication implements baseVisitor {
         }
     }
 
-    /*
-    public void visit(Visitable.Uniq app) throws IOException {
-
-        OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
-        if (app.appArgs.size() > 2) {
-            throw new RuntimeException("uniq: too many arguments");
-        }
-        if (( app.appArgs.size() == 2) && !app.appArgs.get(0).equals("-n")) {
-            throw new RuntimeException("uniq: wrong argument " + app.appArgs.get(0));
-        }
-        if(app.appArgs.isEmpty()){
-            throw new RuntimeException("uniq: missing arguments");
-        }
-        String ignore ="";
-        String headArg = "";
-        if (app.appArgs.size() == 2 || app.appArgs.size() == 3) {
-            try {
-                ignore = app.appArgs.get(1);
-            } catch (Exception e) {
-                throw new RuntimeException("uniq: wrong argument " + app.appArgs.get(1));
-            }
-            if (app.appArgs.size() == 3) {
-                headArg = app.appArgs.get(2);
-            }
-        } else if (app.appArgs.size() == 1) {
-            headArg = app.appArgs.get(0);
-        }
-        if (ignore != "i") {
-            throw new RuntimeException("uniq: wrong argument " + String.valueOf(ignore));
-        }
-        if (app.appArgs.size() == 2) {
-            File headFile = new File(app.currentDirectory + File.separator + headArg);
-            if (headFile.exists()) {
-                uniqhelperIgnore(headArg);
-                long length = headFile.length();
-                Charset encoding = StandardCharsets.UTF_8;
-                Path filePath = Paths.get((String) app.currentDirectory + File.separator + headArg);
-                try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
-                    reader.lines().limit(length).forEach((line) -> lineOutputWriter(line, writer, "uniq"));
-                } catch (IOException e) {
-                    throw new RuntimeException("uniq: cannot open " + headArg);
-                }
-            } else {
-                throw new RuntimeException("uniq: " + headArg + " does not exist");
-            }
-        } else if (app.appArgs.size() == 1) {
-            File headFile = new File(app.currentDirectory + File.separator + headArg);
-            if (headFile.exists()) {
-                uniqhelper(headArg);
-                long length = headFile.length();
-                Charset encoding = StandardCharsets.UTF_8;
-                Path filePath = Paths.get((String) app.currentDirectory + File.separator + headArg);
-                try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
-                    reader.lines().limit(length).forEach((line) -> lineOutputWriter(line, writer, "uniq"));
-                } catch (IOException e) {
-                    throw new RuntimeException("uniq: cannot open " + headArg);
-                }
-            } else {
-                throw new RuntimeException("uniq: " + headArg + " does not exist");
-            }
-        }
-    }
-    */
-    public void uniqhelper(String filename) throws IOException
-    {
-        File inputFile = new File("tester.txt");
-        File tempFile = new File("myTempFile.txt");
-
-        BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-        BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
-
-        String currentLine;
-        String previousLine="";
-
-        while((currentLine = reader.readLine()) != null) {
-
-            String prev = previousLine;
-            previousLine = currentLine;
-            String trimmedLine = currentLine.trim();
-
-            if(trimmedLine.equals(prev)) continue;
-
-            writer.write(currentLine + System.getProperty("line.separator"));
-        }
-
-        writer.close();
-        reader.close();
-
-        inputFile.delete();
-        tempFile.renameTo(inputFile);
-    }
-    //if -i is passed in as a argument and we do not consider case(case insensitive)
-    public void uniqhelperIgnore(String filename) throws IOException
-    {
-        File inputFile = new File("tester.txt");
-        File tempFile = new File("myTempFile.txt");
-
-        BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-        BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
-
-        String currentLine;
-        String previousLine="";
-
-        while((currentLine = reader.readLine()).toLowerCase() != null) {
-
-            String prev = previousLine.toLowerCase();
-            previousLine = currentLine.toLowerCase();
-            String trimmedLine = currentLine.trim();
-
-            if(trimmedLine.equals(prev)) continue;
-
-            writer.write(currentLine + System.getProperty("line.separator"));
-        }
-
-        writer.close();
-        reader.close();
-
-        inputFile.delete();
-        tempFile.renameTo(inputFile);
-    }
-
+    /* This function uses the text file provided as an argument in order 
+        to sort the contents and write out as the outputstream. The sorting is done 
+        trivially using streams api. If -r is provided, the the output will be in 
+        reverse order. Furthermore, if the app args is empty or contains no file name, 
+        then we use stdin as our input stream. 
+     * @Params = APP contains info about arguments and currentDirectory.
+     */
     public void visit(Visitable.Sort app) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(app.output);
         if (app.appArgs.size() > 2) {
@@ -876,6 +762,9 @@ public class visitorApplication implements baseVisitor {
             if(app.appArgs.isEmpty() || (app.appArgs.size()==1 && app.appArgs.get(0).equals("-r")))
             {
                 if(app.input != null){
+
+                    //if the app args are empty and only -r is provided, we are using stdin
+
                     BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
                     standardInputBuffer.lines().sorted().forEach((line) -> lineOutputWriter(line, writer, "sort"));
                 }
@@ -900,6 +789,8 @@ public class visitorApplication implements baseVisitor {
             }
             else if(app.appArgs.size()==2)
             {
+                //using the comparator to reverse the order if -r is provided in the args 
+
                 lines.sorted(Comparator.reverseOrder()).forEach(s -> {
                 try{
                     writer.write(s);
@@ -915,6 +806,15 @@ public class visitorApplication implements baseVisitor {
         }
     }
     
+    /* This function uses the text file provided as an argument in order 
+        to apply the uniq linux command. This command deletes all lines 
+        that are not unique, in this case defined as not the same as the previous 
+        line. It then writes these changes not only to the file, but the output
+        stream. If -i is passed, then we do not consider case when doing the comp-
+        arisons. If the app_args are empty or only contain -i, we use stdin as 
+        our input stream. 
+     * @Params = APP contains info about arguments and currentDirectory.
+     */
     public void visit(Visitable.Uniq app) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(app.output);
         if (app.appArgs.size() > 2) {
@@ -941,10 +841,21 @@ public class visitorApplication implements baseVisitor {
             if(app.appArgs.isEmpty() || (app.appArgs.size()==1 && app.appArgs.get(0).equals("-i")))
             {
                 if(app.input != null){
+
+                    /*
+                        It is worth noting why we have chosen a linkedlist. Mostly due to its simplicity. 
+                        While is may not be the most efficient for searching, it is elegant for keeping track 
+                        of the previous line in text file, and its 'getLast()' method has shown to be effective.
+                    */
+
                     LinkedList<String> previous = new LinkedList<String>();
                     previous.add("");
                     BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
                     if(app.appArgs.size()==1 && app.appArgs.get(0).equals("-i")){
+
+                        //we are using stdin here as our input stream as no correct text file for applying 
+                        //the linux uniq command has been given. 
+
                         standardInputBuffer.lines().forEach((line) -> {
                             if (!line.toLowerCase().equals(previous.getLast().toLowerCase())) {
                                 lineOutputWriter(line, writer, "uniq");
