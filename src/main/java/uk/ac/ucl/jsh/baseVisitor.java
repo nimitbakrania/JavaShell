@@ -15,4 +15,8 @@ public interface baseVisitor {
     public void visit(Visitable.Find app) throws IOException;
     public void visit(Visitable.Uniq app) throws IOException;
     public void visit(Visitable.Sort app) throws IOException;
+    public void visit(Visitable.Mkdir app) throws IOException;
+    public void visit(Visitable.Rmdir app) throws IOException;
+    public void visit(Visitable.DateTime app) throws IOException;
+    public void visit(Visitable.WordCount app) throws IOException;
 }
