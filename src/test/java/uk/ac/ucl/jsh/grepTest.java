@@ -35,20 +35,16 @@ public class grepTest {
     @Test
     public void stdinTest() throws IOException{
         File tempFile = TempFolder.newFile("Test1.txt");
-        File tempFile2 = TempFolder.newFile("Test2.txt");
-        File tempFile3 = TempFolder.newFile("Test3.txt");
-        File tempFile4 = TempFolder.newFile("Other1.txt");
-        File tempFile5 = TempFolder.newFile("Other2.txt");
-
+        FileWriter w = new FileWriter(tempFile);
+        w.write("Hello Test\nhello world test\n Test Test test \n lorem\nipsum\ndolor");;
+        w.close();
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
-        Jsh.eval("find -name '*.txt' | grep Test", out);
+        Jsh.eval("head -n 4 " + tempFile.getName() + " | grep Test", out);
         Scanner scn = new Scanner(in);
-        System.out.println(scn.hasNextLine());
-        assertEquals(tempFile.getAbsolutePath(), scn.nextLine());
-        assertEquals(tempFile2.getAbsolutePath(), scn.nextLine());
-        assertEquals(tempFile3.getAbsolutePath(), scn.nextLine());
+        assertEquals("Hello Test", scn.nextLine());
+        assertEquals(" Test Test test ", scn.nextLine());
         scn.close();
 
     } 
