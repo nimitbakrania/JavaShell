@@ -1,5 +1,4 @@
 package uk.ac.ucl.jsh;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -19,11 +18,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.*;
-
 import uk.ac.ucl.jsh.Visitable.DateTime;
 import uk.ac.ucl.jsh.Visitable.Mkdir;
 import uk.ac.ucl.jsh.Visitable.Rmdir;
-import uk.ac.ucl.jsh.Visitable.WordCount;
 
 import java.io.InputStream;
 
@@ -1136,10 +1133,5 @@ public class visitorApplication implements baseVisitor {
         writer.flush();
     }
 
-    @Override
-    public void visit(WordCount app) throws IOException {
-        // TODO Auto-generated method stub
-
-    }
 }
 
