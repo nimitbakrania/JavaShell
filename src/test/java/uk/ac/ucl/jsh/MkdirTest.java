@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 
-public class mkdirTest {
+public class MkdirTest {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
