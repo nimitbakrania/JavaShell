@@ -53,16 +53,13 @@ public class Factory {
                 app = new UnsafeDecorator(new Visitable.Sort(in, out, appArgs, currentDirectory), flag);
                 break;
             case "mkdir":
-                app = new UnsafeDecorator(new Visitable.Sort(in, out, appArgs, currentDirectory), flag);
+                app = new UnsafeDecorator(new Visitable.Mkdir(in, out, appArgs, currentDirectory), flag);
                 break;
             case "rmdir":
-                app = new UnsafeDecorator(new Visitable.Sort(in, out, appArgs, currentDirectory), flag);
-                break;
-            case "wc":
-                app = new UnsafeDecorator(new Visitable.Sort(in, out, appArgs, currentDirectory), flag);
+                app = new UnsafeDecorator(new Visitable.Rmdir(in, out, appArgs, currentDirectory), flag);
                 break;
             case "datetime":
-                app = new UnsafeDecorator(new Visitable.Sort(in, out, appArgs, currentDirectory), flag);
+                app = new UnsafeDecorator(new Visitable.DateTime(in, out, appArgs, currentDirectory), flag);
                 break;
             default:
                 throw new RuntimeException(application + ": unknown application");
