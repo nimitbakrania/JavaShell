@@ -30,18 +30,18 @@ public class JshTest {
         PipedOutputStream out = new PipedOutputStream(in);
         Scanner scan = new Scanner(in);
         Jsh.eval("echo `cat anirudh.txt`", out);
-        assertEquals("\"''\"", scan.nextLine());
+        assertEquals("''", scan.nextLine());
         scan.close();
     }
 
     @Test
-    public void testSemicolonException() throws Exception {
+    public void testGlobbingDir() throws Exception {
 
         PipedInputStream in = new PipedInputStream();
-        PipedOutputStream out = new PipedOutputStream(in);
+        PipedOutputStream out = new PipedOutputStream();
         Scanner scan = new Scanner(in);
-        Jsh.eval("ls fakeDir; echo BBB", out);
-        assertEquals("", scan.nextLine());
+        Jsh.eval("echo dir1/*.txt", out);
+        assertEquals("file1.txt", scan.nextLine());
         scan.close();
     }
 

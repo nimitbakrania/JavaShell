@@ -52,7 +52,7 @@ public class pwdTest {
         out = new PipedOutputStream(in);
         
         try{
-            Jsh.eval("pwd src", out);
+            Jsh.eval("_pwd src", out);
         }
         catch(IOException e){
             assertEquals("pwd: too many arguments", e.toString());

@@ -10,7 +10,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileNotFoundException;
 import java.io.OutputStream;
 import java.util.Scanner;
 
@@ -25,18 +24,17 @@ public class OurParser {
 
     public OurParser() { }
 
-    private void setCmdline(String cmdline) {
-
-        this.currCmdline = cmdline;
-    }
+    private void setCmdline(String cmdline) { this.currCmdline = cmdline; }
     
-    /* Handles calling relevant functions to parse input. First we seperate the commands up using getCommands.
-       Next we check if any commands use command substitution. If they do we execute it and replace the backquoted
-       command with the output from it. Finally we loop through each command and split it into tokens and store it as an
-       ArrayList<String>. Each ArrayList is added to ret and returned.
-       @params = cmdline is the commandline that we need to parse.
-                 currentDirectory is the current directory that jsh is in.
-       @returns = an arraylist of an arraylist<string>. it contains each command that has been split into tokens.
+    /**
+     * Handles calling relevant functions to parse input. First we seperate the commands up using getCommands.
+     * Next we check if any commands use command substitution. If they do we execute it and replace the backquoted
+     * command with the output from it. Finally we loop through each command and split it into tokens and store it as an
+     * ArrayList<String>. Each ArrayList is added to ret and returned.
+     * 
+     * @param = cmdline is the commandline that we need to parse.
+     *          currentDirectory is the current directory that jsh is in.
+     * @return = an arraylist of an arraylist<string>. it contains each command that has been split into tokens.
     */
     public ArrayList<ArrayList<String>> parse(String cmdline, String currentDirectory) throws IOException {
 
@@ -60,8 +58,12 @@ public class OurParser {
         return ret;
     }
 
-    /* Splits the commands on ";". 
-       @returns = arraylist of commands.
+    /**
+     * Splits the commands on ";". Builds a parse tree then goes over it and
+     * builds up subCommands. Adds each of these subCommands to rawCommands which will
+     * contain all the parsed commands.
+     * 
+     * @return = arraylist of commands.
     */
     private ArrayList<String> getCommands() {
 
@@ -85,9 +87,12 @@ public class OurParser {
         return rawCommands;
     }
 
-    /* Splits the commands into tokens and adds them into an arraylist which it then returns
-       @params = rawCommand is the untokenized command. 
-                 currentDirectory is the directory that jsh is currently in.
+    /**
+     * Splits the commands into tokens and adds them into an arraylist which it then returns
+     * 
+     * @param = rawCommand is the untokenized command. 
+     *           currentDirectory is the directory that jsh is currently in.
+     * @return = arraylist of tokens for the rawCommand param.
     */
     private ArrayList<String> splitIn2Tokens(String rawCommand, String currentDirectory) throws IOException {
 
@@ -101,16 +106,40 @@ public class OurParser {
                 String quoted = regexMatcher.group(0).trim();    // quoted = " "''" "
                 tokens.add(quoted.substring(1,quoted.length()-1));
             } else {
-                // globbing done here
+                // globbing done here echo dir1/*.txt
                 nonQuote = regexMatcher.group().trim();
+                String dirPath = "";
+                int flag = 0;
+                if (nonQuote.contains("/*")) {
+                    int index = nonQuote.indexOf("*");
+                    dirPath = nonQuote.substring(0, index - 1);
+                    nonQuote = nonQuote.substring(index, nonQuote.length());
+                    flag = 1;
+                }
                 ArrayList<String> globbingResult = new ArrayList<String>();
-                Path dir = Paths.get(currentDirectory);
+                Path dir;
+                if (flag == 1) {
+                    dir = Paths.get(currentDirectory + System.getProperty("file.separator") + dirPath);
+                }
+                else {
+                    dir = Paths.get(currentDirectory);
+                }
                 DirectoryStream<Path> stream = Files.newDirectoryStream(dir, nonQuote);
                 for (Path entry : stream) {
-                    globbingResult.add(entry.getFileName().toString());
+                    if (flag == 1) {
+                        globbingResult.add(dirPath + System.getProperty("file.separator") + entry.getFileName().toString());
+                    }
+                    else {
+                        globbingResult.add(entry.getFileName().toString());
+                    }
                 }
                 if (globbingResult.isEmpty()) {
-                    globbingResult.add(nonQuote);
+                    if (flag == 1) {
+                        globbingResult.add(dirPath + System.getProperty("file.separator") + nonQuote);
+                    }
+                    else {
+                        globbingResult.add(nonQuote);
+                    }
                 }
                 tokens.addAll(globbingResult);
             }
@@ -118,24 +147,11 @@ public class OurParser {
 
         return tokens;
     }
-    // "''"
-    private String escapeQuotes(String quoted) {
-
-        String ret = "";
-        for (int i = 0; i != quoted.length(); ++i) {
-            if (quoted.charAt(i) == '"') {
-                ret += "\"";
-                continue;
-            }
-
-            ret += quoted.charAt(i);
-        }
-        System.out.println("escapeQuotes: " + ret);
-        return ret;
-    }
     
-    /* Checks to see if CMD uses command substitution by looping to see 2 backquotes.
-       @returns = true if command substitution is found.
+    /**
+     * Checks to see if CMD uses command substitution by looping to see 2 backquotes.
+     * 
+     * @return = true if command substitution is found.
     */
     private boolean checkCmdSubstitution(String cmd) {
 
@@ -165,14 +181,16 @@ public class OurParser {
         return false;
     }
 
-    /* Executes command substitution. The algoritm is outlined here:
-       1) Loop through and split the cmd by ;. ; incased in backquotes is not split. E.g. `echo foo;echo bar` is 1 sub command not 2.
-       2) For each command check if they have command substitution. If not add them to ret and continue.
-       2.1) If yes, extract subcommand while storing indexes of backquotes. Execute subcommand using executeCmdSubstitution.
-       2.2) Add the returned command from executeCmdSubstitution into ret.
-       3) Concat all the commands in ret and return them.
-       @params = cmd : commandline with command substitution.
-       @returns = string of commands without command substitution
+    /**
+     * Executes command substitution. The algoritm is outlined here:
+     * 1) Loop through and split the cmd by ;. ; incased in backquotes is not split. E.g. `echo foo;echo bar` is 1 sub command not 2.
+     * 2) For each command check if they have command substitution. If not add them to ret and continue.
+     * 2.1) If yes, extract subcommand while storing indexes of backquotes. Execute subcommand using executeCmdSubstitution.
+     * 2.2) Add the returned command from executeCmdSubstitution into ret.
+     * 3) Concat all the commands in ret and return them.
+     * 
+     * @param = cmd : commandline with command substitution.
+     * @return = string of commands without command substitution
     */
     private String cmdSubstitution(String cmd) {
 
@@ -222,10 +240,12 @@ public class OurParser {
         return concatArrayList(ret);
     }
 
-    /* Auxiliary method for cmdSubstitution. Just loops thru and extracts each command and adds it to
-       commands. 
-       @params = cmd : commandline with command stubstitution
-       @returns = arraylist of commands.
+    /**
+     * Auxiliary method for cmdSubstitution. Just loops thru and extracts each command and adds it to
+     * commands. 
+     * 
+     * @param = cmd : commandline with command stubstitution
+     * @return = arraylist of commands.
     */
     private ArrayList<String> splitCommands(String cmd) {
 
@@ -257,13 +277,15 @@ public class OurParser {
         return commands;
     }
 
-    /* Executes the subcommand and stores its output into a temporary file. It then reads the temporary file 
-       and puts its content into cmd. The backquoted subcommand is replaced by output.
-       @params = startIndex : index of first `.
-                 endIndex : index of second `.
-                 cmd : string with command substitution.
-                 subCommand : command encased with `.
-       @returns = cmd but with the command substitution part replaced with the output of subCommand.
+    /**
+     * Executes the subcommand and stores its output into a temporary file. It then reads the temporary file 
+     * and puts its content into cmd. The backquoted subcommand is replaced by output.
+     * 
+     * @param = startIndex : index of first `.
+     *          endIndex : index of second `.
+     *          cmd : string with command substitution.
+     *          subCommand : command encased with `.
+     * @return = cmd but with the command substitution part replaced with the output of subCommand.
     */
     private String executeCmdSubstitution(int startIndex, int endIndex, String cmd, String subCommand) {
 

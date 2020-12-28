@@ -21,7 +21,6 @@ public class UnsafeDecorator {
             }
             else {
                 throw new RuntimeException(e.getMessage());
-                // somehow stop running here by printing nothing and waiting for next command.
             }
         }
     }

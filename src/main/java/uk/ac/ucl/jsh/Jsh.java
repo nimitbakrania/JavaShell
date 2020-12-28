@@ -10,13 +10,19 @@ public class Jsh {
 
     private static String currentDirectory = System.getProperty("user.dir");
     final private static String homeDirectory = System.getProperty("user.dir");
+    private static OurParser parser = new OurParser();
+    private static Call call = new Call();
+    private static Pipe pipe = new Pipe();
+    private static IoRedirection redirect = new IoRedirection();
 
+    /**
+     * This function executes the application given in cmdline. It first parses it using parser object.
+     * Command substitution is done while parsing. Afterwards it executes each line of commands.
+     * 
+     * @param = cmdline contains the commands to execute from the commandline.
+     */
     public static void eval(String cmdline, OutputStream output) throws IOException {
         
-        OurParser parser = new OurParser();
-        Call call = new Call();
-        Pipe pipe = new Pipe();
-        IoRedirection redirect = new IoRedirection();
         ArrayList<ArrayList<String>> lines = parser.parse(cmdline, currentDirectory);
         for (ArrayList<String> line : lines) {
             String appName = line.get(0);
@@ -33,7 +39,7 @@ public class Jsh {
         }
     }
 
-    public static String getHomeDirectory() {
+    public static String getHomeDirectory() { // do we need this? - anirudh
         return homeDirectory;
     }
 

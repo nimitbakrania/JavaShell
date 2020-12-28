@@ -13,6 +13,7 @@ import java.io.PipedOutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -20,16 +21,21 @@ import org.junit.Test;
 
 public class tailTest{
     @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
+    public TemporaryFolder TempFolder = new TemporaryFolder();
+
+    @Before
+    public void EnterTempFolder() throws IOException{
+        Jsh.setCurrentDirectory(TempFolder.getRoot().toString());
+    }
 
     @After
     public void deleteTempFolder() {
-        folder.delete();
+        TempFolder.delete();
     }
 
     protected void createTestFile(String fileName, String toWrite) throws IOException {
         Charset encoding = StandardCharsets.UTF_8;
-        File file = folder.newFile(fileName);
+        File file = TempFolder.newFile(fileName);
         if (toWrite != null) {
             FileWriter writer = new FileWriter(file, encoding);
             writer.write(toWrite);
@@ -39,25 +45,18 @@ public class tailTest{
     
     @Test
     public void stdinTest() throws IOException{
-        String oldDir = Jsh.getCurrentDirectory();
-        Jsh.setCurrentDirectory(folder.getRoot().toString());
-        File tempFile = folder.newFile("Test1.txt");
-        File tempFile2 = folder.newFile("Test2.txt");
-        File tempFile3 = folder.newFile("Test3.txt");
-        File tempFile4 = folder.newFile("Test4.txt");
-        File tempFile5 = folder.newFile("Test5.txt");
-
+        File tempFile = TempFolder.newFile("Test1.txt");
+        FileWriter w = new FileWriter(tempFile);
+        w.write("Hello Test\nhello world test\n Test Test test \n lorem\nipsum\ndolor");;
+        w.close();
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
-        Jsh.eval("find -name '*.txt' | tail -n 3", out);
+        Jsh.eval("head -n 5 " + tempFile.getName() + " | tail -n 2", out);
         Scanner scn = new Scanner(in);
-        System.out.println(scn.hasNextLine());
-        assertEquals(tempFile3.getAbsolutePath(), scn.nextLine());
-        assertEquals(tempFile4.getAbsolutePath(), scn.nextLine());
-        assertEquals(tempFile5.getAbsolutePath(), scn.nextLine());
+        assertEquals(" lorem", scn.nextLine());
+        assertEquals("ipsum", scn.nextLine());
         scn.close();
-        Jsh.setCurrentDirectory(oldDir);
     } 
 
     @Test
@@ -65,7 +64,7 @@ public class tailTest{
         try{
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("tail", out);
+            Jsh.eval("_tail", out);
         }
         catch(RuntimeException expected)
         {
@@ -80,7 +79,7 @@ public class tailTest{
         try{
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("tail arg1 arg2", out);
+            Jsh.eval("_tail arg1 arg2", out);
         }
         catch(RuntimeException expected)
         {
@@ -94,7 +93,7 @@ public class tailTest{
         try{
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("tail -x arg1 arg2", out);
+            Jsh.eval("_tail -x arg1 arg2", out);
         }
         catch(RuntimeException expected)
         {
@@ -108,7 +107,7 @@ public class tailTest{
         try{
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("tail -x arg1 arg2 arg3 arg4", out);
+            Jsh.eval("_tail -x arg1 arg2 arg3 arg4", out);
         }
         catch(RuntimeException expected)
         {
@@ -122,7 +121,7 @@ public class tailTest{
         try{
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("tail -n Ten arg1", out);
+            Jsh.eval("_tail -n Ten arg1", out);
         }
         catch(RuntimeException expected)
         {
@@ -137,7 +136,7 @@ public class tailTest{
         try{
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("tail -n 2 unexistentFile.txt", out);
+            Jsh.eval("_tail -n 2 unexistentFile.txt", out);
         }
         catch(RuntimeException expected)
         {

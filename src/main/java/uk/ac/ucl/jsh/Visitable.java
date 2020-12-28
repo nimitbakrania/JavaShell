@@ -262,4 +262,88 @@ public interface Visitable {
             visitor.visit(this);
         }
     }
+
+    public class Mkdir implements Visitable {
+
+        public InputStream input;
+        public OutputStream output;
+        public String currentDirectory;
+        public ArrayList<String> appArgs;
+
+        public Mkdir(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+
+            this.input = inputstream;
+            this.output = outputstream;
+            this.currentDirectory = thisDirectory;
+            this.appArgs = args;
+        }
+
+        public void accept(baseVisitor visitor) throws IOException {
+
+            visitor.visit(this);
+        }
+    }
+
+    public class Rmdir implements Visitable {
+
+        public InputStream input;
+        public OutputStream output;
+        public String currentDirectory;
+        public ArrayList<String> appArgs;
+
+        public Rmdir(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+
+            this.input = inputstream;
+            this.output = outputstream;
+            this.currentDirectory = thisDirectory;
+            this.appArgs = args;
+        }
+
+        public void accept(baseVisitor visitor) throws IOException {
+
+            visitor.visit(this);
+        }
+    }
+
+    public class DateTime implements Visitable {
+
+        public InputStream input;
+        public OutputStream output;
+        public String currentDirectory;
+        public ArrayList<String> appArgs;
+
+        public DateTime(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+
+            this.input = inputstream;
+            this.output = outputstream;
+            this.currentDirectory = thisDirectory;
+            this.appArgs = args;
+        }
+
+        public void accept(baseVisitor visitor) throws IOException {
+
+            visitor.visit(this);
+        }
+    }
+
+    public class WordCount implements Visitable {
+
+        public InputStream input;
+        public OutputStream output;
+        public String currentDirectory;
+        public ArrayList<String> appArgs;
+
+        public WordCount(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+
+            this.input = inputstream;
+            this.output = outputstream;
+            this.currentDirectory = thisDirectory;
+            this.appArgs = args;
+        }
+
+        public void accept(baseVisitor visitor) throws IOException {
+
+            visitor.visit(this);
+        }
+    }
 }
