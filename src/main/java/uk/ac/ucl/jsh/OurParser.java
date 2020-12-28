@@ -108,36 +108,18 @@ public class OurParser {
             } else {
                 // globbing done here echo dir1/*.txt
                 nonQuote = regexMatcher.group().trim();
-                String dirPath = "";
-                int flag = 0;
-                if (nonQuote.contains("/*")) {
-                    int index = nonQuote.indexOf("*");
-                    dirPath = nonQuote.substring(0, index - 1);
-                    nonQuote = nonQuote.substring(index, nonQuote.length());
-                    flag = 1;
-                }
                 ArrayList<String> globbingResult = new ArrayList<String>();
-                Path dir;
-                if (flag == 1) {
-                    dir = Paths.get(currentDirectory + System.getProperty("file.separator") + dirPath);
+                if (nonQuote.contains("/*")) {
+                    globbingResult = globbingWithDirectory(nonQuote, currentDirectory);
                 }
                 else {
-                    dir = Paths.get(currentDirectory);
-                }
-                DirectoryStream<Path> stream = Files.newDirectoryStream(dir, nonQuote);
-                for (Path entry : stream) {
-                    if (flag == 1) {
-                        globbingResult.add(dirPath + System.getProperty("file.separator") + entry.getFileName().toString());
-                    }
-                    else {
+                    Path dir = Paths.get(currentDirectory);
+                    DirectoryStream<Path> stream = Files.newDirectoryStream(dir, nonQuote);
+                    for (Path entry : stream) {
                         globbingResult.add(entry.getFileName().toString());
                     }
-                }
-                if (globbingResult.isEmpty()) {
-                    if (flag == 1) {
-                        globbingResult.add(dirPath + System.getProperty("file.separator") + nonQuote);
-                    }
-                    else {
+
+                    if (globbingResult.isEmpty()) {
                         globbingResult.add(nonQuote);
                     }
                 }
@@ -147,6 +129,26 @@ public class OurParser {
 
         return tokens;
     }
+
+    private ArrayList<String> globbingWithDirectory(String nonQuote, String currentDirectory) throws IOException {
+
+        int index = nonQuote.indexOf("*");
+        String dirPath = nonQuote.substring(0, index - 1);
+        nonQuote = nonQuote.substring(index, nonQuote.length());
+        ArrayList<String> globbingResult = new ArrayList<String>();
+        Path dir = Paths.get(currentDirectory + System.getProperty("file.separator") + dirPath);
+        DirectoryStream<Path> stream = Files.newDirectoryStream(dir, nonQuote);
+        
+        for (Path entry : stream) {
+            globbingResult.add(dirPath + System.getProperty("file.separator") + entry.getFileName().toString());
+        }
+
+        if (globbingResult.isEmpty()) {
+            globbingResult.add(dirPath + System.getProperty("file.separator") + nonQuote);
+        }
+
+        return globbingResult;
+    } 
     
     /**
      * Checks to see if CMD uses command substitution by looping to see 2 backquotes.
@@ -205,7 +207,7 @@ public class OurParser {
                 continue;
             }
             
-            int startIndex = -1;                      // now holds index of lhs `.
+            int startIndex = -1;                      // holds index of lhs `.
             int endIndex = -1;                        // holds index of rhs `.
             String subCommand = "";
             int counter = 0;
@@ -301,7 +303,7 @@ public class OurParser {
             while (scan.hasNextLine()) {
                 cmdOut += scan.nextLine() + " ";
             }
-            cmdOut = cmdOut.substring(0, cmdOut.length() - 1);
+            cmdOut = cmdOut.substring(0, cmdOut.length() - 1);             //remove whitespace at end
             scan.close();
             file.delete();
             return cmd.substring(0, startIndex) + cmdOut + cmd.substring(endIndex + 1, cmd.length()); 

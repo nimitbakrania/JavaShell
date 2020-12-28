@@ -10,7 +10,7 @@ public class UnsafeDecorator {
         this.unsafeFlag = flag;
     }
 
-    public void accept(baseVisitor visitor) { 
+    public void accept(BaseVisitor visitor) { 
         try{
             this.app.accept(visitor);
         }

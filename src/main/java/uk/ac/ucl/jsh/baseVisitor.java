@@ -2,7 +2,7 @@ package uk.ac.ucl.jsh;
 
 import java.io.IOException;
 
-public interface baseVisitor {
+public interface BaseVisitor {
     public void visit(Visitable.Cd app) throws IOException;
     public void visit(Visitable.Pwd app) throws IOException;
     public void visit(Visitable.Echo app) throws IOException;

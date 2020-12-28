@@ -15,7 +15,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
-public class sortTest {
+public class SortTest {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 

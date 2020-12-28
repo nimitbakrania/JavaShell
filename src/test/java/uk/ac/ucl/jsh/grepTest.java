@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 
-public class grepTest {
+public class GrepTest {
     // Needs to test 0 args 2 args >2 args, invalid file name, valid
     @Rule
     public TemporaryFolder TempFolder = new TemporaryFolder();

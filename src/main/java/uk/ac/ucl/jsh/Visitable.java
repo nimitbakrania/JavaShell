@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public interface Visitable {
 
-    public void accept(baseVisitor visitor) throws IOException;
+    public void accept(BaseVisitor visitor) throws IOException;
 
     public class Cd implements Visitable {
 
@@ -24,7 +24,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) throws IOException {
+        public void accept(BaseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -45,7 +45,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) throws IOException {
+        public void accept(BaseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -67,7 +67,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) throws IOException {
+        public void accept(BaseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -88,7 +88,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) throws IOException {
+        public void accept(BaseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -109,7 +109,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) throws IOException {
+        public void accept(BaseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -131,7 +131,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) throws IOException {
+        public void accept(BaseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -152,7 +152,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) throws IOException {
+        public void accept(BaseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -173,7 +173,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) throws IOException {
+        public void accept(BaseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -194,7 +194,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) throws IOException {
+        public void accept(BaseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -215,7 +215,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) throws IOException {
+        public void accept(BaseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -236,7 +236,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) throws IOException {
+        public void accept(BaseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -257,7 +257,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) throws IOException {
+        public void accept(BaseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -278,7 +278,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) throws IOException {
+        public void accept(BaseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -299,7 +299,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) throws IOException {
+        public void accept(BaseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -320,7 +320,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) throws IOException {
+        public void accept(BaseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }
@@ -341,7 +341,7 @@ public interface Visitable {
             this.appArgs = args;
         }
 
-        public void accept(baseVisitor visitor) throws IOException {
+        public void accept(BaseVisitor visitor) throws IOException {
 
             visitor.visit(this);
         }

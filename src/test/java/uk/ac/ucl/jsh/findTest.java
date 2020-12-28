@@ -16,7 +16,7 @@ import java.io.PipedOutputStream;
 import java.util.Scanner;
 
 
-public class findTest {
+public class FindTest {
     /*
     Valid: find -name file, find path -name file, find path -name file with *
     Invalid: 2nd last arg not -name, args size != 2 or 3

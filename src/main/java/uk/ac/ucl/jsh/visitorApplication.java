@@ -27,9 +27,9 @@ import uk.ac.ucl.jsh.Visitable.WordCount;
 
 import java.io.InputStream;
 
-public class visitorApplication implements baseVisitor {
+public class VisitorApplication implements BaseVisitor {
 
-    public visitorApplication() {
+    public VisitorApplication() {
     }
 
     public void visit(Visitable.Cd app) throws IOException {

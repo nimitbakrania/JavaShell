@@ -3,13 +3,10 @@ import static org.junit.Assert.assertEquals;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.Scanner;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import org.junit.After;
@@ -17,9 +14,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.junit.Test;
 
-public class tailTest{
+public class TailTest{
     @Rule
     public TemporaryFolder TempFolder = new TemporaryFolder();
 
