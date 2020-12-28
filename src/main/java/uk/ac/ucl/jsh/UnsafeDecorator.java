@@ -17,10 +17,11 @@ public class UnsafeDecorator {
         catch(Exception e)
         {
             if (unsafeFlag){
-                System.err.println(e.getMessage());
+                System.out.println(e.getMessage()); // cat dir1; echo BBB
             }
-            else{
-                throw new RuntimeException(e.toString());
+            else {
+                throw new RuntimeException(e.getMessage());
+                // somehow stop running here by printing nothing and waiting for next command.
             }
         }
     }

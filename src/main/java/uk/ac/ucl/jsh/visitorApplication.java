@@ -280,7 +280,7 @@ public class visitorApplication implements baseVisitor {
                 writer.flush();
             }
         } catch (NullPointerException e) {
-            throw new RuntimeException("ls: no such directory");
+            throw new RuntimeException("");
         }
     }
 
@@ -626,6 +626,7 @@ public class visitorApplication implements baseVisitor {
             return;
         }
         
+        // This section deals with overlapping parts.
         int highest = -1;
         int indexOfHighest = -1;
         if (to.size() > 1) {
@@ -641,7 +642,6 @@ public class visitorApplication implements baseVisitor {
             temp.add(to.get(indexOfHighest));
             to = temp;
         }
-
         int lowest = 1000000000;        // large number so it always is reset to lwoest at start.
         int indexOfLowest = -1;
         if (from.size() > 1) {
@@ -664,6 +664,7 @@ public class visitorApplication implements baseVisitor {
             }
         }
 
+        // Extract and print relevant bytes.
         int counter = 0;
         try {
             for (int i = 0; i != to.size(); ++i) {

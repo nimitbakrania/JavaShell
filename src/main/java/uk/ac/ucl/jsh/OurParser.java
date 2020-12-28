@@ -98,8 +98,7 @@ public class OurParser {
         String nonQuote;
         while (regexMatcher.find()) {
             if (regexMatcher.group(1) != null || regexMatcher.group(2) != null) {
-                String quoted = regexMatcher.group(0).trim();
-                System.out.println(quoted);
+                String quoted = regexMatcher.group(0).trim();    // quoted = " "''" "
                 tokens.add(quoted.substring(1,quoted.length()-1));
             } else {
                 // globbing done here
@@ -118,6 +117,21 @@ public class OurParser {
         }
 
         return tokens;
+    }
+    // "''"
+    private String escapeQuotes(String quoted) {
+
+        String ret = "";
+        for (int i = 0; i != quoted.length(); ++i) {
+            if (quoted.charAt(i) == '"') {
+                ret += "\"";
+                continue;
+            }
+
+            ret += quoted.charAt(i);
+        }
+        System.out.println("escapeQuotes: " + ret);
+        return ret;
     }
     
     /* Checks to see if CMD uses command substitution by looping to see 2 backquotes.

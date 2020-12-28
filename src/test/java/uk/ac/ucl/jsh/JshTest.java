@@ -14,7 +14,35 @@ public class JshTest {
 
     @Test
     public void testJsh() throws Exception {
-        // ANIRHDh - Change this so that its a system test. It tests each application in jsh to make sure they all work.
+
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in); 
+        Scanner scan = new Scanner(in);
+        Jsh.eval("echo \"\\\"Hello World\\\"\"", out);
+        assertEquals("\"Hello World\"", scan.nextLine());
+        scan.close();
+    }
+
+    @Test
+    public void testKeywords() throws Exception {
+
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        Scanner scan = new Scanner(in);
+        Jsh.eval("echo `cat anirudh.txt`", out);
+        assertEquals("\"''\"", scan.nextLine());
+        scan.close();
+    }
+
+    @Test
+    public void testSemicolonException() throws Exception {
+
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        Scanner scan = new Scanner(in);
+        Jsh.eval("ls fakeDir; echo BBB", out);
+        assertEquals("", scan.nextLine());
+        scan.close();
     }
 
 }

@@ -11,7 +11,6 @@ public class Jsh {
     private static String currentDirectory = System.getProperty("user.dir");
     final private static String homeDirectory = System.getProperty("user.dir");
 
-
     public static void eval(String cmdline, OutputStream output) throws IOException {
         
         OurParser parser = new OurParser();
@@ -59,7 +58,7 @@ public class Jsh {
             try {
                 eval(args[1], System.out);
             } catch (Exception e) {
-                System.out.println("jsh: " + e.getMessage());
+                System.err.println("jsh: " + e.getMessage());
             }
         } else {
             Scanner input = new Scanner(System.in);
@@ -71,7 +70,7 @@ public class Jsh {
                         String cmdline = input.nextLine();
                         eval(cmdline, System.out);
                     } catch (Exception e) {
-                        System.out.println("jsh: " + e.getMessage());
+                        System.err.println("jsh: " + e.getMessage());
                     }
                 }
             } finally {
