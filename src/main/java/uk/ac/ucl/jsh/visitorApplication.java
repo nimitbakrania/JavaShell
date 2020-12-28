@@ -1,4 +1,5 @@
 package uk.ac.ucl.jsh;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -18,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.*;
+
 import uk.ac.ucl.jsh.Visitable.DateTime;
 import uk.ac.ucl.jsh.Visitable.Mkdir;
 import uk.ac.ucl.jsh.Visitable.Rmdir;
@@ -419,7 +421,7 @@ public class visitorApplication implements baseVisitor {
         } else {
             callCommand = app.appArgs.get(0);
             try {
-                if (callCommand.charAt(0) == '/') {
+                if (Path.of(callCommand).isAbsolute()) {
                     rootDirectory = Path.of(app.appArgs.get(0));
                 } else {
                     rootDirectory = Path.of(app.currentDirectory, app.appArgs.get(0));
@@ -466,8 +468,8 @@ public class visitorApplication implements baseVisitor {
                 if (callCommand == null) {
                     lineOutputWriter("./".concat(rootDirectory.toUri().relativize(file.toURI()).toString()), writer,
                             "find");
-                } else if (callCommand.charAt(0) == '/') {
-                    lineOutputWriter(file.toURI().normalize().toString(), writer, "find");
+                } else if (Path.of(callCommand).isAbsolute()) {
+                    lineOutputWriter(file.getAbsolutePath().toString(), writer, "find");
                 } else {
                     lineOutputWriter(Path.of(Jsh.getCurrentDirectory()).toUri().relativize(file.toURI()).toString(),
                             writer, "find");
@@ -1134,4 +1136,3 @@ public class visitorApplication implements baseVisitor {
     }
 
 }
-
