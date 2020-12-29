@@ -20,9 +20,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.*;
 
-import uk.ac.ucl.jsh.Visitable.DateTime;
-import uk.ac.ucl.jsh.Visitable.Mkdir;
-import uk.ac.ucl.jsh.Visitable.Rmdir;
 
 import java.io.InputStream;
 
@@ -699,7 +696,6 @@ public class VisitorApplication implements BaseVisitor {
         }
         
         // This section deals with overlapping parts.
-
         int highest = -1;
         int indexOfHighest = -1;
         if (to.size() > 1) {
@@ -1018,7 +1014,7 @@ public class VisitorApplication implements BaseVisitor {
         * @throws IOException    Exception thrown by BufferedWriter because of something like a closed pipe
     */
     @Override
-    public void visit(Mkdir app) throws IOException {
+    public void visit(Visitable.Mkdir app) throws IOException {
         if (app.appArgs.size() != 1) {
             throw new RuntimeException("mkdir: only one argument allowed");
         }
@@ -1042,7 +1038,7 @@ public class VisitorApplication implements BaseVisitor {
      * @throws IOException    Exception thrown by BufferedWriter because of an issue such as a closed pipe
      */
     @Override
-    public void visit(Rmdir app) throws IOException {
+    public void visit(Visitable.Rmdir app) throws IOException {
         checkArgs(app.appArgs);
         File directory;
         if (app.appArgs.size() == 2) {
@@ -1126,7 +1122,7 @@ public class VisitorApplication implements BaseVisitor {
      * @throws IOException    Exception thrown by BufferedWriter because of something like a closed pipe
      */
     @Override
-    public void visit(DateTime app) throws IOException {
+    public void visit(Visitable.DateTime app) throws IOException {
         Charset encoding = StandardCharsets.UTF_8;
         Date date = new Date(System.currentTimeMillis());
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(app.output, encoding));
@@ -1135,4 +1131,20 @@ public class VisitorApplication implements BaseVisitor {
         writer.flush();
     }
 
+    public void visit(Visitable.WordCount app) {
+        
+    }
+
+    public void visit(Visitable.History app) {
+
+        if (app.appArgs.size() != 0) {
+            throw new RuntimeException("history: too many arguments supplied");
+        }
+
+        ArrayList<String> history = Jsh.getHistory();
+        OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
+        for (String command : history) {
+            lineOutputWriter(command, writer, "history");
+        }
+    } 
 }

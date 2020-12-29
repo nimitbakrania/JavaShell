@@ -61,6 +61,12 @@ public class Factory {
             case "datetime":
                 app = new UnsafeDecorator(new Visitable.DateTime(in, out, appArgs, currentDirectory), flag);
                 break;
+            case "wc":
+                app = new UnsafeDecorator(new Visitable.WordCount(in, out, appArgs, currentDirectory), flag);
+                break;
+            case "history":
+                app = new UnsafeDecorator(new Visitable.History(in, out, appArgs, currentDirectory), flag);
+                break;
             default:
                 throw new RuntimeException(application + ": unknown application");
             }

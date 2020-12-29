@@ -14,6 +14,7 @@ public class Jsh {
     private static Call call = new Call();
     private static Pipe pipe = new Pipe();
     private static IoRedirection redirect = new IoRedirection();
+    private static ArrayList<String> history = new ArrayList<>();
 
     /**
      * This function executes the application given in cmdline. It first parses it using parser object.
@@ -23,6 +24,7 @@ public class Jsh {
      */
     public static void eval(String cmdline, OutputStream output) throws IOException {
         
+        history.add(cmdline);
         ArrayList<ArrayList<String>> lines = parser.parse(cmdline, currentDirectory);
         for (ArrayList<String> line : lines) {
             String appName = line.get(0);
@@ -51,6 +53,8 @@ public class Jsh {
     public static void setCurrentDirectory(String dir) {
         Jsh.currentDirectory = dir;
     }
+
+    public static ArrayList<String> getHistory() { return history; }
 
     public static void main(String[] args) {
         if (args.length > 0) {

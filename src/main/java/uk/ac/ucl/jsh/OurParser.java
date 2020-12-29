@@ -104,7 +104,12 @@ public class OurParser {
         while (regexMatcher.find()) {
             if (regexMatcher.group(1) != null || regexMatcher.group(2) != null) {
                 String quoted = regexMatcher.group(0).trim();    // quoted = " "''" "
-                tokens.add(quoted.substring(1,quoted.length()-1));
+                if (quoted.length() == 2) {
+                    tokens.add(quoted);
+                }
+                else {
+                    tokens.add(quoted.substring(1,quoted.length()-1));
+                }
             } else {
                 // globbing done here echo dir1/*.txt
                 nonQuote = regexMatcher.group().trim();
