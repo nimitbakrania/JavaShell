@@ -72,7 +72,8 @@ public class VisitorApplication implements BaseVisitor {
     /**
      * Prints the arguments to the command line.
      * 
-     * @param = APP, contains the app arguments as public variables.
+     * @param  APP, contains the app arguments as public variables.
+     * 
      */
     public void visit(Visitable.Echo app) throws IOException {
 
@@ -275,8 +276,11 @@ public class VisitorApplication implements BaseVisitor {
      * given. If argument is given then it prints all files/folders in given
      * directory.
      * 
-     * @param = APP which contains information such as arguments and current
+     * @param  APP which contains information such as arguments and current
      *          directory
+     * 
+     * @throws RuntimeException if 1) There is more than 1 argument supplied.
+     *                             2) The directory supplied doesnt exist.
      */
     public void visit(Visitable.Ls app) throws IOException {
 
@@ -307,11 +311,17 @@ public class VisitorApplication implements BaseVisitor {
                 writer.flush();
             }
         } catch (NullPointerException e) {
-            throw new RuntimeException("");
+            throw new RuntimeException("ls: no such directory");
         }
     }
 
-    // Auxiliary method for LS to print argument f onto outputstream.
+    /**
+     * Auxiliary method for LS to print argument f onto outputstream.
+     * @param writer writes the filenames to the outputstream.
+     * @param f file whos name we need to write.
+     *  
+     * @throws RuntimeException if it is unable to write to file.
+     */
     private void lsWriteFile(OutputStreamWriter writer, File f) {
 
         try {
@@ -482,7 +492,12 @@ public class VisitorApplication implements BaseVisitor {
      * the correct format. Next it decides which format is it in and calls the relevant auxiliary
      * function to extract the bytes we want from each line in the supplied file.
      * 
-     * @param = APP contains info about arguments and currentDirectory.
+     * @param APP contains info about arguments, currentDirectory, appArgs, inputstream and outputstream.
+     * 
+     * @throws RuntimeException if 1) There are too many or too few arguments.
+     *                             2) Argument uses something other than "-b".
+     *                             3) Mixed up intervals for example "-3,4-5". Can only have 1 type of interval.
+     *                             4) If it cannot open the file to read.
      */
     public void visit(Visitable.Cut app) {
 
@@ -581,13 +596,16 @@ public class VisitorApplication implements BaseVisitor {
      * the supplied File file. Else we make a BufferedReader object using the
      * inputstream and return it.
      * 
-     * @param = inputStreamUsed is a flag. It is 1 if we are using inputstream else
-     * 0. charset is UTF-8 filePath is Path object specifing path to file. If we are
-     * using inputstream it is null file is File object. it is null if we are using
-     * input stream. input is null if we are using File file otherwise it is
-     * initialized.
+     * @param inputStreamUsed is a flag. It is 1 if we are using inputstream else it is 0.
+     * @param charset is UTF-8 
+     * @param filePath is Path object specifing path to file. If we are using inputstream it is null.
+     * @param file is File object. it is null if we are using input stream. 
+     * @param input is null if we are using File file otherwise it is initialized.
      * 
      * @return = bufferedreader that will be used to read each line.
+     * 
+     * @throws IOException if it is unable to create a bufferedreader object.
+     * @throws RuntimeException if it is unable to find the file to create the bufferedreader object for.
      */
     private BufferedReader initReader(int inputStreamUsed, Charset charset, Path filePath, File file, InputStream input)
             throws IOException {
@@ -610,9 +628,12 @@ public class VisitorApplication implements BaseVisitor {
      * we need and stores them in BYTESTOPRINT. Finally it outputs BYTESTOPRINT as a
      * string.
      * 
-     * @param = line is the line we are looking at in file. writer is used to write
-     * to output args contains the bytes to extract. e.g. it may be ["1","3"]
-     * charset is the charset of the file we are reading it. It is UTF_8.
+     * @param line is the line we are looking at in file. 
+     * @param writer is used to write to output.
+     * @param args contains the bytes to extract. e.g. it may be ["1","3"]
+     * @param charset is the charset of the file we are reading it. It is UTF_8.
+     * 
+     * @throws RuntimeException if the byte interval is out of bounds.
      */
     private void cutSingleBytes(String line, OutputStreamWriter writer, String[] args, Charset charset) {
 
@@ -643,10 +664,13 @@ public class VisitorApplication implements BaseVisitor {
      * we need and stores them in BYTESTOPRINT. Finally it outputs BYTESTOPRINT as a
      * string.
      * 
-     * @param = line is the line we are looking at in file. writer is used to write
-     * to output args contains the bytes to extract. e.g. it may be ["1","3"]
-     * charset is the charset of the file we are reading it. It is UTF_8. length is
-     * the length of the BYTESTOPRINT array that is precalculated.
+     * @param line is the line we are looking at in file. 
+     * @param writer is used to write to output 
+     * @param args contains the bytes to extract. e.g. it may be ["1","3"]
+     * @param charset is the charset of the file we are reading it. It is UTF_8. 
+     * @param length is the length of the BYTESTOPRINT array that is precalculated.
+     * 
+     * @throws RuntimeException if the byte interval is out of bounds.
      */
     private void cutIntervals(String line, OutputStreamWriter writer, String[] args, Charset charset, int length) {
 
@@ -682,9 +706,15 @@ public class VisitorApplication implements BaseVisitor {
      * we need and stores them in BYTESTOPRINT. Finally it outputs BYTESTOPRINT as a
      * string.
      * 
-     * @param = line is the line we are looking at in file. writer is used to write
-     * to output args contains the bytes to extract. e.g. it may be ["1","3"]
-     * charset is the charset of the file we are reading it. It is UTF_8.
+     * @param line is the line we are looking at in file. 
+     * @param writer is used to write to output 
+     * @param to contains integers that upper bound the interval. Each index corresponds 
+     *           to integer at the same index in from. E.g. from[0] and to[0] form 1 interval,
+     *           from[1] and to[1] form another and so on.
+     * @param from contains integers that lower bound the interval.
+     * @param charset is the charset of the file we are reading it. It is UTF_8.
+     * 
+     * @throws RuntimeException if the byte interval is out of bounds.
      */
     private void cutHalfIntervals(String line, OutputStreamWriter writer, ArrayList<Integer> to,
             ArrayList<Integer> from, Charset charset) {
@@ -1135,6 +1165,14 @@ public class VisitorApplication implements BaseVisitor {
         
     }
 
+    /**
+     * Prints out each command that has been entered before. Simply gets an arraylist of 
+     * previous commands and prints them one by one.
+     * 
+     * @param app object contains relevant variables such as outputstream as app.output and 
+     *        app arguments as app.appArgs.
+     * @throws RuntimeException if you supply any arguments to it.
+     */
     public void visit(Visitable.History app) {
 
         if (app.appArgs.size() != 0) {

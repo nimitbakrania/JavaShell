@@ -32,9 +32,9 @@ public class OurParser {
      * command with the output from it. Finally we loop through each command and split it into tokens and store it as an
      * ArrayList<String>. Each ArrayList is added to ret and returned.
      * 
-     * @param = cmdline is the commandline that we need to parse.
-     *          currentDirectory is the current directory that jsh is in.
-     * @return = an arraylist of an arraylist<string>. it contains each command that has been split into tokens.
+     * @param cmdline is the commandline that we need to parse.
+     * @param currentDirectory is the current directory that jsh is in.
+     * @return an arraylist of an arraylist<string>. it contains each command that has been split into tokens.
     */
     public ArrayList<ArrayList<String>> parse(String cmdline, String currentDirectory) throws IOException {
 
@@ -63,7 +63,7 @@ public class OurParser {
      * builds up subCommands. Adds each of these subCommands to rawCommands which will
      * contain all the parsed commands.
      * 
-     * @return = arraylist of commands.
+     * @return arraylist of commands.
     */
     private ArrayList<String> getCommands() {
 
@@ -90,9 +90,9 @@ public class OurParser {
     /**
      * Splits the commands into tokens and adds them into an arraylist which it then returns
      * 
-     * @param = rawCommand is the untokenized command. 
-     *           currentDirectory is the directory that jsh is currently in.
-     * @return = arraylist of tokens for the rawCommand param.
+     * @param rawCommand is the untokenized command. 
+     * @param currentDirectory is the directory that jsh is currently in.
+     * @return arraylist of tokens for the rawCommand param.
     */
     private ArrayList<String> splitIn2Tokens(String rawCommand, String currentDirectory) throws IOException {
 
@@ -135,6 +135,16 @@ public class OurParser {
         return tokens;
     }
 
+    /**
+     * Used to do globbing with directory given E.g. directory/*.txt. It opens a directorystream to that directory
+     * then finds all files matching the pattern. Then at the end it prepends the directory/ infront of filenames and adds
+     * them to globbingResult.
+     * 
+     * @param nonQuote is of the globbing pattern. It will have a path structure e.g. directory1/directory2/*.txt
+     * @param currentDirectory is the directory that Jsh is currently working in.
+     * 
+     * @throws IOException if it is unable to open directory stream.
+     */
     private ArrayList<String> globbingWithDirectory(String nonQuote, String currentDirectory) throws IOException {
 
         int index = nonQuote.indexOf("*");
@@ -158,7 +168,9 @@ public class OurParser {
     /**
      * Checks to see if CMD uses command substitution by looping to see 2 backquotes.
      * 
-     * @return = true if command substitution is found.
+     * @param cmd is the command line.
+     * 
+     * @return true if command substitution is found.
     */
     private boolean checkCmdSubstitution(String cmd) {
 
@@ -196,8 +208,9 @@ public class OurParser {
      * 2.2) Add the returned command from executeCmdSubstitution into ret.
      * 3) Concat all the commands in ret and return them.
      * 
-     * @param = cmd : commandline with command substitution.
-     * @return = string of commands without command substitution
+     * @param cmd : commandline with command substitution.
+     * 
+     * @return string of commands without command substitution
     */
     private String cmdSubstitution(String cmd) {
 
@@ -251,8 +264,9 @@ public class OurParser {
      * Auxiliary method for cmdSubstitution. Just loops thru and extracts each command and adds it to
      * commands. 
      * 
-     * @param = cmd : commandline with command stubstitution
-     * @return = arraylist of commands.
+     * @param cmd : commandline with command stubstitution
+     * 
+     * @return arraylist of commands.
     */
     private ArrayList<String> splitCommands(String cmd) {
 
@@ -288,10 +302,11 @@ public class OurParser {
      * Executes the subcommand and stores its output into a temporary file. It then reads the temporary file 
      * and puts its content into cmd. The backquoted subcommand is replaced by output.
      * 
-     * @param = startIndex : index of first `.
-     *          endIndex : index of second `.
-     *          cmd : string with command substitution.
-     *          subCommand : command encased with `.
+     * @param startIndex : index of first `.
+     * @param endIndex : index of second `.
+     * @param cmd : string with command substitution.
+     * @param subCommand : command encased with `.
+     * 
      * @return = cmd but with the command substitution part replaced with the output of subCommand.
     */
     private String executeCmdSubstitution(int startIndex, int endIndex, String cmd, String subCommand) {
@@ -317,11 +332,14 @@ public class OurParser {
         }
     }
 
-    /* Auxiliary method for cmdSubstitution. Loops through and concatenates each  
-       string in array together. It then returns this string.
-       @params = array : array of strings
-       @returns = all the strings in array concatenated together 
-    */
+    /**
+     * Auxiliary method for cmdSubstitution. Loops through and concatenates each  
+     * string in array together. It then returns this string.
+     * 
+     * @param array : array of strings
+     * 
+     * @return all the strings in array concatenated together 
+     */
     private String concatArrayList(ArrayList<String> array) {
 
         String ret = "";

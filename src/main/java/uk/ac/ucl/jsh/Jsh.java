@@ -20,7 +20,10 @@ public class Jsh {
      * This function executes the application given in cmdline. It first parses it using parser object.
      * Command substitution is done while parsing. Afterwards it executes each line of commands.
      * 
-     * @param = cmdline contains the commands to execute from the commandline.
+     * @param cmdline contains the commands to execute from the commandline.
+     * @param output is the output stream we want to print the results of running the cmdline to.
+     * 
+     * @throws IOException if it is unable to print to outputstream.
      */
     public static void eval(String cmdline, OutputStream output) throws IOException {
         
