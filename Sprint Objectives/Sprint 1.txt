@@ -1,0 +1,7 @@
+Sprint 1 Objectives
+-------------------
+- Design the project code structure
+- Separate Parser and Command logic to adhere to Separation of Concerns Principles.
+- Determine the best design approach for Parsing.
+- Analyse and adher to the programming principles we are being taught in our weekly 
+lectures. 

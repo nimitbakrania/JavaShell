@@ -1,0 +1,9 @@
+Sprint 2 Objectives
+
+-------------------
+
+- Research suitable design patterns, weighing the pros and cons of each, and note whether 
+they fit the programming paradigmn in which we have set up.
+- Implement a basic parser that would allow the testing of the existing commands. 
+- Design a suitable testing environment for faster and rather abrupt testing of added 
+functionality. 

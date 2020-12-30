@@ -1,0 +1,9 @@
+Sprint 3 Objectives
+ 
+--------------------
+
+- Make the required changes to implement piping and io redirection. 
+- Utilise the factory structure for all of the functions/commands we have made.
+- Fix any bugs with the current 'apps', and finish refractoring them. 
+- CD function in particular is not working, research and note the issues arrising. 
+Split refractoring the apps three ways, along with minor adjustment testing. 
