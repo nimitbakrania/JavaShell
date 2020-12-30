@@ -1,0 +1,20 @@
+Week 1 - October 26 
+
+-------------------
+
+What have we done since last time?
+-N/A
+
+What do we plan to do now?
+-Brainstorm implementation ideas for the commands in general.
+-Move the parser logic from the Jsh to a new class. 
+-Organise Roles. 
+-Perhaps make a rough UML diagram on teams share. 
+
+What are we each working on right now?
+- Anirudh - noting and annotating the current commands with documentation
+- Julian - Explaining the parser logic to us in a team meeting. 
+- Nimit - working with Anirudh in documentation.
+
+Am I blocked on anything?
+ - No

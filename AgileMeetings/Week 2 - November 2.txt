@@ -1,0 +1,21 @@
+Week 2 - November 2 
+
+-------------------
+
+What have we done since last time?
+- Moved Parser logic from Jsh to a new class.
+- Solved Reverse Exercising and added coursework-acceptace-tests to the repo.
+- Annotated ANTLR as the Parser Generator.
+
+What do we plan to do now?
+- Pair programming with Julian and Anirudh to expand the current 
+capabilities of the Parser
+- Utilise docker in our project and solve issues arrising this.
+
+What are we each working on right now?
+- Anirudh - Expanding the utilities of the parser.
+- Julian - Expanding the utilities of the parser.
+- Nimit - Working on seperating out the commands and refractoring. 
+
+Am I blocked on anything?
+ - No

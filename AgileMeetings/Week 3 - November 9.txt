@@ -1,0 +1,20 @@
+Week 3 - November 9 
+
+-------------------
+
+What have we done since last time?
+- Solved the issues arrising with docker so we can all develop in the same
+environment- a vital aspect of our project. 
+- Expanded the current capabilities of the Parser.
+
+What do we plan to do now?
+- Use a Parser Generator to parse the input.
+- Solve Reverse Engineering exercise to get access to JUnit Tests.
+
+What are we each working on right now?
+- Anirudh - Working on using the parser generator to parse the input. 
+- Julian - Solving the reverse engineering exercise to get access to JUnit Tests.
+- Nimit - Researching new design patterns.
+
+Am I blocked on anything?
+ - No

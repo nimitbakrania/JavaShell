@@ -1,0 +1,21 @@
+Week 4 - November 16
+
+-------------------
+
+What have we done since last time?
+- Tried to add ANTLR configuration into pom.xml file to work with Docker.
+- Solved the delta debugging exercise to access tests. 
+- Choosen the visitor design pattern and started implementing it. 
+
+What do we plan to do now?
+- Fix pom.xml
+- Fix small bugs arising from our recent implementation of the visitor design pattern.
+- Try finish the refractoring of basic commands before trying new ones. 
+
+What are we each working on right now?
+- Anirudh - Fixing pom.xml and expanding the parser to work with the new design pattern.
+- Julian - Finishing the implementation of the visitor pattern with full documentation.
+- Nimit - Finishing the refractoring of the commands and noting addional functions to be added.
+
+Am I blocked on anything?
+ - No

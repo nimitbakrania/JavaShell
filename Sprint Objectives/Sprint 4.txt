@@ -1,0 +1,10 @@
+Sprint 4 Objectives
+
+-------------------
+
+- Implement command substitution, and integrate with pre-existing code. 
+- Finalise the parser, ensuring that it is fully functional with the new
+io-redirection aspect added. 
+- Implement and fix the commands so that they work fluidly with these 
+additional functionalities, ensuring adherence to the principles is being 
+met. 

@@ -1,0 +1,22 @@
+Week 7 - December 7
+
+-------------------
+
+What have we done since last time?
+- All of the commands are now implemented as described in the spec-
+ification. There are bugs, though minute. 
+-Written J-unit tests for each of the commands.
+
+What do we plan to do now?
+- For some of the J-unit tests, there are fail cases that must be fixed.
+-As well as this, the functionality between running on docker and on normal 
+terminal is different, and so must be fixed. 
+- Created a model for adding tests that are independent of the machine that runs it
+
+What are we each working on right now?
+- Anirudh - Fix failing test cases.
+- Julian - Fixing failing test cases and adding docker functionality.
+- Nimit - Creating a model for adding test cases. 
+
+Am we blocked on anything?
+ - No

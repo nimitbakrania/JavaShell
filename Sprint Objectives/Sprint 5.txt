@@ -1,0 +1,9 @@
+Sprint 5 Objectives
+
+-------------------
+
+- Add and test the following: IO Redirection, Globbing, unsafe version of applications.
+- Fix issues revealed by PMD analysis.
+- Obtain more than 97% branch coverage.
+- Review the existing code base and prepare for deployment.
+- Move Scrum Meeting Reports from Google Docs to GitHub.
