@@ -79,6 +79,9 @@ public class Factory {
             case "history":
                 app = new UnsafeDecorator(new Visitable.History(in, out, appArgs, currentDirectory), flag);
                 break;
+            case "cp":
+                app = new UnsafeDecorator(new Visitable.Copy(in, out, appArgs, currentDirectory), flag);
+                break;
             default:
                 throw new RuntimeException(application + ": unknown application");
             }

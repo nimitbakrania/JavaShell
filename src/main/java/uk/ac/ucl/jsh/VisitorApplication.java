@@ -9,9 +9,11 @@ import java.io.OutputStreamWriter;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -1167,7 +1169,7 @@ public class VisitorApplication implements BaseVisitor {
 
     /**
      * Prints out each command that has been entered before. Simply gets an arraylist of 
-     * previous commands and prints them one by one.
+     * previous commands and converts it to a stream and prints them one by one.
      * 
      * @param app object contains relevant variables such as outputstream as app.output and 
      *        app arguments as app.appArgs.
@@ -1179,11 +1181,95 @@ public class VisitorApplication implements BaseVisitor {
             throw new RuntimeException("history: too many arguments supplied");
         }
 
-        ArrayList<String> history = Jsh.getHistory();
+        Stream<String> history = Jsh.getHistory().stream();
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
-        for (String command : history) {
-            lineOutputWriter(command, writer, "history");
-        }
+        history.forEach(elem -> lineOutputWriter(elem, writer, "history"));
     } 
-}
 
+
+    /**
+     * Of the format "cp (-r) source1 source2 source3 ... dest". 
+     * "-r" is optional and if it is supplied it means copy directories.
+     * There can be any number of source files to copy.
+     * Doesnt work with input stream yet.
+     * 
+     * @param app object contains relevant information such as currentDirectory and appArgs.
+     * 
+     * @throws IOException if it is unable to copy the files.
+     */
+    public void visit(Visitable.Copy app) throws IOException {
+
+        String dest = app.appArgs.get(app.appArgs.size() - 1);   // last element is destination.
+        app.appArgs.remove(app.appArgs.size() - 1);
+        
+        if (app.appArgs.get(0).equals("-r")) {
+            // copying directories
+            app.appArgs.remove(0);               // remove -r.
+            Stream<String> stream = app.appArgs.stream();
+            stream.forEach(directory -> {
+                String srcDir = app.currentDirectory + System.getProperty("file.separator") + directory;
+                String destDir = app.currentDirectory + System.getProperty("file.separator") + dest;
+                copyDirectory(srcDir, destDir);});
+        }
+        else {
+            // copying files.
+            Stream<String> stream = app.appArgs.stream();
+            stream.forEach(file -> {
+                try {
+                    String src = app.currentDirectory + System.getProperty("file.separator") + file;
+                    String destination = app.currentDirectory + System.getProperty("file.separator") + dest + System.getProperty("file.separator") + file;
+                    copyFile(src, destination);
+                } catch (IOException e) {
+                    throw new RuntimeException("cp: unable to copy file.");
+                }
+            });
+
+        }
+    }
+
+    /**
+     * This copies the file argument into the dest directory. 
+     * 
+     * @param file is a string that indicates the path to the directory that src is in.
+     * @param dest is a string that indicates the path to the directory that dest is in.
+     * 
+     * @throws IOException if it is unable to copy the file.
+     */
+    private void copyFile(String src, String dest) throws IOException {
+
+        Path source = Paths.get(src);
+        Path destination = Paths.get(dest);
+        Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    /**
+     * Copies the directory specified by src into dest.
+     * 
+     * @param src is a string that indicates the path to src directory
+     * @param dest is a string that indicates the path to dest directory
+     * 
+     * @throws IOException if it is unable to copy files.
+     */
+    private void copyDirectory(String src, String dest) {
+
+        Path source = Paths.get(src);
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(source)) {
+            for (Path entry : stream) {
+                if (Files.isDirectory(entry)) {
+                    // copying subdirectory. First we need to create subdirectory in dest then copy all the files from subdirectory into the
+                    // newly created dest/subdir.
+                    String path = dest + System.getProperty("file.separator") + entry.getFileName().toString();
+                    new File(path).mkdir();
+                    copyDirectory(entry.toString(), path);
+                }
+                else {
+                    copyFile(entry.toString(), dest + System.getProperty("file.separator") + entry.getFileName().toString());
+                }
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            throw new RuntimeException("cp: unable to copy directory.");
+        }
+    }
+}

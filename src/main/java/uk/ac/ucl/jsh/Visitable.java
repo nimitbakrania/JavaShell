@@ -367,4 +367,25 @@ public interface Visitable {
             visitor.visit(this);
         }
     }
+
+    public class Copy implements Visitable {
+
+        public InputStream input;
+        public OutputStream output;
+        public String currentDirectory;
+        public ArrayList<String> appArgs;
+
+        public Copy(InputStream input, OutputStream output, ArrayList<String> appArgs, String currentDirectory) {
+
+            this.input = input;
+            this.output = output;
+            this.currentDirectory = currentDirectory;
+            this.appArgs = appArgs;
+        }
+
+        public void accept(BaseVisitor visitor) throws IOException {
+
+            visitor.visit(this);
+        }
+    }
 }
