@@ -4,13 +4,26 @@ package uk.ac.ucl.jsh;
 public class UnsafeDecorator {
     private Visitable app;
     private boolean unsafeFlag;
+
+    /**
+     * @param application the application we are creating the unsafedecorator object for.
+     * @param flag true if it is unsafe mode (has "_" prepended to it).
+     */
     public UnsafeDecorator(Visitable application, boolean flag)
     {
         this.app = application;
         this.unsafeFlag = flag;
     }
 
-    public void accept(baseVisitor visitor) { 
+    /**
+     * If unsafeFlag is true then we print onto std.out else Jsh main() will 
+     * print it onto std.err.
+     * 
+     * @param visitor visits the app private variable.
+     * 
+     * @throws RuntimeException if we are in safe mode.
+     */
+    public void accept(BaseVisitor visitor) { 
         try{
             this.app.accept(visitor);
         }

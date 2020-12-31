@@ -1,0 +1,21 @@
+Week 5 - November 23
+
+-------------------
+
+What have we done since last time?
+- Successfully integrated ANTLR with Docker using the right pom.xml configuration.
+- Parser quote bug fix.
+- Finished refractoring of the old commands with full documentation. 
+
+What do we plan to do now?
+- Fix LsCommandTest bug.
+- Refactor parser.
+- implementing uniq, sort, cut, io-redirection and command substitution.
+
+What are we each working on right now?
+- Anirudh - Implementing cut and command substitution.
+- Julian - Implementing io redirection and fixing ls bug.
+- Nimit - Implementing sort and uniq. 
+
+Am I blocked on anything?
+ - No

@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 
-public class catTest{
+public class CatTest{
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 

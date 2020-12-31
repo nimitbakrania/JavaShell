@@ -8,6 +8,18 @@ public class Factory {
 
     public Factory() { }
 
+    /**
+     * Handles creation of UnsafeDecorator object. First it checks if "_" is prepended then it uses a switch statement to create the 
+     * relevant Visitable object wrapped with an unsafedecorator object.
+     * 
+     * @param in inputstream that is null if we arent using it. If we are using pipe or redirection then it is not null
+     * @param out outputstream that we want to print the results of running the application onto.
+     * @param currentDirectory the directory that Jsh is currently operating in.
+     * @param application a string that has the application command. E.g. "echo", "cut", "grep", "head" ...
+     * @param appArgs contains all of the arguments supplied on the cmdline for the application.
+     * 
+     * @returns an UnsafeDecorator object wrapping a Visitable object for the parameter "applciation".
+     */
     public UnsafeDecorator mkApplication(InputStream in, OutputStream out, String application, ArrayList<String> appArgs) {
         UnsafeDecorator app;
         boolean flag = false;
@@ -53,16 +65,22 @@ public class Factory {
                 app = new UnsafeDecorator(new Visitable.Sort(in, out, appArgs), flag);
                 break;
             case "mkdir":
-                app = new UnsafeDecorator(new Visitable.Sort(in, out, appArgs), flag);
+                app = new UnsafeDecorator(new Visitable.Mkdir(in, out, appArgs), flag);
                 break;
             case "rmdir":
-                app = new UnsafeDecorator(new Visitable.Sort(in, out, appArgs), flag);
-                break;
-            case "wc":
-                app = new UnsafeDecorator(new Visitable.Sort(in, out, appArgs), flag);
+                app = new UnsafeDecorator(new Visitable.Rmdir(in, out, appArgs), flag);
                 break;
             case "datetime":
-                app = new UnsafeDecorator(new Visitable.Sort(in, out, appArgs), flag);
+                app = new UnsafeDecorator(new Visitable.DateTime(in, out, appArgs), flag);
+                break;
+            case "wc":
+                app = new UnsafeDecorator(new Visitable.WordCount(in, out, appArgs), flag);
+                break;
+            case "history":
+                app = new UnsafeDecorator(new Visitable.History(in, out, appArgs), flag);
+                break;
+            case "cp":
+                app = new UnsafeDecorator(new Visitable.Copy(in, out, appArgs), flag);
                 break;
             default:
                 throw new RuntimeException(application + ": unknown application");

@@ -12,7 +12,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-public class cdTest{
+public class CdTest{
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 

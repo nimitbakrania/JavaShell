@@ -9,9 +9,11 @@ import java.io.OutputStreamWriter;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -20,16 +22,12 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.*;
 
-import uk.ac.ucl.jsh.Visitable.DateTime;
-import uk.ac.ucl.jsh.Visitable.Mkdir;
-import uk.ac.ucl.jsh.Visitable.Rmdir;
-import uk.ac.ucl.jsh.Visitable.WordCount;
 
 import java.io.InputStream;
 
-public class visitorApplication implements baseVisitor {
+public class VisitorApplication implements BaseVisitor {
 
-    public visitorApplication() {
+    public VisitorApplication() {
     }
 
     public void visit(Visitable.Cd app) throws IOException {
@@ -76,7 +74,8 @@ public class visitorApplication implements baseVisitor {
     /**
      * Prints the arguments to the command line.
      * 
-     * @param = APP, contains the app arguments as public variables.
+     * @param  APP, contains the app arguments as public variables.
+     * 
      */
     public void visit(Visitable.Echo app) throws IOException {
 
@@ -279,8 +278,11 @@ public class visitorApplication implements baseVisitor {
      * given. If argument is given then it prints all files/folders in given
      * directory.
      * 
-     * @param = APP which contains information such as arguments and current
+     * @param  APP which contains information such as arguments and current
      *          directory
+     * 
+     * @throws RuntimeException if 1) There is more than 1 argument supplied.
+     *                             2) The directory supplied doesnt exist.
      */
     public void visit(Visitable.Ls app) throws IOException {
 
@@ -311,11 +313,17 @@ public class visitorApplication implements baseVisitor {
                 writer.flush();
             }
         } catch (NullPointerException e) {
-            throw new RuntimeException("");
+            throw new RuntimeException("ls: no such directory");
         }
     }
 
-    // Auxiliary method for LS to print argument f onto outputstream.
+    /**
+     * Auxiliary method for LS to print argument f onto outputstream.
+     * @param writer writes the filenames to the outputstream.
+     * @param f file whos name we need to write.
+     *  
+     * @throws RuntimeException if it is unable to write to file.
+     */
     private void lsWriteFile(OutputStreamWriter writer, File f) {
 
         try {
@@ -486,7 +494,12 @@ public class visitorApplication implements baseVisitor {
      * the correct format. Next it decides which format is it in and calls the relevant auxiliary
      * function to extract the bytes we want from each line in the supplied file.
      * 
-     * @param = APP contains info about arguments and currentDirectory.
+     * @param APP contains info about arguments, currentDirectory, appArgs, inputstream and outputstream.
+     * 
+     * @throws RuntimeException if 1) There are too many or too few arguments.
+     *                             2) Argument uses something other than "-b".
+     *                             3) Mixed up intervals for example "-3,4-5". Can only have 1 type of interval.
+     *                             4) If it cannot open the file to read.
      */
     public void visit(Visitable.Cut app) {
 
@@ -585,13 +598,16 @@ public class visitorApplication implements baseVisitor {
      * the supplied File file. Else we make a BufferedReader object using the
      * inputstream and return it.
      * 
-     * @param = inputStreamUsed is a flag. It is 1 if we are using inputstream else
-     * 0. charset is UTF-8 filePath is Path object specifing path to file. If we are
-     * using inputstream it is null file is File object. it is null if we are using
-     * input stream. input is null if we are using File file otherwise it is
-     * initialized.
+     * @param inputStreamUsed is a flag. It is 1 if we are using inputstream else it is 0.
+     * @param charset is UTF-8 
+     * @param filePath is Path object specifing path to file. If we are using inputstream it is null.
+     * @param file is File object. it is null if we are using input stream. 
+     * @param input is null if we are using File file otherwise it is initialized.
      * 
      * @return = bufferedreader that will be used to read each line.
+     * 
+     * @throws IOException if it is unable to create a bufferedreader object.
+     * @throws RuntimeException if it is unable to find the file to create the bufferedreader object for.
      */
     private BufferedReader initReader(int inputStreamUsed, Charset charset, Path filePath, File file, InputStream input)
             throws IOException {
@@ -614,9 +630,12 @@ public class visitorApplication implements baseVisitor {
      * we need and stores them in BYTESTOPRINT. Finally it outputs BYTESTOPRINT as a
      * string.
      * 
-     * @param = line is the line we are looking at in file. writer is used to write
-     * to output args contains the bytes to extract. e.g. it may be ["1","3"]
-     * charset is the charset of the file we are reading it. It is UTF_8.
+     * @param line is the line we are looking at in file. 
+     * @param writer is used to write to output.
+     * @param args contains the bytes to extract. e.g. it may be ["1","3"]
+     * @param charset is the charset of the file we are reading it. It is UTF_8.
+     * 
+     * @throws RuntimeException if the byte interval is out of bounds.
      */
     private void cutSingleBytes(String line, OutputStreamWriter writer, String[] args, Charset charset) {
 
@@ -647,10 +666,13 @@ public class visitorApplication implements baseVisitor {
      * we need and stores them in BYTESTOPRINT. Finally it outputs BYTESTOPRINT as a
      * string.
      * 
-     * @param = line is the line we are looking at in file. writer is used to write
-     * to output args contains the bytes to extract. e.g. it may be ["1","3"]
-     * charset is the charset of the file we are reading it. It is UTF_8. length is
-     * the length of the BYTESTOPRINT array that is precalculated.
+     * @param line is the line we are looking at in file. 
+     * @param writer is used to write to output 
+     * @param args contains the bytes to extract. e.g. it may be ["1","3"]
+     * @param charset is the charset of the file we are reading it. It is UTF_8. 
+     * @param length is the length of the BYTESTOPRINT array that is precalculated.
+     * 
+     * @throws RuntimeException if the byte interval is out of bounds.
      */
     private void cutIntervals(String line, OutputStreamWriter writer, String[] args, Charset charset, int length) {
 
@@ -686,9 +708,15 @@ public class visitorApplication implements baseVisitor {
      * we need and stores them in BYTESTOPRINT. Finally it outputs BYTESTOPRINT as a
      * string.
      * 
-     * @param = line is the line we are looking at in file. writer is used to write
-     * to output args contains the bytes to extract. e.g. it may be ["1","3"]
-     * charset is the charset of the file we are reading it. It is UTF_8.
+     * @param line is the line we are looking at in file. 
+     * @param writer is used to write to output 
+     * @param to contains integers that upper bound the interval. Each index corresponds 
+     *           to integer at the same index in from. E.g. from[0] and to[0] form 1 interval,
+     *           from[1] and to[1] form another and so on.
+     * @param from contains integers that lower bound the interval.
+     * @param charset is the charset of the file we are reading it. It is UTF_8.
+     * 
+     * @throws RuntimeException if the byte interval is out of bounds.
      */
     private void cutHalfIntervals(String line, OutputStreamWriter writer, ArrayList<Integer> to,
             ArrayList<Integer> from, Charset charset) {
@@ -700,7 +728,6 @@ public class visitorApplication implements baseVisitor {
         }
         
         // This section deals with overlapping parts.
-
         int highest = -1;
         int indexOfHighest = -1;
         if (to.size() > 1) {
@@ -1019,7 +1046,7 @@ public class visitorApplication implements baseVisitor {
         * @throws IOException    Exception thrown by BufferedWriter because of something like a closed pipe
     */
     @Override
-    public void visit(Mkdir app) throws IOException {
+    public void visit(Visitable.Mkdir app) throws IOException {
         if (app.appArgs.size() != 1) {
             throw new RuntimeException("mkdir: only one argument allowed");
         }
@@ -1043,7 +1070,7 @@ public class visitorApplication implements baseVisitor {
      * @throws IOException    Exception thrown by BufferedWriter because of an issue such as a closed pipe
      */
     @Override
-    public void visit(Rmdir app) throws IOException {
+    public void visit(Visitable.Rmdir app) throws IOException {
         checkArgs(app.appArgs);
         File directory;
         if (app.appArgs.size() == 2) {
@@ -1127,7 +1154,7 @@ public class visitorApplication implements baseVisitor {
      * @throws IOException    Exception thrown by BufferedWriter because of something like a closed pipe
      */
     @Override
-    public void visit(DateTime app) throws IOException {
+    public void visit(Visitable.DateTime app) throws IOException {
         Charset encoding = StandardCharsets.UTF_8;
         Date date = new Date(System.currentTimeMillis());
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(app.output, encoding));
@@ -1136,10 +1163,113 @@ public class visitorApplication implements baseVisitor {
         writer.flush();
     }
 
-    @Override
-    public void visit(WordCount app) throws IOException {
-        // TODO Auto-generated method stub
+    public void visit(Visitable.WordCount app) {
+        
+    }
 
+    /**
+     * Prints out each command that has been entered before. Simply gets an arraylist of 
+     * previous commands and converts it to a stream and prints them one by one.
+     * 
+     * @param app object contains relevant variables such as outputstream as app.output and 
+     *        app arguments as app.appArgs.
+     * @throws RuntimeException if you supply any arguments to it.
+     */
+    public void visit(Visitable.History app) {
+
+        if (app.appArgs.size() != 0) {
+            throw new RuntimeException("history: too many arguments supplied");
+        }
+
+        Stream<String> history = Jsh.getHistory().stream();
+        OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
+        history.forEach(elem -> lineOutputWriter(elem, writer, "history"));
+    } 
+
+
+    /**
+     * Of the format "cp (-r) source1 source2 source3 ... dest". 
+     * "-r" is optional and if it is supplied it means copy directories.
+     * There can be any number of source files to copy.
+     * Doesnt work with input stream yet.
+     * 
+     * @param app object contains relevant information such as currentDirectory and appArgs.
+     * 
+     * @throws IOException if it is unable to copy the files.
+     */
+    public void visit(Visitable.Copy app) throws IOException {
+
+        String dest = app.appArgs.get(app.appArgs.size() - 1);   // last element is destination.
+        app.appArgs.remove(app.appArgs.size() - 1);
+        
+        if (app.appArgs.get(0).equals("-r")) {
+            // copying directories
+            app.appArgs.remove(0);               // remove -r.
+            Stream<String> stream = app.appArgs.stream();
+            stream.forEach(directory -> {
+                String srcDir = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + directory;
+                String destDir = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + dest;
+                copyDirectory(srcDir, destDir);});
+        }
+        else {
+            // copying files.
+            Stream<String> stream = app.appArgs.stream();
+            stream.forEach(file -> {
+                try {
+                    String src = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + file;
+                    String destination = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + dest + System.getProperty("file.separator") + file;
+                    copyFile(src, destination);
+                } catch (IOException e) {
+                    throw new RuntimeException("cp: unable to copy file.");
+                }
+            });
+
+        }
+    }
+
+    /**
+     * This copies the file argument into the dest directory. 
+     * 
+     * @param file is a string that indicates the path to the directory that src is in.
+     * @param dest is a string that indicates the path to the directory that dest is in.
+     * 
+     * @throws IOException if it is unable to copy the file.
+     */
+    private void copyFile(String src, String dest) throws IOException {
+
+        Path source = Paths.get(src);
+        Path destination = Paths.get(dest);
+        Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    /**
+     * Copies the directory specified by src into dest.
+     * 
+     * @param src is a string that indicates the path to src directory
+     * @param dest is a string that indicates the path to dest directory
+     * 
+     * @throws IOException if it is unable to copy files.
+     */
+    private void copyDirectory(String src, String dest) {
+
+        Path source = Paths.get(src);
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(source)) {
+            for (Path entry : stream) {
+                if (Files.isDirectory(entry)) {
+                    // copying subdirectory. First we need to create subdirectory in dest then copy all the files from subdirectory into the
+                    // newly created dest/subdir.
+                    String path = dest + System.getProperty("file.separator") + entry.getFileName().toString();
+                    new File(path).mkdir();
+                    copyDirectory(entry.toString(), path);
+                }
+                else {
+                    copyFile(entry.toString(), dest + System.getProperty("file.separator") + entry.getFileName().toString());
+                }
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            throw new RuntimeException("cp: unable to copy directory.");
+        }
     }
 }
-

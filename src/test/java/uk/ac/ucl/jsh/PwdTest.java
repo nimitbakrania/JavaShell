@@ -14,7 +14,7 @@ import java.io.PipedOutputStream;
 import java.util.Scanner;
 
 
-public class pwdTest {
+public class PwdTest {
     /*
     Valid: no args
     Invalid: any args

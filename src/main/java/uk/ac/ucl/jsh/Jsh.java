@@ -14,27 +14,32 @@ public class Jsh {
     private static Call call = new Call();
     private static Pipe pipe = new Pipe();
     private static IoRedirection redirect = new IoRedirection();
+    private static ArrayList<String> history = new ArrayList<>();
 
     /**
      * This function executes the application given in cmdline. It first parses it using parser object.
      * Command substitution is done while parsing. Afterwards it executes each line of commands.
      * 
-     * @param = cmdline contains the commands to execute from the commandline.
+     * @param cmdline contains the commands to execute from the commandline.
+     * @param output is the output stream we want to print the results of running the cmdline to.
+     * 
+     * @throws IOException if it is unable to print to outputstream.
      */
     public static void eval(String cmdline, OutputStream output) throws IOException {
         
+        history.add(cmdline);
         ArrayList<ArrayList<String>> lines = parser.parse(cmdline, currentDirectory);
         for (ArrayList<String> line : lines) {
             String appName = line.get(0);
             ArrayList<String> appArgs = new ArrayList<String>(line.subList(1, line.size()));
             if (appArgs.contains("|")){
-                pipe.eval(null, output, currentDirectory, appName, appArgs);
+                pipe.eval(null, output, appName, appArgs);
             }
             else if (appArgs.contains(">") || appArgs.contains("<")){
-                redirect.eval(null, output, currentDirectory, appName, appArgs);
+                redirect.eval(null, output, appName, appArgs);
             }
             else{
-                call.eval(null, output, currentDirectory, appName, appArgs);
+                call.eval(null, output, appName, appArgs);
             }
         }
     }
@@ -51,6 +56,8 @@ public class Jsh {
     public static void setCurrentDirectory(String dir) {
         Jsh.currentDirectory = dir;
     }
+
+    public static ArrayList<String> getHistory() { return history; }
 
     public static void main(String[] args) {
         if (args.length > 0) {

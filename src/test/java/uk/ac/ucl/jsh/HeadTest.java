@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 
-public class headTest {
+public class HeadTest {
     /*
     Valid: head -n num file, head file, num>
     Invalid: args > 3, args = 3 and arg[0] not -n, -n non-integer, -n negative, invalid file name

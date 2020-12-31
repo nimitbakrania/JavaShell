@@ -1,0 +1,23 @@
+Week 8 - December 14
+
+-------------------
+
+What have we done since last time?
+- Finished implementing all commands, including the new ones. 
+-Passed majority of all test cases. 
+-Added documentation on commands.
+
+What do we plan to do now?
+- Adding new commands that are not part of the specification. 
+- fixing the commands that are not working as desired, as a result 
+of the tests from the delta debug exercise. 
+- Fixing tests so that they have 100% branch coverage. 
+
+What are we each working on right now?
+- Anirudh - Fixing tests so they have 100% branch coverage.
+- Julian - Fixing commands that that are not working as desired.
+- Nimit - Adding new commands, such as mkdir, rmdir and datetime,
+and tests for these commands. 
+
+Am we blocked on anything?
+ - No

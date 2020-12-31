@@ -1,4 +1,5 @@
 package uk.ac.ucl.jsh;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -14,104 +15,116 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
-public class uniqTest {
+public class SortTest {
     @Rule
-    public TemporaryFolder TempFolder = new TemporaryFolder();
+    public TemporaryFolder folder = new TemporaryFolder();
 
-    @Before
-    public void EnterTempFolder() throws IOException{
-        Jsh.setCurrentDirectory(TempFolder.getRoot().toString());
+    @After
+    public void deleteTempFolder() {
+        folder.delete();
+    }
+
+    protected void createTestFile(String fileName, String toWrite) throws IOException {
+        Charset encoding = StandardCharsets.UTF_8;
+        File file = folder.newFile(fileName);
+        if (toWrite != null) {
+            FileWriter writer = new FileWriter(file, encoding);
+            writer.write(toWrite);
+            writer.close();
+        }
     }
 
 
     @Test
-    public void uniqTestNoArgs() throws Exception {
+    public void sortTestNoArgs() throws Exception {
         try{
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("uniq", out);
+            Jsh.eval("sort", out);
         }
         catch(RuntimeException expected)
         {
-            assertTrue(expected.getMessage().equals("uniq: missing arguments"));
+            assertTrue(expected.getMessage().equals("sort: missing arguments"));
         }
     }
 
 
     @Test
-    public void uniqTestWrongNumOfArgs() throws Exception {
+    public void sortTestWrongNumOfArgs() throws Exception {
         
         try{
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("uniq arg1 arg2", out);
+            Jsh.eval("sort arg1 arg2", out);
         }
         catch(RuntimeException expected)
         {
-            assertTrue(expected.getMessage().equals("uniq: wrong argument " + "args"));
+            assertTrue(expected.getMessage().equals("sort: too many arguments"));
         }
     }
 
     @Test
-    public void uniqInvalidOption() throws Exception {
+    public void sortInvalidOption() throws Exception {
         
         try{
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("uniq -t test.txt", out);
+            Jsh.eval("sort -t test.txt", out);
         }
         catch(RuntimeException expected)
         {
-            assertTrue(expected.getMessage().equals("uniq: wrong argument " + "-t"));
+            assertTrue(expected.getMessage().equals("sort: wrong argument " + "-t"));
         }
     }
 
     @Test
-    public void uniqTooManyArg() throws Exception {
+    public void sortTooManyArg() throws Exception {
         
         try{
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("uniq -x arg1 arg2 arg3 arg4", out);
+            Jsh.eval("sort -x arg1 arg2 arg3 arg4", out);
         }
         catch(RuntimeException expected)
         {
-            assertTrue(expected.getMessage().equals("uniq: too many arguments"));
+            assertTrue(expected.getMessage().equals("sort: too many arguments"));
         }
     }
 
 
 
     @Test
-    public void uniqTestFileDoesNotExist() throws Exception {
+    public void sortTestFileDoesNotExist() throws Exception {
         
         try{
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("uniq test123.txt", out);
+            Jsh.eval("sort test123.txt", out);
         }
         catch(RuntimeException expected)
         {
-            assertTrue(expected.getMessage().equals("uniq: "+ "test123.txt" + " does not exist"));
+            assertTrue(expected.getMessage().equals("sort: cannot open "+ "test123.txt"));
         }
     }
 
 
     @Test
     public void oneArgTest() throws IOException{
-        File tempFile = TempFolder.newFile("Testuniq.txt");
+        File tempFile = folder.newFile("Testsort.txt");
         FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
-        tempFileWriter.write("a\na\n2\nb\nb\na");
+        tempFileWriter.write("a\ns\n2\nb\nd\na");
 
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
-        Jsh.eval("uniq Testsort.txt", out);
+        Jsh.eval("sort Testsort.txt", out);
         Scanner scn = new Scanner(in);
-        assertEquals("a", scn.nextLine());
         assertEquals("2", scn.nextLine());
-        assertEquals("b", scn.nextLine());
         assertEquals("a", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        assertEquals("b", scn.nextLine());
+        assertEquals("d", scn.nextLine());
+        assertEquals("s", scn.nextLine());
         scn.close();
         tempFileWriter.close();
     }

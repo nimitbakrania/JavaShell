@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class Call implements Command {
 
-    private visitorApplication visitor = new visitorApplication();
+    private VisitorApplication visitor = new VisitorApplication();
     private Factory factory = new Factory();
 
     /* Uses factory design pattern to create the object of the app that we are interested in.

@@ -2,7 +2,7 @@ package uk.ac.ucl.jsh;
 
 import java.io.IOException;
 
-public interface baseVisitor {
+public interface BaseVisitor {
     public void visit(Visitable.Cd app) throws IOException;
     public void visit(Visitable.Pwd app) throws IOException;
     public void visit(Visitable.Echo app) throws IOException;
@@ -19,4 +19,6 @@ public interface baseVisitor {
     public void visit(Visitable.Rmdir app) throws IOException;
     public void visit(Visitable.DateTime app) throws IOException;
     public void visit(Visitable.WordCount app) throws IOException;
+    public void visit(Visitable.History app) throws IOException;
+    public void visit(Visitable.Copy app) throws IOException;
 }

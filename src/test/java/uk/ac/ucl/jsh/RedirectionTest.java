@@ -15,12 +15,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-public class redirectionTest{
+public class RedirectionTest{
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 

@@ -1,0 +1,26 @@
+Week 6 - November 30
+
+-------------------
+
+What have we done since last time?
+- Refractored the parser. 
+- Implemented basic versions of sort, command-substitution and io-re-
+direction. 
+- Fixed the bug with ls command
+
+What do we plan to do now?
+- Fix issues with the new commands and ensure they work fluidly as 
+described in the specification. 
+-Start writing tests for each of the commands. 
+- Research Junit testing. 
+
+What are we each working on right now?
+- Anirudh - Fix bugs arising with cut and command-substitution and also
+write 3 tests for the previous commands.
+- Julian - Fix bugs arising with io- redirection and also
+write 3 tests for the previous commands.
+- Nimit - Fix bugs for sort and uniq and write 2 tests for previous commands.
+Also, research J-unit tested. 
+
+Am I blocked on anything?
+ - No
