@@ -160,10 +160,10 @@ public class visitorApplication implements baseVisitor {
             BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
             standardInputBuffer.lines().limit(headLines).forEach((line) -> lineOutputWriter(line, writer, "head"));
         } else if (app.appArgs.size() == 3 || app.appArgs.size() == 1) {
-            File headFile = new File(app.currentDirectory + File.separator + headArg);
+            File headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
             if (headFile.exists()) {
                 Charset encoding = StandardCharsets.UTF_8;
-                Path filePath = Paths.get((String) app.currentDirectory + File.separator + headArg);
+                Path filePath = Paths.get((String) Jsh.getCurrentDirectory() + File.separator + headArg);
                 try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
                     reader.lines().limit(headLines).forEach((line) -> lineOutputWriter(line, writer, "head"));
                 } catch (IOException e) {
@@ -228,10 +228,10 @@ public class visitorApplication implements baseVisitor {
             readerList.stream().skip(((readerList.size() - tailLines) < 0) ? 0 : (readerList.size() - tailLines))
                     .forEach((line) -> lineOutputWriter(line, writer, "tail"));
         } else if (app.appArgs.size() == 3 || app.appArgs.size() == 1) {
-            File tailFile = new File(app.currentDirectory + File.separator + tailArg);
+            File tailFile = new File(Jsh.getCurrentDirectory() + File.separator + tailArg);
             if (tailFile.exists()) {
                 Charset encoding = StandardCharsets.UTF_8;
-                Path filePath = Paths.get((String) app.currentDirectory + File.separator + tailArg);
+                Path filePath = Paths.get((String) Jsh.getCurrentDirectory() + File.separator + tailArg);
                 try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
                     List<String> readerList = reader.lines().collect(Collectors.toList());
                     readerList.stream()
@@ -257,7 +257,7 @@ public class visitorApplication implements baseVisitor {
         } else {
             Charset encoding = StandardCharsets.UTF_8;
             for (String arg : app.appArgs) {
-                File currFile = new File(app.currentDirectory, arg);
+                File currFile = new File(Jsh.getCurrentDirectory(), arg);
                 if (currFile.exists()) {
                     Path filePath = currFile.toPath();
                     try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
@@ -288,12 +288,12 @@ public class visitorApplication implements baseVisitor {
         File currDir;
 
         if (app.appArgs.isEmpty()) {
-            currDir = new File(app.currentDirectory);
+            currDir = new File(Jsh.getCurrentDirectory());
         } else if (app.appArgs.size() == 1) {
             if (app.appArgs.get(0).charAt(0) == '/') {
                 currDir = new File(app.appArgs.get(0));
             } else {
-                currDir = new File(app.currentDirectory, app.appArgs.get(0));
+                currDir = new File(Jsh.getCurrentDirectory(), app.appArgs.get(0));
             }
         } else {
             throw new RuntimeException("ls: too many arguments");
@@ -358,7 +358,7 @@ public class visitorApplication implements baseVisitor {
             int numOfFiles = app.appArgs.size() - 1;
             Path filePath;
             Path[] filePathArray = new Path[numOfFiles];
-            Path currentDir = Paths.get(app.currentDirectory);
+            Path currentDir = Paths.get(Jsh.getCurrentDirectory());
 
             for (int i = 0; i < numOfFiles; i++) {
                 filePath = currentDir.resolve(app.appArgs.get(i + 1));
@@ -418,14 +418,14 @@ public class visitorApplication implements baseVisitor {
             throw new RuntimeException("find: Wrong argument " + app.appArgs.get(app.appArgs.size() - 2));
         }
         if (app.appArgs.size() == 2) {
-            rootDirectory = Path.of(app.currentDirectory);
+            rootDirectory = Path.of(Jsh.getCurrentDirectory());
         } else {
             callCommand = app.appArgs.get(0);
             try {
-                if (callCommand.charAt(0) == '/') {
+                if (Path.of(callCommand).isAbsolute()) {
                     rootDirectory = Path.of(app.appArgs.get(0));
                 } else {
-                    rootDirectory = Path.of(app.currentDirectory, app.appArgs.get(0));
+                    rootDirectory = Path.of(Jsh.getCurrentDirectory(), app.appArgs.get(0));
                 }
             } catch (Exception e) {
                 throw new RuntimeException("find: specified path does not exist");
@@ -469,8 +469,8 @@ public class visitorApplication implements baseVisitor {
                 if (callCommand == null) {
                     lineOutputWriter("./".concat(rootDirectory.toUri().relativize(file.toURI()).toString()), writer,
                             "find");
-                } else if (callCommand.charAt(0) == '/') {
-                    lineOutputWriter(file.toURI().normalize().toString(), writer, "find");
+                } else if (Path.of(callCommand).isAbsolute()) {
+                    lineOutputWriter(file.getAbsolutePath().toString(), writer, "find");
                 } else {
                     lineOutputWriter(Path.of(Jsh.getCurrentDirectory()).toUri().relativize(file.toURI()).toString(),
                             writer, "find");
@@ -521,8 +521,8 @@ public class visitorApplication implements baseVisitor {
         Path filePath = null;
         if (inputStreamUsed == 0) {
             // we are using app args
-            file = new File(app.currentDirectory + File.separator + app.appArgs.get(2));
-            filePath = Paths.get(app.currentDirectory + File.separator + app.appArgs.get(2));
+            file = new File(Jsh.getCurrentDirectory() + File.separator + app.appArgs.get(2));
+            filePath = Paths.get(Jsh.getCurrentDirectory() + File.separator + app.appArgs.get(2));
         }
         if (!args[0].contains("-")) {
             // of the format 1,2,3.
@@ -848,7 +848,7 @@ public class visitorApplication implements baseVisitor {
         if ((app.appArgs.size() == 2) && !app.appArgs.get(0).equals("-r")) {
             throw new RuntimeException("sort: wrong argument " + app.appArgs.get(0));
         }
-        String sortFile = app.currentDirectory + File.separator + headArg;
+        String sortFile = Jsh.getCurrentDirectory() + File.separator + headArg;
         try (Stream<String> lines = Files.lines(Paths.get(sortFile))) {
             if (app.appArgs.isEmpty() || (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-r"))) {
                 if (app.input != null) {
@@ -918,7 +918,7 @@ public class visitorApplication implements baseVisitor {
         if ((app.appArgs.size() == 2) && !app.appArgs.get(0).equals("-i")) {
             throw new RuntimeException("uniq: wrong argument " + app.appArgs.get(0));
         }
-        String sortFile = app.currentDirectory + File.separator + headArg;
+        String sortFile = Jsh.getCurrentDirectory() + File.separator + headArg;
         try (Stream<String> lines = Files.lines(Paths.get(sortFile))) {
             if (app.appArgs.isEmpty() || (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-i"))) {
                 if (app.input != null) {
@@ -959,7 +959,7 @@ public class visitorApplication implements baseVisitor {
             }
             if (app.appArgs.size() == 1) {
                 File file = File.createTempFile("temp", ".txt");
-                File headFile = new File(app.currentDirectory + File.separator + headArg);
+                File headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
                 FileWriter fw = new FileWriter(file.getName(), false);
                 LinkedList<String> previous = new LinkedList<String>();
                 previous.add("");
@@ -983,7 +983,7 @@ public class visitorApplication implements baseVisitor {
                 Boolean t = file.renameTo(headFile);
             } else if (app.appArgs.size() == 2) {
                 File file = File.createTempFile("temp", ".txt");
-                File headFile = new File(app.currentDirectory + File.separator + headArg);
+                File headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
                 FileWriter fw = new FileWriter(file.getName(), false);
                 LinkedList<String> previous = new LinkedList<String>();
                 previous.add("");

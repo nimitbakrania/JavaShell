@@ -1,0 +1,56 @@
+FAIL: test_input_redirection_infront (__main__.TestJSH)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "src/test/system/tests.py", line 380, in test_input_redirection_infront
+    self.assertEqual(result, "CCC")
+AssertionError: '' != 'CCC'
++ CCC
+
+======================================================================
+FAIL: test_input_redirection_nospace (__main__.TestJSH)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "src/test/system/tests.py", line 386, in test_input_redirection_nospace
+    self.assertEqual(result, "CCC")
+AssertionError: '' != 'CCC'
++ CCC
+
+======================================================================
+FAIL: test_pipe_uniq (__main__.TestJSH)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "src/test/system/tests.py", line 443, in test_pipe_uniq
+    self.assertEqual(result, ["AAA", "BBB", "AAA"])
+AssertionError: Lists differ: [''] != ['AAA', 'BBB', 'AAA']
+
+First differing element 0:
+''
+'AAA'
+
+Second list contains 2 additional elements.
+First extra element 1:
+'BBB'
+
+- ['']
++ ['AAA', 'BBB', 'AAA']
+
+======================================================================
+FAIL: test_splitting (__main__.TestJSH)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "src/test/system/tests.py", line 557, in test_splitting
+    self.assertEqual(result, "abc")
+AssertionError: 'a b c' != 'abc'
+- a b c
+?  - -
++ abc
+
+
+======================================================================
+FAIL: test_substitution_keywords (__main__.TestJSH)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "src/test/system/tests.py", line 509, in test_substitution_keywords
+    self.assertEqual(result, "''")
+AssertionError: '' != "''"
++ ''

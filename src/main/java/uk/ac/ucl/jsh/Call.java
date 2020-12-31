@@ -13,13 +13,12 @@ public class Call implements Command {
       Then uses visitor design pattern to call accept on that type of app object. 
       @Params = in is inputstream
                 out is where we are writign to
-                currentDirectory is the directory that jsh is currently in.
                 app is the name of the application that is being evaluated.
                 appArgs contains the arguments that were given to APP.
     */
-    public void eval(InputStream in, OutputStream out, String currentDirectory, String app, ArrayList<String> appArgs) {
+    public void eval(InputStream in, OutputStream out, String app, ArrayList<String> appArgs) {
 
-        UnsafeDecorator application = this.factory.mkApplication(in, out, currentDirectory, app, appArgs);
+        UnsafeDecorator application = this.factory.mkApplication(in, out, app, appArgs);
         application.accept(visitor);
     }
     
