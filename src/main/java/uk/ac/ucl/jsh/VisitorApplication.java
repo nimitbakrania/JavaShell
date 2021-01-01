@@ -159,10 +159,10 @@ public class VisitorApplication implements BaseVisitor {
             BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
             standardInputBuffer.lines().limit(headLines).forEach((line) -> lineOutputWriter(line, writer, "head"));
         } else if (app.appArgs.size() == 3 || app.appArgs.size() == 1) {
-            File headFile = new File(app.currentDirectory + File.separator + headArg);
+            File headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
             if (headFile.exists()) {
                 Charset encoding = StandardCharsets.UTF_8;
-                Path filePath = Paths.get((String) app.currentDirectory + File.separator + headArg);
+                Path filePath = Paths.get((String) Jsh.getCurrentDirectory() + File.separator + headArg);
                 try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
                     reader.lines().limit(headLines).forEach((line) -> lineOutputWriter(line, writer, "head"));
                 } catch (IOException e) {
@@ -227,10 +227,10 @@ public class VisitorApplication implements BaseVisitor {
             readerList.stream().skip(((readerList.size() - tailLines) < 0) ? 0 : (readerList.size() - tailLines))
                     .forEach((line) -> lineOutputWriter(line, writer, "tail"));
         } else if (app.appArgs.size() == 3 || app.appArgs.size() == 1) {
-            File tailFile = new File(app.currentDirectory + File.separator + tailArg);
+            File tailFile = new File(Jsh.getCurrentDirectory() + File.separator + tailArg);
             if (tailFile.exists()) {
                 Charset encoding = StandardCharsets.UTF_8;
-                Path filePath = Paths.get((String) app.currentDirectory + File.separator + tailArg);
+                Path filePath = Paths.get((String) Jsh.getCurrentDirectory() + File.separator + tailArg);
                 try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
                     List<String> readerList = reader.lines().collect(Collectors.toList());
                     readerList.stream()
@@ -256,7 +256,7 @@ public class VisitorApplication implements BaseVisitor {
         } else {
             Charset encoding = StandardCharsets.UTF_8;
             for (String arg : app.appArgs) {
-                File currFile = new File(app.currentDirectory, arg);
+                File currFile = new File(Jsh.getCurrentDirectory(), arg);
                 if (currFile.exists()) {
                     Path filePath = currFile.toPath();
                     try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
@@ -290,12 +290,12 @@ public class VisitorApplication implements BaseVisitor {
         File currDir;
 
         if (app.appArgs.isEmpty()) {
-            currDir = new File(app.currentDirectory);
+            currDir = new File(Jsh.getCurrentDirectory());
         } else if (app.appArgs.size() == 1) {
             if (app.appArgs.get(0).charAt(0) == '/') {
                 currDir = new File(app.appArgs.get(0));
             } else {
-                currDir = new File(app.currentDirectory, app.appArgs.get(0));
+                currDir = new File(Jsh.getCurrentDirectory(), app.appArgs.get(0));
             }
         } else {
             throw new RuntimeException("ls: too many arguments");
@@ -366,7 +366,7 @@ public class VisitorApplication implements BaseVisitor {
             int numOfFiles = app.appArgs.size() - 1;
             Path filePath;
             Path[] filePathArray = new Path[numOfFiles];
-            Path currentDir = Paths.get(app.currentDirectory);
+            Path currentDir = Paths.get(Jsh.getCurrentDirectory());
 
             for (int i = 0; i < numOfFiles; i++) {
                 filePath = currentDir.resolve(app.appArgs.get(i + 1));
@@ -426,14 +426,14 @@ public class VisitorApplication implements BaseVisitor {
             throw new RuntimeException("find: Wrong argument " + app.appArgs.get(app.appArgs.size() - 2));
         }
         if (app.appArgs.size() == 2) {
-            rootDirectory = Path.of(app.currentDirectory);
+            rootDirectory = Path.of(Jsh.getCurrentDirectory());
         } else {
             callCommand = app.appArgs.get(0);
             try {
                 if (Path.of(callCommand).isAbsolute()) {
                     rootDirectory = Path.of(app.appArgs.get(0));
                 } else {
-                    rootDirectory = Path.of(app.currentDirectory, app.appArgs.get(0));
+                    rootDirectory = Path.of(Jsh.getCurrentDirectory(), app.appArgs.get(0));
                 }
             } catch (Exception e) {
                 throw new RuntimeException("find: specified path does not exist");
@@ -534,8 +534,8 @@ public class VisitorApplication implements BaseVisitor {
         Path filePath = null;
         if (inputStreamUsed == 0) {
             // we are using app args
-            file = new File(app.currentDirectory + File.separator + app.appArgs.get(2));
-            filePath = Paths.get(app.currentDirectory + File.separator + app.appArgs.get(2));
+            file = new File(Jsh.getCurrentDirectory() + File.separator + app.appArgs.get(2));
+            filePath = Paths.get(Jsh.getCurrentDirectory() + File.separator + app.appArgs.get(2));
         }
         if (!args[0].contains("-")) {
             // of the format 1,2,3.
@@ -875,7 +875,7 @@ public class VisitorApplication implements BaseVisitor {
         if ((app.appArgs.size() == 2) && !app.appArgs.get(0).equals("-r")) {
             throw new RuntimeException("sort: wrong argument " + app.appArgs.get(0));
         }
-        String sortFile = app.currentDirectory + File.separator + headArg;
+        String sortFile = Jsh.getCurrentDirectory() + File.separator + headArg;
         try (Stream<String> lines = Files.lines(Paths.get(sortFile))) {
             if (app.appArgs.isEmpty() || (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-r"))) {
                 if (app.input != null) {
@@ -945,7 +945,7 @@ public class VisitorApplication implements BaseVisitor {
         if ((app.appArgs.size() == 2) && !app.appArgs.get(0).equals("-i")) {
             throw new RuntimeException("uniq: wrong argument " + app.appArgs.get(0));
         }
-        String sortFile = app.currentDirectory + File.separator + headArg;
+        String sortFile = Jsh.getCurrentDirectory() + File.separator + headArg;
         try (Stream<String> lines = Files.lines(Paths.get(sortFile))) {
             if (app.appArgs.isEmpty() || (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-i"))) {
                 if (app.input != null) {
@@ -986,7 +986,7 @@ public class VisitorApplication implements BaseVisitor {
             }
             if (app.appArgs.size() == 1) {
                 File file = File.createTempFile("temp", ".txt");
-                File headFile = new File(app.currentDirectory + File.separator + headArg);
+                File headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
                 FileWriter fw = new FileWriter(file.getName(), false);
                 LinkedList<String> previous = new LinkedList<String>();
                 previous.add("");
@@ -1010,7 +1010,7 @@ public class VisitorApplication implements BaseVisitor {
                 Boolean t = file.renameTo(headFile);
             } else if (app.appArgs.size() == 2) {
                 File file = File.createTempFile("temp", ".txt");
-                File headFile = new File(app.currentDirectory + File.separator + headArg);
+                File headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
                 FileWriter fw = new FileWriter(file.getName(), false);
                 LinkedList<String> previous = new LinkedList<String>();
                 previous.add("");
@@ -1207,8 +1207,8 @@ public class VisitorApplication implements BaseVisitor {
             app.appArgs.remove(0);               // remove -r.
             Stream<String> stream = app.appArgs.stream();
             stream.forEach(directory -> {
-                String srcDir = app.currentDirectory + System.getProperty("file.separator") + directory;
-                String destDir = app.currentDirectory + System.getProperty("file.separator") + dest;
+                String srcDir = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + directory;
+                String destDir = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + dest;
                 copyDirectory(srcDir, destDir);});
         }
         else {
@@ -1216,8 +1216,8 @@ public class VisitorApplication implements BaseVisitor {
             Stream<String> stream = app.appArgs.stream();
             stream.forEach(file -> {
                 try {
-                    String src = app.currentDirectory + System.getProperty("file.separator") + file;
-                    String destination = app.currentDirectory + System.getProperty("file.separator") + dest + System.getProperty("file.separator") + file;
+                    String src = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + file;
+                    String destination = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + dest + System.getProperty("file.separator") + file;
                     copyFile(src, destination);
                 } catch (IOException e) {
                     throw new RuntimeException("cp: unable to copy file.");

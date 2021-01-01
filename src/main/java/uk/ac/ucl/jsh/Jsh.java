@@ -33,13 +33,13 @@ public class Jsh {
             String appName = line.get(0);
             ArrayList<String> appArgs = new ArrayList<String>(line.subList(1, line.size()));
             if (appArgs.contains("|")){
-                pipe.eval(null, output, currentDirectory, appName, appArgs);
+                pipe.eval(null, output, appName, appArgs);
             }
             else if (appArgs.contains(">") || appArgs.contains("<")){
-                redirect.eval(null, output, currentDirectory, appName, appArgs);
+                redirect.eval(null, output, appName, appArgs);
             }
             else{
-                call.eval(null, output, currentDirectory, appName, appArgs);
+                call.eval(null, output, appName, appArgs);
             }
         }
     }

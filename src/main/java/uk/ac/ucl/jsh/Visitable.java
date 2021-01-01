@@ -13,14 +13,12 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Cd(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+        public Cd(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.currentDirectory = thisDirectory;
             this.appArgs = args;
         }
 
@@ -34,14 +32,12 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Pwd(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+        public Pwd(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.currentDirectory = thisDirectory;
             this.appArgs = args;
         }
 
@@ -56,14 +52,12 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Echo(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+        public Echo(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.currentDirectory = thisDirectory;
             this.appArgs = args;
         }
 
@@ -77,14 +71,12 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Head(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+        public Head(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.currentDirectory = thisDirectory;
             this.appArgs = args;
         }
 
@@ -98,14 +90,12 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Tail(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+        public Tail(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.currentDirectory = thisDirectory;
             this.appArgs = args;
         }
 
@@ -120,14 +110,12 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Cat(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+        public Cat(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.currentDirectory = thisDirectory;
             this.appArgs = args;
         }
 
@@ -141,14 +129,12 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Ls(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+        public Ls(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.currentDirectory = thisDirectory;
             this.appArgs = args;
         }
 
@@ -162,14 +148,12 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Grep(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+        public Grep(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.currentDirectory = thisDirectory;
             this.appArgs = args;
         }
 
@@ -183,14 +167,12 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Cut(InputStream input, OutputStream output, ArrayList<String> args, String thisDirectory) {
+        public Cut(InputStream input, OutputStream output, ArrayList<String> args) {
 
             this.input = input;
             this.output = output;
-            this.currentDirectory = thisDirectory;
             this.appArgs = args;
         }
 
@@ -204,14 +186,12 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Find(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+        public Find(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.currentDirectory = thisDirectory;
             this.appArgs = args;
         }
 
@@ -225,14 +205,12 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Uniq(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+        public Uniq(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.currentDirectory = thisDirectory;
             this.appArgs = args;
         }
 
@@ -246,14 +224,12 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Sort(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+        public Sort(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.currentDirectory = thisDirectory;
             this.appArgs = args;
         }
 
@@ -267,14 +243,12 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Mkdir(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+        public Mkdir(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.currentDirectory = thisDirectory;
             this.appArgs = args;
         }
 
@@ -288,14 +262,12 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Rmdir(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+        public Rmdir(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.currentDirectory = thisDirectory;
             this.appArgs = args;
         }
 
@@ -309,14 +281,12 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public DateTime(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+        public DateTime(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.currentDirectory = thisDirectory;
             this.appArgs = args;
         }
 
@@ -330,14 +300,12 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public WordCount(InputStream inputstream, OutputStream outputstream, ArrayList<String> args, String thisDirectory) {
+        public WordCount(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
 
             this.input = inputstream;
             this.output = outputstream;
-            this.currentDirectory = thisDirectory;
             this.appArgs = args;
         }
 
@@ -351,14 +319,12 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public History(InputStream input, OutputStream output, ArrayList<String> appArgs, String currentDirectory) {
+        public History(InputStream input, OutputStream output, ArrayList<String> appArgs) {
 
             this.input = input;
             this.output = output;
-            this.currentDirectory = currentDirectory;
             this.appArgs = appArgs;
         }
 
@@ -372,14 +338,12 @@ public interface Visitable {
 
         public InputStream input;
         public OutputStream output;
-        public String currentDirectory;
         public ArrayList<String> appArgs;
 
-        public Copy(InputStream input, OutputStream output, ArrayList<String> appArgs, String currentDirectory) {
+        public Copy(InputStream input, OutputStream output, ArrayList<String> appArgs) {
 
             this.input = input;
             this.output = output;
-            this.currentDirectory = currentDirectory;
             this.appArgs = appArgs;
         }
 

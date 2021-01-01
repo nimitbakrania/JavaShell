@@ -6,5 +6,5 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 public interface Command {
-    public void eval(InputStream cmdline, OutputStream output, String currentDirectory, String app, ArrayList<String> appArgs) throws IOException;
+    public void eval(InputStream cmdline, OutputStream output, String app, ArrayList<String> appArgs) throws IOException;
 }
