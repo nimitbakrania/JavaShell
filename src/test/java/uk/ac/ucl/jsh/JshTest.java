@@ -45,4 +45,13 @@ public class JshTest {
         scan.close();
     }
 
+    @Test
+    public void test() throws Exception {
+
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream();
+        Scanner scan = new Scanner(in);
+        Jsh.eval("uniq anirudh.txt", out);
+        scan.close();
+    }
 }
