@@ -985,8 +985,9 @@ public class VisitorApplication implements BaseVisitor {
                 }
             }
             if (app.appArgs.size() == 1) {
-                File file = File.createTempFile("temp", ".txt");
                 File headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
+                headFile.delete();
+                File file = new File(headArg);
                 FileWriter fw = new FileWriter(file.getName(), false);
                 LinkedList<String> previous = new LinkedList<String>();
                 previous.add("");
@@ -1006,8 +1007,6 @@ public class VisitorApplication implements BaseVisitor {
                     }
                 });
                 fw.close();
-                headFile.delete();
-                Boolean t = file.renameTo(headFile);
             } else if (app.appArgs.size() == 2) {
                 File file = File.createTempFile("temp", ".txt");
                 File headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
@@ -1268,7 +1267,6 @@ public class VisitorApplication implements BaseVisitor {
                 }
             }
         } catch (IOException e) {
-            System.out.println(e.getMessage());
             throw new RuntimeException("cp: unable to copy directory.");
         }
     }
