@@ -1,6 +1,10 @@
 Week 1 - October 26 
-
 -------------------
+
+talked what development methodology
+talked about sprint cycle
+read code and got familiar with it.
+
 
 What have we done since last time?
 -N/A

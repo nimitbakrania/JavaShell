@@ -1268,7 +1268,6 @@ public class VisitorApplication implements BaseVisitor {
                 }
             }
         } catch (IOException e) {
-            System.out.println(e.getMessage());
             throw new RuntimeException("cp: unable to copy directory.");
         }
     }
