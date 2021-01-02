@@ -1,5 +1,6 @@
 package uk.ac.ucl.jsh;
-
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -1033,6 +1034,37 @@ public class VisitorApplication implements BaseVisitor {
                 Boolean t = file.renameTo(headFile);
             }
         }
+    }
+
+    public void writeTo(File in, File out)
+    {
+        FileInputStream instream = null;
+	    FileOutputStream outstream = null;
+ 
+    	try{
+
+    	    instream = new FileInputStream(in);
+    	    outstream = new FileOutputStream(out);
+ 
+    	    byte[] buffer = new byte[1024];
+ 
+    	    int length;
+    	    /*copying the contents from input stream to
+    	     * output stream using read and write methods
+    	     */
+    	    while ((length = instream.read(buffer)) > 0){
+    	    	outstream.write(buffer, 0, length);
+    	    }
+
+    	    //Closing the input/output file streams
+    	    instream.close();
+    	    outstream.close();
+
+    	    System.out.println("File copied successfully!!");
+ 
+    	}catch(IOException ioe){
+    		ioe.printStackTrace();
+    	 }
     }
 
     /**
