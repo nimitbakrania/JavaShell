@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.File;
@@ -95,7 +96,9 @@ public class OurParser {
      * @return arraylist of tokens for the rawCommand param.
     */
     private ArrayList<String> splitIn2Tokens(String rawCommand, String currentDirectory) throws IOException {
-
+        if (rawCommand.contains(">") || rawCommand.contains("<")){
+            rawCommand = redirectionSplitIndex(rawCommand);
+        }
         String spaceRegex = "[^\\s\"']+|\"([^\"]*)\"|'([^']*)'";
         ArrayList<String> tokens = new ArrayList<String>();           // Holds the seperated cmd tokens.
         Pattern regex = Pattern.compile(spaceRegex);
@@ -131,7 +134,6 @@ public class OurParser {
                 tokens.addAll(globbingResult);
             }
         }
-
         return tokens;
     }
 
@@ -355,5 +357,36 @@ public class OurParser {
             }
         }
         return ret;
+    }
+
+    private String redirectionSplitIndex(String s) {
+        String tempS = s;
+        ArrayList<Integer> redirectionIndex = new ArrayList<Integer>();
+        String currGroup;
+        String spaceRegex = "\"([^\"]*)\"|'([^']*)'";
+        int groupLength;
+        String replaceString;
+        Pattern regex = Pattern.compile(spaceRegex);
+        Matcher regexMatcher = regex.matcher(tempS);
+        while (regexMatcher.find()){
+            currGroup = regexMatcher.group();
+            groupLength = currGroup.length();
+            replaceString = "A".repeat(groupLength);
+            tempS = tempS.replace(regexMatcher.group(), replaceString);
+        }
+        while (tempS.contains(">")){
+            redirectionIndex.add(tempS.indexOf(">"));
+            tempS = tempS.replace(">", "A");
+        }
+        while (tempS.contains("<")){
+            redirectionIndex.add(tempS.indexOf("<"));
+            tempS = tempS.replace("<", "A");
+        }
+        Collections.sort(redirectionIndex);
+        for (int x=redirectionIndex.size()-1; x>=0; x--){
+            int a = redirectionIndex.get(x);
+            s = s.substring(0, a) + " " + s.charAt(a) + " " + s.substring(a+1);
+        }
+        return s;
     }
 }

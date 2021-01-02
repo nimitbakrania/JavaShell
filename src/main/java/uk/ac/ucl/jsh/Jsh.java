@@ -30,6 +30,7 @@ public class Jsh {
         history.add(cmdline);
         ArrayList<ArrayList<String>> lines = parser.parse(cmdline, currentDirectory);
         for (ArrayList<String> line : lines) {
+            line = reorderLine(line);
             String appName = line.get(0);
             ArrayList<String> appArgs = new ArrayList<String>(line.subList(1, line.size()));
             if (appArgs.contains("|")){
@@ -42,6 +43,29 @@ public class Jsh {
                 call.eval(null, output, appName, appArgs);
             }
         }
+    }
+
+    private static ArrayList<String> reorderLine(ArrayList<String> line) throws IOException{
+        int index = line.size();
+        if (line.contains("|") && line.contains(";")){
+            if (line.indexOf("|") < line.indexOf(";")){index = line.indexOf("|");}
+            else{index = line.indexOf(";");}
+        }
+        else if (line.contains("|")){index = line.indexOf("|");}
+        else if (line.contains(";")){index = line.indexOf(";");}
+        if (line.get(0).equals("<") || line.get(0).equals(">")){
+            line.add(index, line.get(1));
+            line.add(index, line.get(0));
+            line.remove(0);
+            line.remove(0);
+            if (line.get(0).equals("<") || line.get(0).equals(">")){
+                line.add(index, line.get(1));
+                line.add(index, line.get(0));
+                line.remove(0);
+                line.remove(0);
+            }
+        }
+        return line;
     }
 
     public static String getHomeDirectory() { // do we need this? - anirudh
