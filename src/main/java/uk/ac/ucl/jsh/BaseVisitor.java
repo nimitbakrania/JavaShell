@@ -1,7 +1,7 @@
 package uk.ac.ucl.jsh;
 
 import java.io.IOException;
-
+// An interface for the VisitorApplication class
 public interface BaseVisitor {
     public void visit(Visitable.Cd app) throws IOException;
     public void visit(Visitable.Pwd app) throws IOException;

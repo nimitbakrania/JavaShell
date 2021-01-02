@@ -45,6 +45,16 @@ public class Jsh {
         }
     }
 
+    /**
+     * This function reorders any lines which have redirection in front, and 
+     * puts to the back.
+     * 
+     * @param line is the current command line we are working with after being split into tokens.
+     * 
+     * @return line is the reordered version of the parameter.
+     * 
+     * @throws IOException if it is unable to print to outputstream.
+     */
     private static ArrayList<String> reorderLine(ArrayList<String> line) throws IOException{
         int index = line.size();
         if (line.contains("|") && line.contains(";")){
@@ -67,16 +77,23 @@ public class Jsh {
         }
         return line;
     }
-
-    public static String getHomeDirectory() { // do we need this? - anirudh
+    /**
+     * Stores the home directory to use in Cd.
+     */
+    public static String getHomeDirectory() {
         return homeDirectory;
     }
 
-
+    /**
+     * Stores the current working directory for applications to use
+     */
     public static String getCurrentDirectory() {
         return currentDirectory;
     }
     
+    /**
+     * Sets the current working directory,
+     */
     public static void setCurrentDirectory(String dir) {
         Jsh.currentDirectory = dir;
     }

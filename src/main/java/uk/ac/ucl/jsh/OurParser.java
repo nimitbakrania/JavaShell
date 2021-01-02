@@ -358,9 +358,17 @@ public class OurParser {
         }
         return ret;
     }
-
-    private String redirectionSplitIndex(String s) {
-        String tempS = s;
+    /**
+     * This function is used to find any redirection with no spaces that is also not
+     * within quotation marks, so that the program can add a space to either side,
+     * allowing the parser to deal with it normally.
+     * 
+     * @param rawCommand is the command line string.
+     * 
+     * @return rawCommand is the updated command line string.
+     */
+    private String redirectionSplitIndex(String rawCommand) {
+        String tempS = rawCommand;
         ArrayList<Integer> redirectionIndex = new ArrayList<Integer>();
         String currGroup;
         String spaceRegex = "\"([^\"]*)\"|'([^']*)'";
@@ -385,8 +393,8 @@ public class OurParser {
         Collections.sort(redirectionIndex);
         for (int x=redirectionIndex.size()-1; x>=0; x--){
             int a = redirectionIndex.get(x);
-            s = s.substring(0, a) + " " + s.charAt(a) + " " + s.substring(a+1);
+            rawCommand = rawCommand.substring(0, a) + " " + rawCommand.charAt(a) + " " + rawCommand.substring(a+1);
         }
-        return s;
+        return rawCommand;
     }
 }

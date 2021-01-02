@@ -12,6 +12,18 @@ public class Pipe implements Command{
     private Call call = new Call();
     private IoRedirection redirect = new IoRedirection();
 
+    /**
+     * If a pipe symbol is one of the arguments in appArgs, then it causes the left and
+     * right sides of the cmdline to be interpreted seperately, with the output of the left
+     * side becoming the input for the right side.
+     * 
+     * @param in is the input stream for the left hand side of the pipe.
+     * @param out is the output stream for the right hand side of the pipe.
+     * @param app1 is the app name for the app on the left hand side of the pipe.
+     * @param appArgs is the arguments for the app, including the pipe symbol and the whole right hand side.
+     * 
+     * @exception IOException if there are any issues with the Call.eval or IoRedirection.eval functions when they are called.
+    */
     public void eval(InputStream in, OutputStream out, String app1, ArrayList<String> appArgs) throws IOException {
         File tempFile = File.createTempFile("temp", null);
         InputStream inp = new FileInputStream(tempFile);

@@ -11,7 +11,17 @@ import java.util.ArrayList;
 public class IoRedirection implements Command {
 
     private Call call = new Call();
-    
+    /**
+     * If redirection symbols > (redirect output into file) or < (redirect input from file) are used, this eval function
+     * makes sure syntax is correct and makes sure input and output streams are correct.
+     * 
+     * @param in the input stream we are using, null by default however updates to a file input stream if < redirection
+     * @param output the output stream we are using, System.out by default but updates to a file output stream if > redirection
+     * @param app the name of the application being run.
+     * @param appArgs the arguments for the application.
+     * 
+     * @exception IOException if there are too many args, symbols are out of order, file names are wrong or any Call.eval error.
+    */
     public void eval(InputStream in, OutputStream output,  String app, ArrayList<String> appArgs) throws IOException {
         ArrayList<String> appArgs1 = appArgs;
         if (appArgs.contains("<")){

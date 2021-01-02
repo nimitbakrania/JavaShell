@@ -57,8 +57,7 @@ public class VisitorApplication implements BaseVisitor {
      * Prints the current directory which the user is working in
      * 
      * @param app takes in a generalised form app which has the properties
-     *            InputStream input, OutputStream output, String currDirectory,
-     *            ArrayList<String> appArgs.
+     *            InputStream input, OutputStream output, ArrayList<String> appArgs.
      * @return nothing, as any values obtained are written to the OutputStream
      *         specified by the user.
      * @exception RuntimeException if the number of arguments are wrong.
@@ -75,7 +74,7 @@ public class VisitorApplication implements BaseVisitor {
     /**
      * Prints the arguments to the command line.
      * 
-     * @param  APP, contains the app arguments as public variables.
+     * @param  app, contains the app arguments as public variables.
      * 
      */
     public void visit(Visitable.Echo app) throws IOException {
@@ -117,8 +116,7 @@ public class VisitorApplication implements BaseVisitor {
      * number file), it uses the file specified.
      * 
      * @param app takes in a generalised form app which has the properties
-     *            InputStream input, OutputStream output, String currDirectory,
-     *            ArrayList<String> appArgs.
+     *            InputStream input, OutputStream output, ArrayList<String> appArgs.
      * @return nothing, as any values obtained are written to the OutputStream
      *         specified by the user.
      * @exception RuntimeException if the number of arguments are wrong, the input
@@ -183,8 +181,7 @@ public class VisitorApplication implements BaseVisitor {
      * number file), it uses the file specified.
      * 
      * @param app takes in a generalised form app which has the properties
-     *            InputStream input, OutputStream output, String currDirectory,
-     *            ArrayList<String> appArgs.
+     *            InputStream input, OutputStream output, ArrayList<String> appArgs.
      * @return nothing, as any values obtained are written to the OutputStream
      *         specified by the user.
      * @exception RuntimeException if the number of arguments are wrong, the input
@@ -246,6 +243,17 @@ public class VisitorApplication implements BaseVisitor {
         }
     }
 
+    /**
+     * Cat outputs all of the specified files or the input stream onto the specified output stream.
+     * 
+     * @param app takes in a generalised form app which has the properties
+     *            InputStream input, OutputStream output, ArrayList<String> appArgs.
+     * @return nothing, as any values obtained are written to the OutputStream
+     *         specified by the user.
+     * @exception RuntimeException if the number of arguments are wrong, the input
+     *                             stream is null, or the files specified dont
+     *                             exist, cant open, or are folders.
+     */
     public void visit(Visitable.Cat app) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         if (app.appArgs.isEmpty()) {
@@ -279,8 +287,7 @@ public class VisitorApplication implements BaseVisitor {
      * given. If argument is given then it prints all files/folders in given
      * directory.
      * 
-     * @param  APP which contains information such as arguments and current
-     *          directory
+     * @param  app which contains information such as arguments and streams.
      * 
      * @throws RuntimeException if 1) There is more than 1 argument supplied.
      *                             2) The directory supplied doesnt exist.
@@ -342,8 +349,7 @@ public class VisitorApplication implements BaseVisitor {
      * the text in the first arg, outputs to specified OutputStream.
      * 
      * @param app takes in a generalised form app which has the properties
-     *            InputStream input, OutputStream output, String currDirectory,
-     *            ArrayList<String> appArgs.
+     *            InputStream input, OutputStream output, ArrayList<String> appArgs.
      * @return nothing, as any values obtained are written to the OutputStream
      *         specified by the user.
      * @exception RuntimeException if the number of arguments are wrong, the input
@@ -407,8 +413,7 @@ public class VisitorApplication implements BaseVisitor {
      * output.
      * 
      * @param app takes in a generalised form app which has the properties
-     *            InputStream input, OutputStream output, String currDirectory,
-     *            ArrayList<String> appArgs.
+     *            InputStream input, OutputStream output, ArrayList<String> appArgs.
      * @return nothing, as any values obtained are written to the OutputStream
      *         specified by the user.
      * @exception RuntimeException if the number of arguments are wrong, -name is
@@ -460,8 +465,6 @@ public class VisitorApplication implements BaseVisitor {
      *                      "./", if char 0 is '/' it knows to use absolute pathing.
      * @param findPattern   is the regex pattern specified in the appArgs which we
      *                      are matching all the files to.
-     * @return nothing, as any values obtained are written to the OutputStream
-     *         specified by the user.
      */
     private void findRecurse(OutputStreamWriter writer, Path currDirectory, Path rootDirectory, String callCommand,
             Pattern findPattern) throws IOException {
@@ -495,7 +498,7 @@ public class VisitorApplication implements BaseVisitor {
      * the correct format. Next it decides which format is it in and calls the relevant auxiliary
      * function to extract the bytes we want from each line in the supplied file.
      * 
-     * @param APP contains info about arguments, currentDirectory, appArgs, inputstream and outputstream.
+     * @param app contains info about arguments, appArgs, inputstream and outputstream.
      * 
      * @throws RuntimeException if 1) There are too many or too few arguments.
      *                             2) Argument uses something other than "-b".
@@ -798,10 +801,10 @@ public class VisitorApplication implements BaseVisitor {
      * Auxiliary method for cut. It removes any leftover null elements in
      * bytesToPrint.
      * 
-     * @param = bytesToPrint, byte array that contains all the bytes that we want
+     * @param bytesToPrint, byte array that contains all the bytes that we want
      * to output.
      * 
-     * @return = ret, contains all the bytes in bytesToPrint but removed any null
+     * @return ret, contains all the bytes in bytesToPrint but removed any null
      * entries.
      */
     private byte[] removeEmptyBytes(byte[] bytesToPrint) {
@@ -824,7 +827,8 @@ public class VisitorApplication implements BaseVisitor {
 
     /**
      * lineOutputWriter is an abstracted function which uses the generalised form of
-     * how the visit functions usually write to the OutputStream.
+     * how the visit functions usually write to the OutputStream, 
+     * as line -> line separator -> flush, with the appname before an error message.
      * 
      * @param line    is the line which is being written to the OutputStream.
      * @param writer  is the OutputStreamWriter which we use to write to the
@@ -847,14 +851,14 @@ public class VisitorApplication implements BaseVisitor {
         }
     }
 
-    /*
+    /**
      * This function uses the text file provided as an argument in order to sort the
      * contents and write out as the outputstream. The sorting is done trivially
      * using streams api. If -r is provided, the the output will be in reverse
      * order. Furthermore, if the app args is empty or contains no file name, then
      * we use stdin as our input stream.
      * 
-     * @Params = APP contains info about arguments and currentDirectory.
+     * @param app contains info about arguments.
      */
     public void visit(Visitable.Sort app) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(app.output);
@@ -916,7 +920,7 @@ public class VisitorApplication implements BaseVisitor {
         }
     }
 
-    /*
+    /**
      * This function uses the text file provided as an argument in order to apply
      * the uniq linux command. This command deletes all lines that are not unique,
      * in this case defined as not the same as the previous line. It then writes
@@ -924,7 +928,7 @@ public class VisitorApplication implements BaseVisitor {
      * then we do not consider case when doing the comp- arisons. If the app_args
      * are empty or only contain -i, we use stdin as our input stream.
      * 
-     * @Params = APP contains info about arguments and currentDirectory.
+     * @param app contains info about arguments.
      */
     public void visit(Visitable.Uniq app) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(app.output);
