@@ -30,11 +30,6 @@ public class FindTest {
         Jsh.setCurrentDirectory(TempFolder.getRoot().toString());
     }
 
-    @After
-    public void deleteTempFolder(){
-        TempFolder.delete();
-    }
-
     @Test
     public void invalidArgsNumName() throws IOException{
         File tempFile = TempFolder.newFile("Test.txt");
@@ -43,10 +38,10 @@ public class FindTest {
         PipedOutputStream out;
         out = new PipedOutputStream(in);
         try{
-            Jsh.eval("find Test.txt -name abc.txt a.txt", out);
+            Jsh.eval("_find Test.txt -name abc.txt a.txt", out);
         }
         catch(IOException e){
-            assertEquals("find: wrong number of arguments", e.toString());
+            assertEquals("find: Wrong number of arguments", e.toString());
         }
     }
 
@@ -58,10 +53,10 @@ public class FindTest {
         PipedOutputStream out;
         out = new PipedOutputStream(in);
         try{
-            Jsh.eval("find name Test.txt", out);
+            Jsh.eval("_find name Test.txt", out);
         }
         catch(IOException e){
-            assertEquals("head: invalid argument name", e.toString());
+            assertEquals("find: Wrong argument name", e.toString());
         }
     }
 
@@ -75,12 +70,12 @@ public class FindTest {
         out = new PipedOutputStream(in);
         Jsh.eval("find -name Test.txt", out);
         Scanner scn = new Scanner(in);
-        assertEquals(tempFile.getAbsolutePath(), scn.nextLine());
+        assertEquals("./" + tempFile.getName(), scn.nextLine());
         scn.close();
     }
 
     @Test
-    public void threeArgsTest() throws IOException{
+    public void threeArgsAbsoluteTest() throws IOException{
         File tempFolder2 = TempFolder.newFolder("Test");
         File tempFile = new File(tempFolder2, "Test.txt");
         FileWriter writer = new FileWriter(tempFile);
@@ -93,7 +88,25 @@ public class FindTest {
         out = new PipedOutputStream(in);
         Jsh.eval(cmdline, out);
         Scanner scn = new Scanner(in);
-        assertEquals(tempFile.getAbsolutePath(), scn.nextLine());
+        assertEquals(tempFile.getAbsolutePath().toString(), scn.nextLine());
+        scn.close();
+    }
+
+    @Test
+    public void threeArgsRelativeTest() throws IOException{
+        File tempFolder2 = TempFolder.newFolder("Test");
+        File tempFile = new File(tempFolder2, "Test.txt");
+        FileWriter writer = new FileWriter(tempFile);
+        writer.write("hello");
+        writer.close();
+        
+        String cmdline = "find Test -name Test.txt";
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        Jsh.eval(cmdline, out);
+        Scanner scn = new Scanner(in);
+        assertEquals("Test/Test.txt", scn.nextLine());
         scn.close();
     }
 
@@ -114,8 +127,8 @@ public class FindTest {
         out = new PipedOutputStream(in);
         Jsh.eval("find -name 'T*.txt'", out);
         Scanner scn = new Scanner(in);
-        assertEquals(tempFile2.getAbsolutePath(), scn.nextLine());
-        assertEquals(tempFile.getAbsolutePath(), scn.nextLine());
+        assertEquals("./Test/Test2.txt", scn.nextLine());
+        assertEquals("./Test.txt", scn.nextLine());
         scn.close();
     }
 }

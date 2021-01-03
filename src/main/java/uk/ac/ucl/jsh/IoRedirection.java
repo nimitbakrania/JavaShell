@@ -28,10 +28,14 @@ public class IoRedirection implements Command {
             int index1 = appArgs.indexOf("<");
             appArgs1 = new ArrayList<String>(appArgs.subList(0, index1));
             File inputFile = new File(Jsh.getCurrentDirectory(), appArgs.get(index1 + 1));
+            if (!inputFile.exists()){
+                throw new RuntimeException("redirection: input file does not exist");
+            }
             in = new FileInputStream(inputFile);
             if (appArgs.contains(">")){
                 int index2 = appArgs.indexOf(">");
                 File outputFile = new File(Jsh.getCurrentDirectory(), appArgs.get(index2 + 1));
+                outputFile.createNewFile(); //If a file already exists this doesn't reset it, just uses it
                 output = new FileOutputStream(outputFile);
                 if (appArgs1.size() > index2 + 2){
                     in.close();
@@ -50,6 +54,7 @@ public class IoRedirection implements Command {
             int index1 = appArgs.indexOf(">");
             appArgs1 = new ArrayList<String>(appArgs.subList(0, index1));
             File outputFile = new File(Jsh.getCurrentDirectory(), appArgs.get(index1 + 1));
+            outputFile.createNewFile();
             output = new FileOutputStream(outputFile);
             if (appArgs1.size() > index1 + 2){
                 output.close();
