@@ -3,9 +3,13 @@ package uk.ac.ucl.jsh;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -25,7 +29,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.*;
 
-
+import javax.management.RuntimeErrorException;
 
 import java.io.InputStream;
 
@@ -77,7 +81,7 @@ public class VisitorApplication implements BaseVisitor {
     /**
      * Prints the arguments to the command line.
      * 
-     * @param  app, contains the app arguments as public variables.
+     * @param app, contains the app arguments as public variables.
      * 
      */
     public void visit(Visitable.Echo app) throws IOException {
@@ -139,6 +143,7 @@ public class VisitorApplication implements BaseVisitor {
         }
         int headLines = 10;
         String headArg = "";
+        File headFile;
         if (app.appArgs.size() == 2 || app.appArgs.size() == 3) {
             try {
                 headLines = Integer.parseInt(app.appArgs.get(1));
@@ -161,7 +166,12 @@ public class VisitorApplication implements BaseVisitor {
             BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
             standardInputBuffer.lines().limit(headLines).forEach((line) -> lineOutputWriter(line, writer, "head"));
         } else if (app.appArgs.size() == 3 || app.appArgs.size() == 1) {
-            File headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
+            if (isUri(headArg)){
+                headFile = uriToPath(headArg, "head").toFile();
+            }
+            else{
+                headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
+            }
             if (headFile.exists()) {
                 Charset encoding = StandardCharsets.UTF_8;
                 Path filePath = Paths.get((String) Jsh.getCurrentDirectory() + File.separator + headArg);
@@ -204,6 +214,7 @@ public class VisitorApplication implements BaseVisitor {
         }
         int tailLines = 10;
         String tailArg = "";
+        File tailFile;
         if (app.appArgs.size() == 2 || app.appArgs.size() == 3) {
             try {
                 tailLines = Integer.parseInt(app.appArgs.get(1));
@@ -228,7 +239,12 @@ public class VisitorApplication implements BaseVisitor {
             readerList.stream().skip(((readerList.size() - tailLines) < 0) ? 0 : (readerList.size() - tailLines))
                     .forEach((line) -> lineOutputWriter(line, writer, "tail"));
         } else if (app.appArgs.size() == 3 || app.appArgs.size() == 1) {
-            File tailFile = new File(Jsh.getCurrentDirectory() + File.separator + tailArg);
+            if (isUri(tailArg)){
+                tailFile = uriToPath(tailArg, "tail").toFile();
+            }
+            else{
+                tailFile = new File(Jsh.getCurrentDirectory() + File.separator + tailArg);
+            }
             if (tailFile.exists()) {
                 Charset encoding = StandardCharsets.UTF_8;
                 Path filePath = Paths.get((String) Jsh.getCurrentDirectory() + File.separator + tailArg);
@@ -247,7 +263,8 @@ public class VisitorApplication implements BaseVisitor {
     }
 
     /**
-     * Cat outputs all of the specified files or the input stream onto the specified output stream.
+     * Cat outputs all of the specified files or the input stream onto the specified
+     * output stream.
      * 
      * @param app takes in a generalised form app which has the properties
      *            InputStream input, OutputStream output, ArrayList<String> appArgs.
@@ -259,6 +276,7 @@ public class VisitorApplication implements BaseVisitor {
      */
     public void visit(Visitable.Cat app) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
+        File currFile;
         if (app.appArgs.isEmpty()) {
             if (app.input == null) {
                 throw new RuntimeException("cat: no input stream given");
@@ -268,7 +286,12 @@ public class VisitorApplication implements BaseVisitor {
         } else {
             Charset encoding = StandardCharsets.UTF_8;
             for (String arg : app.appArgs) {
-                File currFile = new File(Jsh.getCurrentDirectory(), arg);
+                if (isUri(arg)){
+                    currFile = uriToPath(arg, "head").toFile();
+                }
+                else{
+                    currFile = new File(Jsh.getCurrentDirectory(), arg);
+                }
                 if (currFile.exists()) {
                     Path filePath = currFile.toPath();
                     try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
@@ -290,10 +313,10 @@ public class VisitorApplication implements BaseVisitor {
      * given. If argument is given then it prints all files/folders in given
      * directory.
      * 
-     * @param  app which contains information such as arguments and streams.
+     * @param app which contains information such as arguments and streams.
      * 
-     * @throws RuntimeException if 1) There is more than 1 argument supplied.
-     *                             2) The directory supplied doesnt exist.
+     * @throws RuntimeException if 1) There is more than 1 argument supplied. 2) The
+     *                          directory supplied doesnt exist.
      */
     public void visit(Visitable.Ls app) throws IOException {
 
@@ -330,9 +353,10 @@ public class VisitorApplication implements BaseVisitor {
 
     /**
      * Auxiliary method for LS to print argument f onto outputstream.
+     * 
      * @param writer writes the filenames to the outputstream.
-     * @param f file whos name we need to write.
-     *  
+     * @param f      file whos name we need to write.
+     * 
      * @throws RuntimeException if it is unable to write to file.
      */
     private void lsWriteFile(OutputStreamWriter writer, File f) {
@@ -379,7 +403,12 @@ public class VisitorApplication implements BaseVisitor {
             Path currentDir = Paths.get(Jsh.getCurrentDirectory());
 
             for (int i = 0; i < numOfFiles; i++) {
-                filePath = currentDir.resolve(app.appArgs.get(i + 1));
+                if (isUri(app.appArgs.get(i + 1))){
+                    filePath = uriToPath(app.appArgs.get(i + 1), "grep");
+                }
+                else{
+                    filePath = currentDir.resolve(app.appArgs.get(i + 1));
+                }
                 if (Files.notExists(filePath) || Files.isDirectory(filePath) || !Files.exists(filePath)
                         || !Files.isReadable(filePath)) {
                     writer.close();
@@ -497,16 +526,18 @@ public class VisitorApplication implements BaseVisitor {
     /**
      * Takes specified bytes from each line in a text file then outputs it. This
      * function assumes you cant have multiple different options. Eg 1,2,3 OR
-     * 5-6,7-8 OR -5,6-. Not 1,2,4-5. It firstly parses the string and checks if its in
-     * the correct format. Next it decides which format is it in and calls the relevant auxiliary
-     * function to extract the bytes we want from each line in the supplied file.
+     * 5-6,7-8 OR -5,6-. Not 1,2,4-5. It firstly parses the string and checks if its
+     * in the correct format. Next it decides which format is it in and calls the
+     * relevant auxiliary function to extract the bytes we want from each line in
+     * the supplied file.
      * 
-     * @param app contains info about arguments, appArgs, inputstream and outputstream.
+     * @param app contains info about arguments, appArgs, inputstream and
+     *            outputstream.
      * 
-     * @throws RuntimeException if 1) There are too many or too few arguments.
-     *                             2) Argument uses something other than "-b".
-     *                             3) Mixed up intervals for example "-3,4-5". Can only have 1 type of interval.
-     *                             4) If it cannot open the file to read.
+     * @throws RuntimeException if 1) There are too many or too few arguments. 2)
+     *                          Argument uses something other than "-b". 3) Mixed up
+     *                          intervals for example "-3,4-5". Can only have 1 type
+     *                          of interval. 4) If it cannot open the file to read.
      */
     public void visit(Visitable.Cut app) {
 
@@ -605,16 +636,21 @@ public class VisitorApplication implements BaseVisitor {
      * the supplied File file. Else we make a BufferedReader object using the
      * inputstream and return it.
      * 
-     * @param inputStreamUsed is a flag. It is 1 if we are using inputstream else it is 0.
-     * @param charset is UTF-8 
-     * @param filePath is Path object specifing path to file. If we are using inputstream it is null.
-     * @param file is File object. it is null if we are using input stream. 
-     * @param input is null if we are using File file otherwise it is initialized.
+     * @param inputStreamUsed is a flag. It is 1 if we are using inputstream else it
+     *                        is 0.
+     * @param charset         is UTF-8
+     * @param filePath        is Path object specifing path to file. If we are using
+     *                        inputstream it is null.
+     * @param file            is File object. it is null if we are using input
+     *                        stream.
+     * @param input           is null if we are using File file otherwise it is
+     *                        initialized.
      * 
      * @return = bufferedreader that will be used to read each line.
      * 
-     * @throws IOException if it is unable to create a bufferedreader object.
-     * @throws RuntimeException if it is unable to find the file to create the bufferedreader object for.
+     * @throws IOException      if it is unable to create a bufferedreader object.
+     * @throws RuntimeException if it is unable to find the file to create the
+     *                          bufferedreader object for.
      */
     private BufferedReader initReader(int inputStreamUsed, Charset charset, Path filePath, File file, InputStream input)
             throws IOException {
@@ -637,9 +673,9 @@ public class VisitorApplication implements BaseVisitor {
      * we need and stores them in BYTESTOPRINT. Finally it outputs BYTESTOPRINT as a
      * string.
      * 
-     * @param line is the line we are looking at in file. 
-     * @param writer is used to write to output.
-     * @param args contains the bytes to extract. e.g. it may be ["1","3"]
+     * @param line    is the line we are looking at in file.
+     * @param writer  is used to write to output.
+     * @param args    contains the bytes to extract. e.g. it may be ["1","3"]
      * @param charset is the charset of the file we are reading it. It is UTF_8.
      * 
      * @throws RuntimeException if the byte interval is out of bounds.
@@ -673,11 +709,11 @@ public class VisitorApplication implements BaseVisitor {
      * we need and stores them in BYTESTOPRINT. Finally it outputs BYTESTOPRINT as a
      * string.
      * 
-     * @param line is the line we are looking at in file. 
-     * @param writer is used to write to output 
-     * @param args contains the bytes to extract. e.g. it may be ["1","3"]
-     * @param charset is the charset of the file we are reading it. It is UTF_8. 
-     * @param length is the length of the BYTESTOPRINT array that is precalculated.
+     * @param line    is the line we are looking at in file.
+     * @param writer  is used to write to output
+     * @param args    contains the bytes to extract. e.g. it may be ["1","3"]
+     * @param charset is the charset of the file we are reading it. It is UTF_8.
+     * @param length  is the length of the BYTESTOPRINT array that is precalculated.
      * 
      * @throws RuntimeException if the byte interval is out of bounds.
      */
@@ -709,18 +745,19 @@ public class VisitorApplication implements BaseVisitor {
         lineOutputWriter(new String(bytesToPrint, charset), writer, "cut");
     }
 
-    /** 
+    /**
      * Auxiliary method for Cut. It works for input of the format 1,2,3 etc. The
      * algorithm takes each line, converts it to bytes then extracts the bytes that
      * we need and stores them in BYTESTOPRINT. Finally it outputs BYTESTOPRINT as a
      * string.
      * 
-     * @param line is the line we are looking at in file. 
-     * @param writer is used to write to output 
-     * @param to contains integers that upper bound the interval. Each index corresponds 
-     *           to integer at the same index in from. E.g. from[0] and to[0] form 1 interval,
-     *           from[1] and to[1] form another and so on.
-     * @param from contains integers that lower bound the interval.
+     * @param line    is the line we are looking at in file.
+     * @param writer  is used to write to output
+     * @param to      contains integers that upper bound the interval. Each index
+     *                corresponds to integer at the same index in from. E.g. from[0]
+     *                and to[0] form 1 interval, from[1] and to[1] form another and
+     *                so on.
+     * @param from    contains integers that lower bound the interval.
      * @param charset is the charset of the file we are reading it. It is UTF_8.
      * 
      * @throws RuntimeException if the byte interval is out of bounds.
@@ -733,7 +770,7 @@ public class VisitorApplication implements BaseVisitor {
         if (bytes.length == 0) {
             return;
         }
-        
+
         // This section deals with overlapping parts.
         int highest = -1;
         int indexOfHighest = -1;
@@ -800,15 +837,15 @@ public class VisitorApplication implements BaseVisitor {
         lineOutputWriter(new String(bytesToPrint, charset), writer, "cut");
     }
 
-    /** 
+    /**
      * Auxiliary method for cut. It removes any leftover null elements in
      * bytesToPrint.
      * 
-     * @param bytesToPrint, byte array that contains all the bytes that we want
-     * to output.
+     * @param bytesToPrint, byte array that contains all the bytes that we want to
+     *                      output.
      * 
      * @return ret, contains all the bytes in bytesToPrint but removed any null
-     * entries.
+     *         entries.
      */
     private byte[] removeEmptyBytes(byte[] bytesToPrint) {
 
@@ -830,8 +867,8 @@ public class VisitorApplication implements BaseVisitor {
 
     /**
      * lineOutputWriter is an abstracted function which uses the generalised form of
-     * how the visit functions usually write to the OutputStream, 
-     * as line -> line separator -> flush, with the appname before an error message.
+     * how the visit functions usually write to the OutputStream, as line -> line
+     * separator -> flush, with the appname before an error message.
      * 
      * @param line    is the line which is being written to the OutputStream.
      * @param writer  is the OutputStreamWriter which we use to write to the
@@ -1043,46 +1080,50 @@ public class VisitorApplication implements BaseVisitor {
         }
     }
 
-    public void writeTo(File in, File out)
-    {
+    public void writeTo(File in, File out) {
         FileInputStream instream = null;
-	    FileOutputStream outstream = null;
- 
-    	try{
+        FileOutputStream outstream = null;
 
-    	    instream = new FileInputStream(in);
-    	    outstream = new FileOutputStream(out);
- 
-    	    byte[] buffer = new byte[1024];
- 
-    	    int length;
-    	    /*copying the contents from input stream to
-    	     * output stream using read and write methods
-    	     */
-    	    while ((length = instream.read(buffer)) > 0){
-    	    	outstream.write(buffer, 0, length);
-    	    }
+        try {
 
-    	    //Closing the input/output file streams
-    	    instream.close();
-    	    outstream.close();
+            instream = new FileInputStream(in);
+            outstream = new FileOutputStream(out);
 
-    	    System.out.println("File copied successfully!!");
- 
-    	}catch(IOException ioe){
-    		ioe.printStackTrace();
-    	 }
+            byte[] buffer = new byte[1024];
+
+            int length;
+            /*
+             * copying the contents from input stream to output stream using read and write
+             * methods
+             */
+            while ((length = instream.read(buffer)) > 0) {
+                outstream.write(buffer, 0, length);
+            }
+
+            // Closing the input/output file streams
+            instream.close();
+            outstream.close();
+
+            System.out.println("File copied successfully!!");
+
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
     }
 
     /**
-        * Will create a directory inside the current directory with the name provided assuing the name is valid
-        * Does not create directory within directories e.g. mkdir one/two will not work.
-        * 
-        * @param commandLineArgs Holds nothing or the requested path
-        * @param input           The InputStream from which to read from if a pipe or redirection is occuring
-        * @param output          The OutputStream to write the result of the application to.
-        * @throws IOException    Exception thrown by BufferedWriter because of something like a closed pipe
-    */
+     * Will create a directory inside the current directory with the name provided
+     * assuing the name is valid Does not create directory within directories e.g.
+     * mkdir one/two will not work.
+     * 
+     * @param commandLineArgs Holds nothing or the requested path
+     * @param input           The InputStream from which to read from if a pipe or
+     *                        redirection is occuring
+     * @param output          The OutputStream to write the result of the
+     *                        application to.
+     * @throws IOException Exception thrown by BufferedWriter because of something
+     *                     like a closed pipe
+     */
     @Override
     public void visit(Visitable.Mkdir app) throws IOException {
         if (app.appArgs.size() != 1) {
@@ -1098,14 +1139,18 @@ public class VisitorApplication implements BaseVisitor {
         newDir.mkdir();
     }
 
-     /**
-     * Will remove an empty directory within the current directory or if the -r tag is appllied will remove
-     * all subdirectories and files from the named directory passed as an argument.
+    /**
+     * Will remove an empty directory within the current directory or if the -r tag
+     * is appllied will remove all subdirectories and files from the named directory
+     * passed as an argument.
      * 
      * @param commandLineArgs Holds nothing or the requested path
-     * @param input           The InputStream from which to read from if a pipe or redirection is occuring
-     * @param output          The OutputStream to write the result of the application to.
-     * @throws IOException    Exception thrown by BufferedWriter because of an issue such as a closed pipe
+     * @param input           The InputStream from which to read from if a pipe or
+     *                        redirection is occuring
+     * @param output          The OutputStream to write the result of the
+     *                        application to.
+     * @throws IOException Exception thrown by BufferedWriter because of an issue
+     *                     such as a closed pipe
      */
     @Override
     public void visit(Visitable.Rmdir app) throws IOException {
@@ -1125,8 +1170,8 @@ public class VisitorApplication implements BaseVisitor {
     }
 
     /**
-     * If -r flag applied the the method will recursively call itself and delete all folders and
-     * files inside the folder passed as an argument.
+     * If -r flag applied the the method will recursively call itself and delete all
+     * folders and files inside the folder passed as an argument.
      * 
      * @param directory The File or directory to be deleted.
      */
@@ -1148,8 +1193,8 @@ public class VisitorApplication implements BaseVisitor {
     }
 
     /**
-     * If no flag is given then checks to see if the directory exists and is empty, if so then the 
-     * directory is deleted.
+     * If no flag is given then checks to see if the directory exists and is empty,
+     * if so then the directory is deleted.
      * 
      * @param directory The name of the directory to be deleted.
      */
@@ -1180,16 +1225,20 @@ public class VisitorApplication implements BaseVisitor {
         }
     }
 
-    //Run application by typing in date, application named Datetime to avoid name conflict with imported Date package
+    // Run application by typing in date, application named Datetime to avoid name
+    // conflict with imported Date package
     /**
-     * Outputs to the OutputStream the current date and time in the following format.
-     * E M d H:m:s z Y
-     * according to date and time patterns described in the oracle docs for SimpleDateFormat.
+     * Outputs to the OutputStream the current date and time in the following
+     * format. E M d H:m:s z Y according to date and time patterns described in the
+     * oracle docs for SimpleDateFormat.
      *
      * @param commandLineArgs Holds the new dirctory that is being requested
-     * @param input           The InputStream from which to read from if a pipe or redirection is occuring
-     * @param output          The OutputStream to write the result of the application to.
-     * @throws IOException    Exception thrown by BufferedWriter because of something like a closed pipe
+     * @param input           The InputStream from which to read from if a pipe or
+     *                        redirection is occuring
+     * @param output          The OutputStream to write the result of the
+     *                        application to.
+     * @throws IOException Exception thrown by BufferedWriter because of something
+     *                     like a closed pipe
      */
     @Override
     public void visit(Visitable.DateTime app) throws IOException {
@@ -1214,16 +1263,15 @@ public class VisitorApplication implements BaseVisitor {
 
             if (app.appArgs.size() == 0) {
                 writeUsingInputStream(writer, lines, "all");
-            }
-            else{
+            } else {
                 writeUsingInputStream(writer, lines, app.appArgs.get(0));
             }
-        }
-        else {
+        } else {
             int numOfFiles = app.appArgs.size();
             int offset = 0;
 
-            // if statement ensures that for loop in getFilePathArray doesn't treat option as a file
+            // if statement ensures that for loop in getFilePathArray doesn't treat option
+            // as a file
             if (app.appArgs.get(0).equals("-m") || app.appArgs.get(0).equals("-w") || app.appArgs.get(0).equals("-l")) {
                 offset = 1;
                 numOfFiles -= 1;
@@ -1237,28 +1285,27 @@ public class VisitorApplication implements BaseVisitor {
 
             if (app.appArgs.get(0).equals("-m") || app.appArgs.get(0).equals("-w") || app.appArgs.get(0).equals("-l")) {
                 writeUsingFiles(writer, filePathArray, app.appArgs.get(0), totalNeeded);
-            }
-            else {
+            } else {
                 writeUsingFiles(writer, filePathArray, "all", totalNeeded);
             }
         }
     }
 
     /*
-        Method loops through files and adds path to returned array if valid.
-    */
+     * Method loops through files and adds path to returned array if valid.
+     */
     private Path[] getFilePathArray(String currentDirectory, int numOfFiles, int offset, ArrayList<String> args) {
         Path filePath;
         Path currentDir = Paths.get(currentDirectory);
         Path[] filePathArray = new Path[numOfFiles];
 
-        // if file specified in command line by user is a real/usable file, it will return an array of the paths of the files
+        // if file specified in command line by user is a real/usable file, it will
+        // return an array of the paths of the files
         for (int i = 0; i < numOfFiles; i++) {
             filePath = currentDir.resolve(args.get(i + offset));
-            if (Files.isDirectory(filePath) || !Files.isReadable(filePath)){
+            if (Files.isDirectory(filePath) || !Files.isReadable(filePath)) {
                 throw new RuntimeException("wc: wrong file argument");
-            }
-            else {
+            } else {
                 filePathArray[i] = filePath;
             }
         }
@@ -1266,49 +1313,50 @@ public class VisitorApplication implements BaseVisitor {
     }
 
     /*
-        Method removes directory details to obtain only file name when given path as string.
-    */
+     * Method removes directory details to obtain only file name when given path as
+     * string.
+     */
     private String getFileName(String string) {
-        return string.split("/")[string.split("/").length-1];
+        return string.split("/")[string.split("/").length - 1];
     }
 
     /*
-        Method stores word, char and newline counts for each file in hashmap.
-        Writes count specified by option to OutputStream, and total if neccesary.
-    */
-    private void writeUsingFiles(BufferedWriter writer, Path[] filePathArray, String option, Boolean totalNeeded) throws IOException {
+     * Method stores word, char and newline counts for each file in hashmap. Writes
+     * count specified by option to OutputStream, and total if neccesary.
+     */
+    private void writeUsingFiles(BufferedWriter writer, Path[] filePathArray, String option, Boolean totalNeeded)
+            throws IOException {
         int totalLineCount = 0;
         int totalWordCount = 0;
         int totalCharCount = 0;
         int totalCount = 0;
 
         List<String> options = Arrays.asList("-l", "-w", "-m");
-        
-        for(Path path : filePathArray){
-            Map<String, String> resultsHashMap  = new HashMap<>();
+
+        for (Path path : filePathArray) {
+            Map<String, String> resultsHashMap = new HashMap<>();
 
             resultsHashMap.put("-w", calcWords(path));
             resultsHashMap.put("-m", calcChars(path));
             resultsHashMap.put("-l", calcNewlines(path));
-            
+
             if (option != "all") {
                 String result = resultsHashMap.get(option);
                 totalCount += Integer.parseInt(result);
                 writer.write(result + '\t');
 
-            }
-            else {
+            } else {
                 List<String> result = new ArrayList<>();
 
-                for(String opt : options) {
+                for (String opt : options) {
                     result.add(resultsHashMap.get(opt));
                     writer.write(resultsHashMap.get(opt) + '\t');
                     writer.flush();
                 }
 
-                totalCharCount+= Integer.parseInt(result.get(2));
-                totalWordCount+= Integer.parseInt(result.get(1));
-                totalLineCount+= Integer.parseInt(result.get(0));
+                totalCharCount += Integer.parseInt(result.get(2));
+                totalWordCount += Integer.parseInt(result.get(1));
+                totalLineCount += Integer.parseInt(result.get(0));
             }
 
             writer.write(getFileName(path.toString()));
@@ -1316,17 +1364,16 @@ public class VisitorApplication implements BaseVisitor {
             writer.flush();
         }
 
-        Map<String, String> totalsHashMap  = new HashMap<>();
+        Map<String, String> totalsHashMap = new HashMap<>();
         totalsHashMap.put("-m", Integer.toString(totalCharCount));
         totalsHashMap.put("-w", Integer.toString(totalWordCount));
         totalsHashMap.put("-l", Integer.toString(totalLineCount));
-        
+
         if (totalNeeded) {
-            if(option != "all"){
+            if (option != "all") {
                 writer.write(Integer.toString(totalCount) + '\t');
-            }
-            else {
-                for(String opt : options) {
+            } else {
+                for (String opt : options) {
                     writer.write(totalsHashMap.get(opt) + '\t');
                     writer.flush();
                 }
@@ -1338,23 +1385,22 @@ public class VisitorApplication implements BaseVisitor {
     }
 
     /*
-        Method stores word, char and newline counts for stdin in hashmap.
-        Writes count specified by option to OutputStream, and total if neccesary.
-    */
+     * Method stores word, char and newline counts for stdin in hashmap. Writes
+     * count specified by option to OutputStream, and total if neccesary.
+     */
     private void writeUsingInputStream(BufferedWriter writer, String[] lines, String option) throws IOException {
 
-        List<String> options  = Arrays.asList("-l", "-w", "-m");
-        Map<String, String> resultsHashMap  = new HashMap<>();
+        List<String> options = Arrays.asList("-l", "-w", "-m");
+        Map<String, String> resultsHashMap = new HashMap<>();
 
         resultsHashMap.put("-w", calcWords(lines));
         resultsHashMap.put("-m", calcChars(lines));
         resultsHashMap.put("-l", Integer.toString(lines.length));
-        
-        if(option != "all"){
+
+        if (option != "all") {
             writer.write(resultsHashMap.get(option));
-        }
-        else {
-            for(String opt : options){
+        } else {
+            for (String opt : options) {
                 writer.write(resultsHashMap.get(opt) + '\t');
             }
         }
@@ -1364,31 +1410,31 @@ public class VisitorApplication implements BaseVisitor {
     }
 
     /*
-        Method to calculate newline count when using Files.
-        Increases a counter everytime '\n' is seen and returns counter as string.
-    */
+     * Method to calculate newline count when using Files. Increases a counter
+     * everytime '\n' is seen and returns counter as string.
+     */
     private String calcNewlines(Path path) throws IOException {
         Charset encoding = StandardCharsets.UTF_8;
         int value;
         int newlineCount = 0;
 
         try (BufferedReader reader = Files.newBufferedReader(path, encoding)) {
-            while((value = reader.read()) != -1) {
+            while ((value = reader.read()) != -1) {
                 char c = (char) value;
-                if (c == '\n'){
+                if (c == '\n') {
                     newlineCount += 1;
                 }
             }
             reader.close();
-        }              
+        }
         return Integer.toString(newlineCount);
     }
 
     /*
-        Method to calculate char count when using Files.
-        Increases a counter by number of chars in line, accounting for newline char.
-        Returns string form of counter.
-    */
+     * Method to calculate char count when using Files. Increases a counter by
+     * number of chars in line, accounting for newline char. Returns string form of
+     * counter.
+     */
     private String calcChars(Path path) throws IOException {
         int charCount = Integer.parseInt(calcNewlines(path));
         try (BufferedReader reader = Files.newBufferedReader(path)) {
@@ -1401,10 +1447,10 @@ public class VisitorApplication implements BaseVisitor {
     }
 
     /*
-        Method to calculate char count when using stdin.
-        Increases a counter by number of chars in line, accounting for newline char.
-        Returns string form of counter.
-    */
+     * Method to calculate char count when using stdin. Increases a counter by
+     * number of chars in line, accounting for newline char. Returns string form of
+     * counter.
+     */
     private String calcChars(String[] lines) {
         int charCount = lines.length;
         for (String line : lines) {
@@ -1414,10 +1460,10 @@ public class VisitorApplication implements BaseVisitor {
     }
 
     /*
-        Method to calculate word count when using Files.
-        Increases a counter by size of array of words in each line, for every line.
-        Returns string form of counter.
-    */
+     * Method to calculate word count when using Files. Increases a counter by size
+     * of array of words in each line, for every line. Returns string form of
+     * counter.
+     */
     private String calcWords(Path path) throws IOException {
         int wordCount = 0;
         try (BufferedReader reader = Files.newBufferedReader(path)) {
@@ -1431,20 +1477,20 @@ public class VisitorApplication implements BaseVisitor {
                         words.add(preWords[i]);
                     }
                 }
-                wordCount += words.size(); 
+                wordCount += words.size();
             }
         }
         return Integer.toString(wordCount);
     }
 
     /*
-        Method to calculate word count when using stdin.
-        Increases a counter by size of array of words in each line, for every line.
-        Returns string form of counter.
-    */
-    private String calcWords(String[] lines){
+     * Method to calculate word count when using stdin. Increases a counter by size
+     * of array of words in each line, for every line. Returns string form of
+     * counter.
+     */
+    private String calcWords(String[] lines) {
         int wordCount = 0;
-        for(String line : lines) {
+        for (String line : lines) {
             String[] preWords = line.split("[\\s]+");
             ArrayList<String> words = new ArrayList<>();
 
@@ -1453,45 +1499,46 @@ public class VisitorApplication implements BaseVisitor {
                     words.add(preWords[i]);
                 }
             }
-            wordCount += words.size(); 
+            wordCount += words.size();
         }
         return Integer.toString(wordCount);
     }
 
     /*
-        Method checks args using if statements to update useInputStream if stdin is to be used and ensures options valid.
-    */
+     * Method checks args using if statements to update useInputStream if stdin is
+     * to be used and ensures options valid.
+     */
     private boolean validateArgs(ArrayList<String> args, InputStream input) {
         if (args.size() == 0) {
             if (input == null) {
                 throw new RuntimeException("wc: wrong number of arguments");
-            }
-            else {
+            } else {
                 return true;
             }
         }
 
-        if (args.get(0).startsWith("-") && !(args.get(0).equals("-m") || args.get(0).equals("-w") || args.get(0).equals("-l"))) {
+        if (args.get(0).startsWith("-")
+                && !(args.get(0).equals("-m") || args.get(0).equals("-w") || args.get(0).equals("-l"))) {
             throw new RuntimeException("wc: illegal option given");
         }
 
         if (args.size() == 1 && args.get(0).startsWith("-")) {
             if (input != null) {
-                return true;         
-            }
-            else {
+                return true;
+            } else {
                 throw new RuntimeException("wc: wrong number of arguments");
-            }    
+            }
         }
         return false;
     }
 
     /**
-     * Prints out each command that has been entered before. Simply gets an arraylist of 
-     * previous commands and converts it to a stream and prints them one by one.
+     * Prints out each command that has been entered before. Simply gets an
+     * arraylist of previous commands and converts it to a stream and prints them
+     * one by one.
      * 
-     * @param app object contains relevant variables such as outputstream as app.output and 
-     *        app arguments as app.appArgs.
+     * @param app object contains relevant variables such as outputstream as
+     *            app.output and app arguments as app.appArgs.
      * @throws RuntimeException if you supply any arguments to it.
      */
     public void visit(Visitable.History app) {
@@ -1503,40 +1550,40 @@ public class VisitorApplication implements BaseVisitor {
         Stream<String> history = Jsh.getHistory().stream();
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         history.forEach(elem -> lineOutputWriter(elem, writer, "history"));
-    } 
-
+    }
 
     /**
-     * Of the format "cp (-r) source1 source2 source3 ... dest". 
-     * "-r" is optional and if it is supplied it means copy directories.
-     * There can be any number of source files to copy.
-     * Doesnt work with input stream yet.
+     * Of the format "cp (-r) source1 source2 source3 ... dest". "-r" is optional
+     * and if it is supplied it means copy directories. There can be any number of
+     * source files to copy. Doesnt work with input stream yet.
      * 
-     * @param app object contains relevant information such as currentDirectory and appArgs.
+     * @param app object contains relevant information such as currentDirectory and
+     *            appArgs.
      * 
      * @throws IOException if it is unable to copy the files.
      */
     public void visit(Visitable.Copy app) throws IOException {
 
-        String dest = app.appArgs.get(app.appArgs.size() - 1);   // last element is destination.
+        String dest = app.appArgs.get(app.appArgs.size() - 1); // last element is destination.
         app.appArgs.remove(app.appArgs.size() - 1);
-        
+
         if (app.appArgs.get(0).equals("-r")) {
             // copying directories
-            app.appArgs.remove(0);               // remove -r.
+            app.appArgs.remove(0); // remove -r.
             Stream<String> stream = app.appArgs.stream();
             stream.forEach(directory -> {
                 String srcDir = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + directory;
                 String destDir = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + dest;
-                copyDirectory(srcDir, destDir);});
-        }
-        else {
+                copyDirectory(srcDir, destDir);
+            });
+        } else {
             // copying files.
             Stream<String> stream = app.appArgs.stream();
             stream.forEach(file -> {
                 try {
                     String src = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + file;
-                    String destination = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + dest + System.getProperty("file.separator") + file;
+                    String destination = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + dest
+                            + System.getProperty("file.separator") + file;
                     copyFile(src, destination);
                 } catch (IOException e) {
                     throw new RuntimeException("cp: unable to copy file.");
@@ -1547,10 +1594,12 @@ public class VisitorApplication implements BaseVisitor {
     }
 
     /**
-     * This copies the file argument into the dest directory. 
+     * This copies the file argument into the dest directory.
      * 
-     * @param file is a string that indicates the path to the directory that src is in.
-     * @param dest is a string that indicates the path to the directory that dest is in.
+     * @param file is a string that indicates the path to the directory that src is
+     *             in.
+     * @param dest is a string that indicates the path to the directory that dest is
+     *             in.
      * 
      * @throws IOException if it is unable to copy the file.
      */
@@ -1564,7 +1613,7 @@ public class VisitorApplication implements BaseVisitor {
     /**
      * Copies the directory specified by src into dest.
      * 
-     * @param src is a string that indicates the path to src directory
+     * @param src  is a string that indicates the path to src directory
      * @param dest is a string that indicates the path to dest directory
      * 
      * @throws IOException if it is unable to copy files.
@@ -1576,18 +1625,43 @@ public class VisitorApplication implements BaseVisitor {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(source)) {
             for (Path entry : stream) {
                 if (Files.isDirectory(entry)) {
-                    // copying subdirectory. First we need to create subdirectory in dest then copy all the files from subdirectory into the
+                    // copying subdirectory. First we need to create subdirectory in dest then copy
+                    // all the files from subdirectory into the
                     // newly created dest/subdir.
                     String path = dest + System.getProperty("file.separator") + entry.getFileName().toString();
                     new File(path).mkdir();
                     copyDirectory(entry.toString(), path);
-                }
-                else {
-                    copyFile(entry.toString(), dest + System.getProperty("file.separator") + entry.getFileName().toString());
+                } else {
+                    copyFile(entry.toString(),
+                            dest + System.getProperty("file.separator") + entry.getFileName().toString());
                 }
             }
         } catch (IOException e) {
             throw new RuntimeException("cp: unable to copy directory.");
         }
+    }
+
+    private Path uriToPath(String uri, String appname){
+        URI newuri;
+        Path path;
+        try {
+            newuri = new URI(uri);
+            newuri = Path.of(Jsh.getCurrentDirectory()).toUri().resolve(newuri);
+            path = Path.of(newuri);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        return path;
+    }
+
+    private boolean isUri(String uri){
+        try{
+            new URI(uri);
+            return true;
+        }
+        catch(Exception e){
+            return false;
+        }
+
     }
 }
