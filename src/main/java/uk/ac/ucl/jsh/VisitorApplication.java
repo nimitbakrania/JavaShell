@@ -1,5 +1,4 @@
 package uk.ac.ucl.jsh;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -9,7 +8,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -28,9 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.*;
-
-import javax.management.RuntimeErrorException;
-
 import java.io.InputStream;
 
 public class VisitorApplication implements BaseVisitor {
@@ -923,11 +918,21 @@ public class VisitorApplication implements BaseVisitor {
         } else if (app.appArgs.size() == 1) {
             headArg = app.appArgs.get(0);
         }
-        if ((app.appArgs.size() == 2) && !app.appArgs.get(0).equals("-r")) {
+        if ((app.appArgs.size() == 2) && !reverse.equals("-r")) {
             throw new RuntimeException("sort: wrong argument " + app.appArgs.get(0));
         }
-        String sortFile = Jsh.getCurrentDirectory() + File.separator + headArg;
-        try (Stream<String> lines = Files.lines(Paths.get(sortFile))) {
+        File sortFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);;
+        if(app.appArgs.size() == 1 || app.appArgs.size() == 2)
+        {
+            if (isUri(headArg)){
+                sortFile = uriToPath(headArg, "sort").toFile();
+            }
+            else{
+                sortFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
+            }
+        }
+        String sortFileName = Jsh.getCurrentDirectory() + File.separator + headArg;
+        try (Stream<String> lines = Files.lines(Paths.get(sortFileName))) {
             if (app.appArgs.isEmpty() || (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-r"))) {
                 if (app.input != null) {
 
@@ -940,7 +945,7 @@ public class VisitorApplication implements BaseVisitor {
                 }
 
             }
-            if (app.appArgs.size() == 1) {
+            if (app.appArgs.size() == 1 && sortFile.exists()) {
                 lines.sorted().forEach(s -> {
                     try {
                         writer.write(s);
@@ -993,10 +998,21 @@ public class VisitorApplication implements BaseVisitor {
         } else if (app.appArgs.size() == 1) {
             headArg = app.appArgs.get(0);
         }
-        if ((app.appArgs.size() == 2) && !app.appArgs.get(0).equals("-i")) {
+        if ((app.appArgs.size() == 2) && !reverse.equals("-i")) {
             throw new RuntimeException("uniq: wrong argument " + app.appArgs.get(0));
         }
-        String sortFile = Jsh.getCurrentDirectory() + File.separator + headArg;
+        File uniqFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
+        String sortFile = "";
+        if(app.appArgs.size() == 1 || app.appArgs.size() == 2)
+        {
+            if (isUri(headArg)){
+                uniqFile = uriToPath(headArg, "uniq").toFile();
+            }
+            else{
+                uniqFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
+            }
+        }
+        sortFile = Jsh.getCurrentDirectory() + File.separator + headArg;
         try (Stream<String> lines = Files.lines(Paths.get(sortFile))) {
             if (app.appArgs.isEmpty() || (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-i"))) {
                 if (app.input != null) {
@@ -1035,7 +1051,7 @@ public class VisitorApplication implements BaseVisitor {
                     throw new RuntimeException("uniq: error with stdin");
                 }
             }
-            if (app.appArgs.size() == 1) {
+            if (app.appArgs.size() == 1 && uniqFile.exists()) {
                 File headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
                 headFile.delete();
                 File file = new File(headArg);
@@ -1059,8 +1075,9 @@ public class VisitorApplication implements BaseVisitor {
                 });
                 fw.close();
             } else if (app.appArgs.size() == 2) {
-                File file = File.createTempFile("temp", ".txt");
                 File headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
+                headFile.delete();
+                File file = new File(headArg);
                 FileWriter fw = new FileWriter(file.getName(), false);
                 LinkedList<String> previous = new LinkedList<String>();
                 previous.add("");
