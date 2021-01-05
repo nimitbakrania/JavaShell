@@ -571,15 +571,18 @@ public class VisitorApplication implements BaseVisitor {
             }
         }
 
-        if (isUri(app.appArgs.get(2))) {
-            app.appArgs.set(2, uriToPath(app.appArgs.get(2), "cut").toString());
-        }
         File file = null;
         Path filePath = null;
         if (inputStreamUsed == 0) {
             // we are using app args
-            file = new File(Jsh.getCurrentDirectory() + File.separator + app.appArgs.get(2));
-            filePath = Paths.get(Jsh.getCurrentDirectory() + File.separator + app.appArgs.get(2));
+            if (isUri(app.appArgs.get(2))) {
+                filePath = uriToPath(app.appArgs.get(2), "cut");
+                file = new File(filePath.toString());
+            }
+            else {
+                file = new File(Jsh.getCurrentDirectory() + System.getProperty("file.separator") + app.appArgs.get(2));
+                filePath = Paths.get(Jsh.getCurrentDirectory() + System.getProperty("file.separator") + app.appArgs.get(2));
+            }
         }
         if (!args[0].contains("-")) {
             // of the format 1,2,3.
@@ -1578,25 +1581,36 @@ public class VisitorApplication implements BaseVisitor {
             app.appArgs.remove(0); // remove -r.
             Stream<String> stream = app.appArgs.stream();
             stream.forEach(directory -> {
+                String srcDir;
+                String destDir;
                 if (isUri(directory)) {
-                    directory = uriToPath(directory, "copy").toString();
+                    // assume that all arguments are uri.
+                    srcDir = uriToPath(directory, "copy").toString();
+                    destDir = uriToPath(dest, "copy").toString();
                 }
-                String srcDir = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + directory;
-                String destDir = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + dest;
+                else {
+                    srcDir = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + directory;
+                    destDir = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + dest;
+                }
                 copyDirectory(srcDir, destDir);
             });
         } else {
             // copying files.
             Stream<String> stream = app.appArgs.stream();
             stream.forEach(file -> {
+                String src;
+                String destFile;
+                if (isUri(file)) {
+                    src = uriToPath(file, "copy").toString();
+                    destFile = uriToPath(dest, "copy").toString() + System.getProperty("file.separator") + file;
+                }
+                else {
+                    src = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + file;
+                    destFile = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + dest
+                                + System.getProperty("file.separator") + file;
+                }
                 try {
-                    if (isUri(file)) {
-                        file = uriToPath(file, "copy").toString();
-                    }
-                    String src = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + file;
-                    String destination = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + dest
-                            + System.getProperty("file.separator") + file;
-                    copyFile(src, destination);
+                    copyFile(src, destFile);
                 } catch (IOException e) {
                     throw new RuntimeException("cp: unable to copy file.");
                 }

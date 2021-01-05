@@ -44,8 +44,8 @@ public class CopyTest {
         Jsh.eval("cp test4.txt dir1", out);
         Jsh.eval("ls dir1", out);
         assertEquals("subDir", scan.next());
-        assertEquals("test1.txt", scan.next());
         assertEquals("test2.txt", scan.next());
+        assertEquals("test1.txt", scan.next());
         assertEquals("test4.txt", scan.next());
         scan.close();
     }
