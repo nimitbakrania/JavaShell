@@ -317,7 +317,8 @@ public class VisitorApplication implements BaseVisitor {
 
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
         File currDir;
-        if (isUri(app.appArgs.get(0))) {
+
+        if ((app.appArgs.size() == 1) && (isUri(app.appArgs.get(0)))) {
             app.appArgs.set(0, uriToPath(app.appArgs.get(0), "ls").toString());
         }
 

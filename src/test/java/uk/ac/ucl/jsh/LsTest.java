@@ -39,8 +39,8 @@ public class LsTest {
         PipedOutputStream out = new PipedOutputStream(in);
         Jsh.eval("ls", out);
         Scanner scan = new Scanner(in);
-        assertEquals("test3.txt", scan.next());
         assertEquals("dir1", scan.next());
+        assertEquals("test3.txt", scan.next());
         assertEquals("test4.txt", scan.next());
         scan.close();
     }
