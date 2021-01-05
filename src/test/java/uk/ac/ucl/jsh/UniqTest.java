@@ -1,12 +1,15 @@
 package uk.ac.ucl.jsh;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import static org.junit.Assert.*;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -14,27 +17,18 @@ import java.util.Scanner;
 
 public class UniqTest {
     @Rule
-    public TemporaryFolder TempFolder = new TemporaryFolder();
+    public TemporaryFolder folder = new TemporaryFolder();
 
     @Before
-    public void EnterTempFolder() throws IOException{
-        Jsh.setCurrentDirectory(TempFolder.getRoot().toString());
+    public void setUpDummyData() throws IOException {
+
+        File testFile = folder.newFile("test1.txt");
+        OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(testFile), StandardCharsets.UTF_8);
+        writer.write("a\na\n2\nb\na");        
+        writer.close();
+
+        Jsh.setCurrentDirectory(folder.getRoot().getAbsolutePath());
     }
-
-
-    @Test
-    public void uniqTestNoArgs() throws Exception {
-        try{
-            PipedInputStream in = new PipedInputStream();
-            PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("uniq", out);
-        }
-        catch(RuntimeException expected)
-        {
-            assertTrue(expected.getMessage().equals("uniq: missing arguments"));
-        }
-    }
-
 
     @Test
     public void uniqTestWrongNumOfArgs() throws Exception {
@@ -46,7 +40,7 @@ public class UniqTest {
         }
         catch(RuntimeException expected)
         {
-            assertTrue(expected.getMessage().equals("uniq: wrong argument " + "args"));
+            assertTrue(expected.getMessage().equals("uniq: wrong argument arg1"));
         }
     }
 
@@ -90,27 +84,22 @@ public class UniqTest {
         }
         catch(RuntimeException expected)
         {
-            assertTrue(expected.getMessage().equals("uniq: "+ "test123.txt" + " does not exist"));
+            assertTrue(expected.getMessage().equals("uniq: file does not exist"));
         }
     }
 
 
     @Test
     public void oneArgTest() throws IOException{
-        File tempFile = TempFolder.newFile("Testuniq.txt");
-        FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
-        tempFileWriter.write("a\na\n2\nb\nb\na");
-
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
-        Jsh.eval("uniq Testsort.txt", out);
+        Jsh.eval("uniq test1.txt", out);
         Scanner scn = new Scanner(in);
         assertEquals("a", scn.nextLine());
         assertEquals("2", scn.nextLine());
         assertEquals("b", scn.nextLine());
         assertEquals("a", scn.nextLine());
         scn.close();
-        tempFileWriter.close();
     }
 }

@@ -1,15 +1,15 @@
 package uk.ac.ucl.jsh;
-import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import static org.junit.Assert.*;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
@@ -17,33 +17,15 @@ public class SortTest {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
-    @After
-    public void deleteTempFolder() {
-        folder.delete();
-    }
+    @Before
+    public void setUpDummyData() throws IOException {
 
-    protected void createTestFile(String fileName, String toWrite) throws IOException {
-        Charset encoding = StandardCharsets.UTF_8;
-        File file = folder.newFile(fileName);
-        if (toWrite != null) {
-            FileWriter writer = new FileWriter(file, encoding);
-            writer.write(toWrite);
-            writer.close();
-        }
-    }
+        File testFile = folder.newFile("test1.txt");
+        OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(testFile), StandardCharsets.UTF_8);
+        writer.write("a\na\n2\nb\na");         
+        writer.close();
 
-
-    @Test
-    public void sortTestNoArgs() throws Exception {
-        try{
-            PipedInputStream in = new PipedInputStream();
-            PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("sort", out);
-        }
-        catch(RuntimeException expected)
-        {
-            assertTrue(expected.getMessage().equals("sort: error with stdin"));
-        }
+        Jsh.setCurrentDirectory(folder.getRoot().getAbsolutePath());
     }
 
 
@@ -57,7 +39,7 @@ public class SortTest {
         }
         catch(RuntimeException expected)
         {
-            assertTrue(expected.getMessage().equals("sort: wrong argument " + "arg1"));
+            assertTrue(expected.getMessage().equals("sort: wrong argument arg1"));
         }
     }
 
@@ -101,29 +83,23 @@ public class SortTest {
         }
         catch(RuntimeException expected)
         {
-            assertTrue(expected.getMessage().equals("sort: cannot open "+ "test123.txt"));
+            assertTrue(expected.getMessage().equals("sort: file does not exist"));
         }
     }
 
 
     @Test
     public void oneArgTest() throws IOException{
-        File tempFile = folder.newFile("Testsort.txt");
-        FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
-        tempFileWriter.write("a\ns\n2\nb\nd\na");
-
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
-        Jsh.eval("sort Testsort.txt", out);
+        Jsh.eval("sort test1.txt", out);
         Scanner scn = new Scanner(in);
         assertEquals("2", scn.nextLine());
         assertEquals("a", scn.nextLine());
         assertEquals("a", scn.nextLine());
+        assertEquals("a", scn.nextLine());
         assertEquals("b", scn.nextLine());
-        assertEquals("d", scn.nextLine());
-        assertEquals("s", scn.nextLine());
         scn.close();
-        tempFileWriter.close();
     }
 }
