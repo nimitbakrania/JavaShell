@@ -1,7 +1,5 @@
 package uk.ac.ucl.jsh;
-
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -44,7 +42,7 @@ public class SortTest {
         }
         catch(RuntimeException expected)
         {
-            assertTrue(expected.getMessage().equals("sort: missing arguments"));
+            assertTrue(expected.getMessage().equals("sort: error with stdin"));
         }
     }
 
@@ -59,7 +57,7 @@ public class SortTest {
         }
         catch(RuntimeException expected)
         {
-            assertTrue(expected.getMessage().equals("sort: too many arguments"));
+            assertTrue(expected.getMessage().equals("sort: wrong argument " + "arg1"));
         }
     }
 
