@@ -32,13 +32,23 @@ public class Pipe implements Command {
         ArrayList<String> appArgs1 = new ArrayList<String>(appArgs.subList(0, appArgs.indexOf("|")));
         ArrayList<String> appArgs2 = new ArrayList<String>(appArgs.subList(appArgs.indexOf("|") + 2, appArgs.size()));
         String app2 = appArgs.get(appArgs.indexOf("|") + 1);
-        Thread t1 = new Thread(){
+        evalLeft(in, outp, app1, appArgs1);
+        if (appArgs2.contains("|")){
+            eval(inp, out, app2, appArgs2);    
+        }
+        else{
+            evalRight(inp, out, app2, appArgs2);
+        }
+    }
+
+    private void evalLeft(InputStream in, PipedOutputStream outp, String app1, ArrayList<String> appArgs1){
+        new Thread(){
             public void run(){
                 if (appArgs1.contains(">") || appArgs1.contains("<")) {
                     try {
                         redirect.eval(in, outp, app1, appArgs1);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        throw new RuntimeException(e);
                     }
                 } else {
                     call.eval(in, outp, app1, appArgs1);
@@ -46,23 +56,20 @@ public class Pipe implements Command {
                 try {
                     outp.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
             }
-        };
-        Thread t2 = new Thread(){
+        }.start();
+    }
+    
+    private void evalRight(PipedInputStream inp, OutputStream out, String app2, ArrayList<String> appArgs2){
+        new Thread(){
             public void run(){
-                if (appArgs2.contains("|")) {
-                    try {
-                        eval(inp, out, app2, appArgs2);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else if (appArgs2.contains(">") || appArgs2.contains("<")) {
+                if (appArgs2.contains(">") || appArgs2.contains("<")) {
                     try {
                         redirect.eval(inp, out, app2, appArgs2);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        throw new RuntimeException(e);
                     }
                 } else {
                     call.eval(inp, out, app2, appArgs2);
@@ -70,14 +77,14 @@ public class Pipe implements Command {
                 try {
                     inp.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
 
             }
-        };
-        t1.start();
-        t2.start();
+        }.start();
     }
+    
+
 }
     
 
@@ -117,14 +124,12 @@ private class P1 extends Thread {
     private ArrayList<String> appArgs1;
     private String app1;
     private InputStream in;
-
     public P1(PipedOutputStream out, ArrayList<String> appArgs, String appname, InputStream inp) {
         this.outp = out;
         this.in = inp;
         this.appArgs1 = appArgs;
         this.app1 = appname;
     }
-
     public void run() {
         try {
             if (appArgs1.contains(">") || appArgs1.contains("<")) {
@@ -139,20 +144,17 @@ private class P1 extends Thread {
         }
     }
 }
-
 private class P2 extends Thread {
     private PipedInputStream inp;
     private OutputStream out;
     private ArrayList<String> appArgs2;
     private String app2;
-
     public P2(PipedInputStream in, ArrayList<String> appArgs, String appname, OutputStream outp) {
         this.out = outp;
         this.inp = in;
         this.appArgs2 = appArgs;
         this.app2 = appname;
     }
-
     public void run() {
         try {
             if (appArgs2.contains("|")) {
@@ -166,7 +168,6 @@ private class P2 extends Thread {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-
     }
 }
 */

@@ -924,7 +924,11 @@ public class VisitorApplication implements BaseVisitor {
         if ((app.appArgs.size() == 2) && !reverse.equals("-r")) {
             throw new RuntimeException("sort: wrong argument " + app.appArgs.get(0));
         }
-        File sortFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);;
+        File sortFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
+        if(!sortFile.exists())
+        {
+            throw new RuntimeException("sort: file does not exist");
+        }
         if(app.appArgs.size() == 1 || app.appArgs.size() == 2)
         {
             if (isUri(headArg)){
@@ -950,25 +954,13 @@ public class VisitorApplication implements BaseVisitor {
             }
             if (app.appArgs.size() == 1 && sortFile.exists()) {
                 lines.sorted().forEach(s -> {
-                    try {
-                        writer.write(s);
-                        writer.write(System.getProperty("line.separator"));
-                        writer.flush();
-                    } catch (IOException e) {
-                        throw new RuntimeException("sort: cannot open " + app.appArgs.get(0));
-                    }
+                    lineOutputWriter(s, writer, "sort");
                 });
             } else if (app.appArgs.size() == 2) {
                 // using the comparator to reverse the order if -r is provided in the args
 
                 lines.sorted(Comparator.reverseOrder()).forEach(s -> {
-                    try {
-                        writer.write(s);
-                        writer.write(System.getProperty("line.separator"));
-                        writer.flush();
-                    } catch (IOException e) {
-                        throw new RuntimeException("sort: cannot open " + app.appArgs.get(0));
-                    }
+                    lineOutputWriter(s, writer, "sort");
                 });
             }
         }
@@ -1005,6 +997,10 @@ public class VisitorApplication implements BaseVisitor {
             throw new RuntimeException("uniq: wrong argument " + app.appArgs.get(0));
         }
         File uniqFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
+        if(!uniqFile.exists())
+        {
+            throw new RuntimeException("uniq: file does not exist");
+        }
         String sortFile = "";
         if(app.appArgs.size() == 1 || app.appArgs.size() == 2)
         {
@@ -1062,18 +1058,10 @@ public class VisitorApplication implements BaseVisitor {
                 LinkedList<String> previous = new LinkedList<String>();
                 previous.add("");
                 lines.forEach(s -> {
-                    try {
-                        if (!s.equals(previous.getLast())) {
-                            writer.write(s);
-                            writer.write(System.getProperty("line.separator"));
-                            writer.flush();
-                            fw.write(s);
-                            fw.write(System.getProperty("line.separator"));
-                            fw.flush();
+                    if (!s.equals(previous.getLast())) {
+                            lineOutputWriter(s, writer, "uniq");
+                            lineOutputWriter(s, fw, "uniq");
                             previous.add(s);
-                        }
-                    } catch (IOException e) {
-                        throw new RuntimeException("uniq: cannot open " + app.appArgs.get(0));
                     }
                 });
                 fw.close();
@@ -1085,19 +1073,11 @@ public class VisitorApplication implements BaseVisitor {
                 LinkedList<String> previous = new LinkedList<String>();
                 previous.add("");
                 lines.forEach(s -> {
-                    try {
-                        if (!s.toLowerCase().equals(previous.getLast().toLowerCase())) {
-                            writer.write(s);
-                            writer.write(System.getProperty("line.separator"));
-                            writer.flush();
-                            fw.write(s);
-                            fw.write(System.getProperty("line.separator"));
-                            fw.flush();
+                    if (!s.toLowerCase().equals(previous.getLast().toLowerCase())) {
+                            lineOutputWriter(s, writer, "uniq");
+                            lineOutputWriter(s, fw, "uniq");
                             previous.add(s);
                         }
-                    } catch (IOException e) {
-                        throw new RuntimeException("uniq: cannot open " + app.appArgs.get(0));
-                    }
                 });
                 fw.close();
                 headFile.delete();
