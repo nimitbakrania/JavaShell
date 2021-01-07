@@ -127,8 +127,15 @@ public class FindTest {
         out = new PipedOutputStream(in);
         Jsh.eval("find -name 'T*.txt'", out);
         Scanner scn = new Scanner(in);
-        assertEquals("./Test/Test2.txt", scn.nextLine());
-        assertEquals("./Test.txt", scn.nextLine());
+        String next = scn.nextLine();
+        if (next.equals("./Test/Test2.txt")){
+            assertEquals("./Test/Test2.txt", next);
+            assertEquals("./Test.txt", scn.nextLine());
+        }
+        else{
+            assertEquals("./Test/Test2.txt", scn.nextLine());
+            assertEquals("./Test.txt", next);
+        }
         scn.close();
     }
 }
