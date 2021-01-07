@@ -11,11 +11,13 @@ import java.io.PipedOutputStream;
 import java.util.Scanner;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class LsTest {
     
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
+    private VisitorApplication visitor = new VisitorApplication();
 
     @Before
     public void goIntoTempfolder() throws IOException {
@@ -31,6 +33,91 @@ public class LsTest {
 
         Jsh.setCurrentDirectory(folder.getRoot().getAbsolutePath());
     }
+
+    // UNIT TEST
+
+    @Test
+    public void lsUnitTest() throws IOException {
+
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        Scanner scan = new Scanner(in);
+        ArrayList<String> arr = new ArrayList<>();
+        Visitable.Ls app = new Visitable.Ls(null, out, arr);
+        app.accept(visitor);
+        String line = scan.nextLine();
+        assertTrue(line.contains("test3.txt"));
+        assertTrue(line.contains("test4.txt"));
+        assertTrue(line.contains("dir1"));
+        scan.close();
+    }
+
+    @Test
+    public void lsUnitTestWithDirectory() throws IOException {
+
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        Scanner scan = new Scanner(in);
+        ArrayList<String> arr = new ArrayList<>();
+        arr.add("dir1");
+        Visitable.Ls app = new Visitable.Ls(null, out, arr);
+        app.accept(visitor);
+        assertEquals("test1.txt", scan.next());
+        scan.close();
+
+    }
+
+    @Test
+    public void lsUnitTestWithAbsolutePath() throws IOException {
+
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        Scanner scan = new Scanner(in);
+        ArrayList<String> arr = new ArrayList<>();
+        String path = folder.getRoot().getAbsolutePath() + System.getProperty("file.separator") + "dir1";
+        arr.add(path);
+        Visitable.Ls app = new Visitable.Ls(null, out, arr);
+        app.accept(visitor);
+        assertEquals("test1.txt", scan.next());
+        scan.close();
+    }
+
+    @Test
+    public void lsUnitTestWithTooManyArgs() throws IOException {
+
+        try {
+            PipedInputStream in = new PipedInputStream();
+            PipedOutputStream out = new PipedOutputStream(in);
+            Scanner scan = new Scanner(in);
+            ArrayList<String> arr = new ArrayList<>();
+            arr.add("foo");
+            arr.add("bar");
+            arr.add("foobar");
+            Visitable.Ls app = new Visitable.Ls(null, out, arr);
+            app.accept(visitor);
+        } catch (RuntimeException expected) {
+            assertTrue(expected.getMessage().contains("ls: too many arguments"));
+        }
+    }
+
+    @Test
+    public void lsUnitTestWithInvalidDirectory() throws IOException {
+
+        try {
+            PipedInputStream in = new PipedInputStream();
+            PipedOutputStream out = new PipedOutputStream(in);
+            Scanner scan = new Scanner(in);
+            ArrayList<String> arr = new ArrayList<>();
+            arr.add("fakeDirectory");
+            Visitable.Ls app = new Visitable.Ls(null, out, arr);
+            app.accept(visitor);
+        } catch (RuntimeException expected) {
+            assertTrue(expected.getMessage().contains("ls: no such directory"));
+        }
+
+    }
+
+    // INTEGRATION TESTS
 
     @Test
     public void testLs() throws IOException {
