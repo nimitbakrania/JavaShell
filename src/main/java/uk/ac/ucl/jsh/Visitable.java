@@ -281,63 +281,6 @@ public interface Visitable {
         }
     }
 
-    public class DateTime implements Visitable {
-
-        public InputStream input;
-        public OutputStream output;
-        public ArrayList<String> appArgs;
-
-        public DateTime(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
-
-            this.input = inputstream;
-            this.output = outputstream;
-            this.appArgs = args;
-        }
-
-        public void accept(BaseVisitor visitor) throws IOException {
-
-            visitor.visit(this);
-        }
-    }
-
-    public class WordCount implements Visitable {
-
-        public InputStream input;
-        public OutputStream output;
-        public ArrayList<String> appArgs;
-
-        public WordCount(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
-
-            this.input = inputstream;
-            this.output = outputstream;
-            this.appArgs = args;
-        }
-
-        public void accept(BaseVisitor visitor) throws IOException {
-
-            visitor.visit(this);
-        }
-    }
-
-    public class History implements Visitable {
-
-        public InputStream input;
-        public OutputStream output;
-        public ArrayList<String> appArgs;
-
-        public History(InputStream input, OutputStream output, ArrayList<String> appArgs) {
-
-            this.input = input;
-            this.output = output;
-            this.appArgs = appArgs;
-        }
-
-        public void accept(BaseVisitor visitor) throws IOException {
-
-            visitor.visit(this);
-        }
-    }
-
     public class Copy implements Visitable {
 
         public InputStream input;
