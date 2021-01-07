@@ -39,7 +39,7 @@ public class CatTest{
         try{
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("cat", out);
+            Jsh.eval("_cat", out);
         }
         catch(RuntimeException expected)
         {
@@ -52,7 +52,7 @@ public class CatTest{
         try{
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
-            Jsh.eval("cat Invalid", out);
+            Jsh.eval("_cat Invalid", out);
         }
         catch(RuntimeException expected)
         {
@@ -64,7 +64,7 @@ public class CatTest{
     public void catDirectory() throws Exception {
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
-        Jsh.eval("cat src", out);
+        Jsh.eval("_cat src", out);
     }
 
     @Test(expected = RuntimeException.class)
@@ -73,7 +73,7 @@ public class CatTest{
         folder.newFolder(folderName);
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
-        Jsh.eval("cat " + folderName, out);
+        Jsh.eval("_cat " + folderName, out);
     }
 
     @Test(expected = RuntimeException.class)
@@ -82,7 +82,7 @@ public class CatTest{
         createTestFile(fileName, null);
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
-        Jsh.eval("cat " + fileName + " Invalid", out);
+        Jsh.eval("_cat " + fileName + " Invalid", out);
     }
 
     @Test
@@ -91,7 +91,7 @@ public class CatTest{
         createTestFile(fileName, null);
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
-        Jsh.eval("cat " + fileName, out);
+        Jsh.eval("_cat " + fileName, out);
         out.close();
         String contents = new String(in.readAllBytes());
         assertEquals("file not empty", "", contents);
@@ -105,7 +105,7 @@ public class CatTest{
 
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
-        Jsh.eval("cat " + fileName, out);
+        Jsh.eval("_cat " + fileName, out);
         out.close();
         String contents = new String(in.readAllBytes());
         assertEquals("File contents wrong", toWrite, contents);
