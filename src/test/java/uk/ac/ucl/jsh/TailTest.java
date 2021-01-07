@@ -224,4 +224,17 @@ public class TailTest{
             assertEquals("tail: wrong argument -10", e.toString());
         }
     }
+
+    @Test
+    public void absoluteTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        File file = new File(TempFolder.getRoot().toString(), "Test2.txt");
+        Jsh.eval("_tail -n 2 '" + file.toString() + "'", out);
+        Scanner scn = new Scanner(in);
+        assertEquals("Hello", scn.nextLine());
+        assertEquals("hello", scn.nextLine());
+        scn.close();
+    }
 }

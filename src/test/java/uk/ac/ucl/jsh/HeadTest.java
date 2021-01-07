@@ -258,4 +258,17 @@ public class HeadTest {
         scn.close();
     } 
 
+    @Test
+    public void absoluteTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        File file = new File(TempFolder.getRoot().toString(), "Test.txt");
+        Jsh.eval("_head -n 2 '" + file.toString() + "'", out);
+        Scanner scn = new Scanner(in);
+        assertEquals("Hello", scn.nextLine());
+        assertEquals("hello world", scn.nextLine());
+        scn.close();
+    }
+
 }

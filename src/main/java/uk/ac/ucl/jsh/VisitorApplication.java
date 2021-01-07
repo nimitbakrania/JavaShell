@@ -171,11 +171,11 @@ public class VisitorApplication implements BaseVisitor {
                 headFile = uriToPath(headArg, "head").toFile();
             }
             else{
-                headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
+                headFile = Path.of(Jsh.getCurrentDirectory()).resolve(headArg).toFile();;
             }
             if (headFile.exists()) {
                 Charset encoding = StandardCharsets.UTF_8;
-                Path filePath = Paths.get((String) Jsh.getCurrentDirectory() + File.separator + headArg);
+                Path filePath = headFile.toPath();
                 try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
                     reader.lines().limit(headLines).forEach((line) -> lineOutputWriter(line, writer, "head"));
                 } catch (IOException e) {
@@ -244,11 +244,11 @@ public class VisitorApplication implements BaseVisitor {
                 tailFile = uriToPath(tailArg, "tail").toFile();
             }
             else{
-                tailFile = new File(Jsh.getCurrentDirectory() + File.separator + tailArg);
+                tailFile = Path.of(Jsh.getCurrentDirectory()).resolve(tailArg).toFile();
             }
             if (tailFile.exists()) {
                 Charset encoding = StandardCharsets.UTF_8;
-                Path filePath = Paths.get((String) Jsh.getCurrentDirectory() + File.separator + tailArg);
+                Path filePath = tailFile.toPath();
                 try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
                     List<String> readerList = reader.lines().collect(Collectors.toList());
                     readerList.stream()
@@ -291,7 +291,7 @@ public class VisitorApplication implements BaseVisitor {
                     currFile = uriToPath(arg, "head").toFile();
                 }
                 else{
-                    currFile = new File(Jsh.getCurrentDirectory(), arg);
+                    currFile = Path.of(Jsh.getCurrentDirectory()).resolve(arg).toFile();
                 }
                 if (currFile.exists()) {
                     Path filePath = currFile.toPath();
@@ -1001,22 +1001,19 @@ public class VisitorApplication implements BaseVisitor {
         if ((app.appArgs.size() == 2) && !reverse.equals("-i")) {
             throw new RuntimeException("uniq: wrong argument " + app.appArgs.get(0));
         }
-        File uniqFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
+        File uniqFile;
+        String sortFile = "";
+        if (isUri(headArg)){
+            uniqFile = uriToPath(headArg, "uniq").toFile();
+        }
+        else{
+            uniqFile = Path.of(Jsh.getCurrentDirectory()).resolve(headArg).toFile();
+        }
         if(!uniqFile.exists())
         {
             throw new RuntimeException("uniq: file does not exist");
         }
-        String sortFile = "";
-        if(app.appArgs.size() == 1 || app.appArgs.size() == 2)
-        {
-            if (isUri(headArg)){
-                uniqFile = uriToPath(headArg, "uniq").toFile();
-            }
-            else{
-                uniqFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
-            }
-        }
-        sortFile = Jsh.getCurrentDirectory() + File.separator + headArg;
+        sortFile = Path.of(Jsh.getCurrentDirectory()).resolve(headArg).toString();
         try (Stream<String> lines = Files.lines(Paths.get(sortFile))) {
             if (app.appArgs.isEmpty() || (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-i"))) {
                 if (app.input != null) {
@@ -1088,37 +1085,6 @@ public class VisitorApplication implements BaseVisitor {
                 headFile.delete();
                 Boolean t = file.renameTo(headFile);
             }
-        }
-    }
-
-    public void writeTo(File in, File out) {
-        FileInputStream instream = null;
-        FileOutputStream outstream = null;
-
-        try {
-
-            instream = new FileInputStream(in);
-            outstream = new FileOutputStream(out);
-
-            byte[] buffer = new byte[1024];
-
-            int length;
-            /*
-             * copying the contents from input stream to output stream using read and write
-             * methods
-             */
-            while ((length = instream.read(buffer)) > 0) {
-                outstream.write(buffer, 0, length);
-            }
-
-            // Closing the input/output file streams
-            instream.close();
-            outstream.close();
-
-            System.out.println("File copied successfully!!");
-
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
         }
     }
 

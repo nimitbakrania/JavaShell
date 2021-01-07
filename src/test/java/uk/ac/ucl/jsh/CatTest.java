@@ -173,4 +173,20 @@ public class CatTest{
         scn.close();
     }
 
+    @Test
+    public void absoluteTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        File file = new File(TempFolder.getRoot().toString(), "Test.txt");
+        Jsh.eval("_cat '" + file.toString() + "'", out);
+        Scanner scn = new Scanner(in);
+        assertEquals("a", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        assertEquals("2", scn.nextLine());
+        assertEquals("b", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        scn.close();
+    }
+
 }
