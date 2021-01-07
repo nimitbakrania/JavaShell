@@ -172,4 +172,5 @@ public class CatTest{
         assertEquals("a", scn.nextLine());
         scn.close();
     }
+
 }

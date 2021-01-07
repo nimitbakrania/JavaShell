@@ -161,4 +161,19 @@ public class GrepTest {
         assertEquals(scn.nextLine(), "Test2.txt:hello world Java");
         scn.close();
     } 
+
+    @Test
+    public void globbingTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        Jsh.eval("_grep 'hello world' *", out);
+        Scanner scn = new Scanner(in);
+        assertEquals(scn.nextLine(), "Test.txt:hello world hello everybody");
+        assertEquals(scn.nextLine(), "Test2.txt:hello world tempfile2");
+        assertEquals(scn.nextLine(), "Test2.txt:hello world Java");
+        scn.close();
+    }
+   
+    
 }

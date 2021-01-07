@@ -211,5 +211,17 @@ public class TailTest{
         appArgs.add("unexistentFile.txt");
         new Visitable.Tail(null, out, appArgs).accept(new VisitorApplication());
     } 
-    
+
+    @Test
+    public void negativeTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        try{
+            Jsh.eval("_tail -n -10 Test.txt", out);
+        }
+        catch(IOException e){
+            assertEquals("tail: wrong argument -10", e.toString());
+        }
+    }
 }
