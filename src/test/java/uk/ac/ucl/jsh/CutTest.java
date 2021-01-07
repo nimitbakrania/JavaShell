@@ -119,11 +119,11 @@ public class CutTest {
         PipedOutputStream out = new PipedOutputStream(in);
         Scanner scan = new Scanner(in);
         Jsh.eval("cut -b 1-2,7-9 test1.txt", out);    // get bytes 1,7,8
-        assertEquals("Lip", scan.nextLine());
-        assertEquals("Del", scan.nextLine());
-        assertEquals("A a", scan.nextLine());
-        assertEquals("Eet", scan.nextLine());
-        assertEquals("uib", scan.nextLine());
+        assertEquals("Loips", scan.nextLine());
+        assertEquals("Dueli", scan.nextLine());
+        assertEquals("Ae ac", scan.nextLine());
+        assertEquals("Etet ", scan.nextLine());
+        assertEquals("ulibe", scan.nextLine());
         scan.close();
     }
 
