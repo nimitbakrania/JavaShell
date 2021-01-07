@@ -5,14 +5,18 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import uk.ac.ucl.jsh.Visitable.Find;
+
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 
@@ -26,57 +30,72 @@ public class HeadTest {
     public TemporaryFolder TempFolder = new TemporaryFolder();
 
     @Before
-    public void EnterTempFolder() throws IOException{
+    public void setUp() throws IOException{
         Jsh.setCurrentDirectory(TempFolder.getRoot().toString());
+
+        File tempFile = TempFolder.newFile("Test.txt");
+        FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
+        tempFileWriter.write("Hello\nhello world\nJava\nTests\nExample\nTesting Head\nLorem\nipsum\ndolor\nsit\namet\nconsectetuer\nadipiscing\nelit");
+        tempFileWriter.close();
+
+        File tempFile2 = TempFolder.newFile("Test2.txt");
+        FileWriter tempFileWriter2 = new FileWriter(tempFile2, StandardCharsets.UTF_8);
+        tempFileWriter2.write("Hello\nhello");
+        tempFileWriter2.close();
     }
 
     @Test
     public void stdinTest() throws IOException{
-        File tempFile = TempFolder.newFile("Test1.txt");
-        FileWriter w = new FileWriter(tempFile);
-        w.write("Hello Test\nhello world test\n Test Test test \n lorem\nipsum\ndolor");;
-        w.close();
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
-        Jsh.eval("tail -n 4 " + tempFile.getName() + " | head -n 2", out);
+        Jsh.eval("tail -n 4 Test.txt" + " | head -n 2", out);
         Scanner scn = new Scanner(in);
-        assertEquals(" Test Test test ", scn.nextLine());
-        assertEquals(" lorem", scn.nextLine());
+        assertEquals("amet", scn.nextLine());
+        assertEquals("consectetuer", scn.nextLine());
         scn.close();
 
     } 
 
     @Test
+    public void stdinUnitTest() throws IOException{
+        FileInputStream stdin = new FileInputStream(new File(TempFolder.getRoot().toString(), "Test.txt"));
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        ArrayList<String> appArgs = new ArrayList<String>();
+        appArgs.add("-n");
+        appArgs.add("2");
+        new Visitable.Head(stdin, out, appArgs).accept(new VisitorApplication());
+        Scanner scn = new Scanner(in);
+        assertEquals("Hello", scn.nextLine());
+        assertEquals("hello world", scn.nextLine());
+        scn.close();
+    } 
+
+    @Test
     public void invalidFileName() throws IOException{
-        File tempFile = TempFolder.newFile("Test1.txt");
-        FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
-        tempFileWriter.write("Hello\nhello world");
-        tempFileWriter.close();
-        
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
         try{
-            Jsh.eval("_head Test.txt", out);
+            Jsh.eval("_head Test1.txt", out);
         }
         catch(IOException e){
-            assertEquals("head: Test.txt does not exist", e.toString());
+            assertEquals("head: Test1.txt does not exist", e.toString());
         }
     }
 
-    @Test
-    public void tooManyArgsTest() throws IOException{ //error one
-        File tempFile = TempFolder.newFile("Test.txt");
-        FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
-        tempFileWriter.write("Hello\nhello world");
-        tempFileWriter.close();
-        
-        File tempFile2 = TempFolder.newFile("Test2.txt");
-        FileWriter tempFileWriter2 = new FileWriter(tempFile2, StandardCharsets.UTF_8);
-        tempFileWriter2.write("Hello\nhello");
-        tempFileWriter2.close();
+    @Test(expected = RuntimeException.class)
+    public void invalidFileNameUnitTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        ArrayList<String> appArgs = new ArrayList<String>();
+        appArgs.add("Test1.txt");
+        new Visitable.Head(null, out, appArgs).accept(new VisitorApplication());
+    } 
 
+    @Test
+    public void tooManyArgsTest() throws IOException{ 
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
@@ -87,14 +106,19 @@ public class HeadTest {
             assertEquals("head: too many arguments", e.toString());
         }
     }
+        
+    @Test(expected = RuntimeException.class)
+    public void tooManyArgsUnitTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        ArrayList<String> appArgs = new ArrayList<String>();
+        appArgs.add("Test.txt");
+        appArgs.add("Test2.txt");
+        new Visitable.Head(null, out, appArgs).accept(new VisitorApplication());
+    } 
 
     @Test
-    public void noNThreeArgsTest() throws IOException{ //error one
-        File tempFile = TempFolder.newFile("Test.txt");
-        FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
-        tempFileWriter.write("Hello\nhello world");
-        tempFileWriter.close();
-
+    public void noNThreeArgsTest() throws IOException{ 
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
@@ -105,14 +129,19 @@ public class HeadTest {
             assertEquals("head: wrong argument n", e.toString());
         }
     }
+    
+    @Test(expected = RuntimeException.class)
+    public void noNThreeArgsUnitTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        ArrayList<String> appArgs = new ArrayList<String>();
+        appArgs.add("n");
+        appArgs.add("Test.txt");
+        new Visitable.Head(null, out, appArgs).accept(new VisitorApplication());
+    } 
 
     @Test
-    public void nonIntegerTest() throws IOException{ //error one
-        File tempFile = TempFolder.newFile("Test.txt");
-        FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
-        tempFileWriter.write("Hello\nhello world");
-        tempFileWriter.close();
-        
+    public void nonIntegerTest() throws IOException{ 
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
@@ -123,14 +152,20 @@ public class HeadTest {
             assertEquals("head: wrong argument ab", e.toString());
         }
     }
+    
+    @Test(expected = RuntimeException.class)
+    public void nonIntegerUnitTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        ArrayList<String> appArgs = new ArrayList<String>();
+        appArgs.add("-n");
+        appArgs.add("ab");
+        appArgs.add("Test.txt");
+        new Visitable.Head(null, out, appArgs).accept(new VisitorApplication());
+    } 
 
     @Test
-    public void negativeTest() throws IOException{ //error one
-        File tempFile = TempFolder.newFile("Test.txt");
-        FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
-        tempFileWriter.write("Hello\nhello world");
-        tempFileWriter.close();
-
+    public void negativeTest() throws IOException{
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
@@ -141,20 +176,25 @@ public class HeadTest {
             assertEquals("head: wrong argument -10", e.toString());
         }
     }
+        
+    @Test(expected = RuntimeException.class)
+    public void negativeUnitTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        ArrayList<String> appArgs = new ArrayList<String>();
+        appArgs.add("-n");
+        appArgs.add("-10");
+        appArgs.add("Test.txt");
+        new Visitable.Head(null, out, appArgs).accept(new VisitorApplication());
+    } 
 
     @Test
     public void threeArgsTest() throws IOException{
-        File tempFile = TempFolder.newFile("Test.txt");
-        FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
-        tempFileWriter.write("Hello\nhello world\nJava\nTests\nExample\nTesting Head");
-        tempFileWriter.close();
-
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
         Jsh.eval("head -n 3 Test.txt", out);
         Scanner scn = new Scanner(in);
-        System.out.println(scn.hasNextLine());
         assertEquals("Hello", scn.nextLine());
         assertEquals("hello world", scn.nextLine());
         assertEquals("Java", scn.nextLine());
@@ -162,12 +202,23 @@ public class HeadTest {
     }
 
     @Test
-    public void oneArgTest() throws IOException{
-        File tempFile = TempFolder.newFile("Test.txt");
-        FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
-        tempFileWriter.write("Hello\nhello world\nJava\nTests\nExample\nTesting Head\nLorem\nipsum\ndolor\nsit\namet\nconsectetuer\nadipiscing\nelit");
-        tempFileWriter.close();
+    public void threeArgsUnitTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        ArrayList<String> appArgs = new ArrayList<String>();
+        appArgs.add("-n");
+        appArgs.add("3");
+        appArgs.add("Test.txt");
+        new Visitable.Head(null, out, appArgs).accept(new VisitorApplication());
+        Scanner scn = new Scanner(in);
+        assertEquals("Hello", scn.nextLine());
+        assertEquals("hello world", scn.nextLine());
+        assertEquals("Java", scn.nextLine());
+        scn.close();
+    } 
 
+    @Test
+    public void oneArgTest() throws IOException{
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
@@ -186,5 +237,25 @@ public class HeadTest {
         scn.close();
     }
 
+    @Test
+    public void oneArgUnitTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        ArrayList<String> appArgs = new ArrayList<String>();
+        appArgs.add("Test.txt");
+        new Visitable.Head(null, out, appArgs).accept(new VisitorApplication());
+        Scanner scn = new Scanner(in);
+        assertEquals("Hello", scn.nextLine());
+        assertEquals("hello world", scn.nextLine());
+        assertEquals("Java", scn.nextLine());
+        assertEquals("Tests", scn.nextLine());
+        assertEquals("Example", scn.nextLine());
+        assertEquals("Testing Head", scn.nextLine());
+        assertEquals("Lorem", scn.nextLine());
+        assertEquals("ipsum", scn.nextLine());
+        assertEquals("dolor", scn.nextLine());
+        assertEquals("sit", scn.nextLine());
+        scn.close();
+    } 
 
 }
