@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 public class Call implements Command {
 
+    
     private VisitorApplication visitor = new VisitorApplication();
     private Factory factory = new Factory();
 

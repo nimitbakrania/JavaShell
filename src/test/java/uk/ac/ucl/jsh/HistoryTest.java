@@ -14,6 +14,14 @@ import java.io.IOException;
 
 public class HistoryTest {
 
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
+
+    @Before
+    public void EnterTempFolder() throws IOException{
+        Jsh.setCurrentDirectory(folder.getRoot().toString());
+    }
+    
     @Before 
     public void setUp() throws IOException {
 

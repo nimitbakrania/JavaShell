@@ -8,6 +8,7 @@ import java.io.PipedOutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -16,9 +17,9 @@ public class CdTest{
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
-    @After
-    public void deleteTempFolder() {
-        folder.delete();
+    @Before
+    public void EnterTempFolder() throws IOException{
+        Jsh.setCurrentDirectory(folder.getRoot().toString());
     }
 
     protected void createTestFile(String fileName, String toWrite) throws IOException {
