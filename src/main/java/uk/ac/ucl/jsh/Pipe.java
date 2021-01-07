@@ -32,55 +32,30 @@ public class Pipe implements Command {
         ArrayList<String> appArgs1 = new ArrayList<String>(appArgs.subList(0, appArgs.indexOf("|")));
         ArrayList<String> appArgs2 = new ArrayList<String>(appArgs.subList(appArgs.indexOf("|") + 2, appArgs.size()));
         String app2 = appArgs.get(appArgs.indexOf("|") + 1);
-        evalLeft(in, outp, app1, appArgs1);
+        evalThread(in, outp, app1, appArgs1);
         if (appArgs2.contains("|")){
             eval(inp, out, app2, appArgs2);    
         }
         else{
-            evalRight(inp, out, app2, appArgs2);
+            evalThread(inp, out, app2, appArgs2);
         }
     }
 
-    private void evalLeft(InputStream in, PipedOutputStream outp, String app1, ArrayList<String> appArgs1){
+    private void evalThread(InputStream in, OutputStream outp, String app1, ArrayList<String> appArgs1) throws IOException{
         new Thread(){
             public void run(){
-                if (appArgs1.contains(">") || appArgs1.contains("<")) {
-                    try {
+                try{
+                    if (appArgs1.contains(">") || appArgs1.contains("<")) {
                         redirect.eval(in, outp, app1, appArgs1);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
+                    } else {
+                        call.eval(in, outp, app1, appArgs1);
                     }
-                } else {
-                    call.eval(in, outp, app1, appArgs1);
-                }
-                try {
                     outp.close();
-                } catch (IOException e) {
+                }
+                catch (IOException e){
                     throw new RuntimeException(e);
                 }
             }
         }.start();
-    }
-    
-    private void evalRight(PipedInputStream inp, OutputStream out, String app2, ArrayList<String> appArgs2){
-        new Thread(){
-            public void run(){
-                if (appArgs2.contains(">") || appArgs2.contains("<")) {
-                    try {
-                        redirect.eval(inp, out, app2, appArgs2);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                } else {
-                    call.eval(inp, out, app2, appArgs2);
-                }
-                try {
-                    inp.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-
-            }
-        }.start();
-    }
+    }   
 }
