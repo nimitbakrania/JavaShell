@@ -39,9 +39,10 @@ public class LsTest {
         PipedOutputStream out = new PipedOutputStream(in);
         Jsh.eval("ls", out);
         Scanner scan = new Scanner(in);
-        assertEquals("dir1", scan.next());
-        assertEquals("test3.txt", scan.next());
-        assertEquals("test4.txt", scan.next());
+        String line = scan.nextLine();
+        assertTrue(line.contains("test3.txt"));
+        assertTrue(line.contains("test4.txt"));
+        assertTrue(line.contains("dir1"));
         scan.close();
     }
 

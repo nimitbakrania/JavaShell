@@ -43,10 +43,11 @@ public class CopyTest {
         Scanner scan = new Scanner(in);
         Jsh.eval("cp test4.txt dir1", out);
         Jsh.eval("ls dir1", out);
-        assertEquals("subDir", scan.next());
-        assertEquals("test2.txt", scan.next());
-        assertEquals("test1.txt", scan.next());
-        assertEquals("test4.txt", scan.next());
+        String line = scan.nextLine();
+        assertTrue(line.contains("subDir"));
+        assertTrue(line.contains("test2.txt"));
+        assertTrue(line.contains("test1.txt"));
+        assertTrue(line.contains("test4.txt"));
         scan.close();
     }
 
@@ -58,11 +59,13 @@ public class CopyTest {
         Scanner scan = new Scanner(in);
         Jsh.eval("cp -r dir1 dir2", out);
         Jsh.eval("ls dir2", out);
-        assertEquals("subDir", scan.next());
-        assertEquals("test2.txt", scan.next());
-        assertEquals("test1.txt", scan.next());
+        String line = scan.nextLine();
+        assertTrue(line.contains("subDir"));
+        assertTrue(line.contains("test2.txt"));
+        assertTrue(line.contains("test1.txt"));
         Jsh.eval("ls dir2" + System.getProperty("file.separator") + "subDir", out);
-        assertEquals("test3.txt", scan.next());
+        String line2 = scan.nextLine();
+        assertTrue(line2.contains("test3.txt"));
         scan.close();
     }
 

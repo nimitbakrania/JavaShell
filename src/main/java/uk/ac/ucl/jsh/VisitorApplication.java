@@ -82,6 +82,12 @@ public class VisitorApplication implements BaseVisitor {
     public void visit(Visitable.Echo app) throws IOException {
 
         OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
+        if (app.appArgs.size() == 0) { 
+            writer.write(System.getProperty("line.separator"));
+            writer.flush();
+            return;
+        }
+
         Stream<String> args = app.appArgs.stream();
         int size = app.appArgs.size();
         String lastArg = app.appArgs.get(size - 1);
