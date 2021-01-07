@@ -292,11 +292,9 @@ public class VisitorApplication implements BaseVisitor {
                     try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
                         reader.lines().forEach(line -> lineOutputWriter(line, writer, "cat"));
                     } catch (IOException e) {
-                        writer.close();
                         throw new RuntimeException("cat: cannot open " + arg);
                     }
                 } else {
-                    writer.close();
                     throw new RuntimeException("cat: file does not exist");
                 }
             }
