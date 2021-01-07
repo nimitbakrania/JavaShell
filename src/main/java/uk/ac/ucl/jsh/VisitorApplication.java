@@ -1575,6 +1575,15 @@ public class VisitorApplication implements BaseVisitor {
      */
     public void visit(Visitable.Copy app) throws IOException {
 
+        if (app.appArgs.get(0).equals("-r")) {
+            if (app.appArgs.size() < 3) {
+                throw new RuntimeException("copy: too few arguments");
+            }
+        }
+        else if (app.appArgs.size() < 2) {
+            throw new RuntimeException("copy: too few arguments");
+        }
+
         String dest = app.appArgs.get(app.appArgs.size() - 1); // last element is destination.
         app.appArgs.remove(app.appArgs.size() - 1);
 

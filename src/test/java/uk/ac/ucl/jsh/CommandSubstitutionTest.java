@@ -18,6 +18,7 @@ public class CommandSubstitutionTest {
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
+    private OurParser parser = new OurParser();
 
     @Before
     public void setUp() throws IOException {
@@ -30,6 +31,37 @@ public class CommandSubstitutionTest {
         Jsh.setCurrentDirectory(folder.getRoot().getAbsolutePath());
     }
 
+    // UNIT TESTS
+
+    @Test
+    public void unitTestCmdSub() throws IOException {
+
+        String cmd = "echo `cat test1.txt`";
+        assertEquals("echo this is a string to test with foobar", parser.cmdSubstitution(cmd));
+    }
+
+    @Test
+    public void unitTestCmdSubSeq() throws IOException {
+
+        String cmd = "echo `cat test1.txt`; echo foo";
+        assertEquals("echo this is a string to test with foobar; echo foo", parser.cmdSubstitution(cmd));
+    }
+
+    @Test
+    public void unitTestCmdSubWithSemicolonInsideQuotes() throws IOException {
+
+        String cmd = "echo `echo foo; cat test1.txt`";
+        assertEquals("echo foo this is a string to test with foobar", parser.cmdSubstitution(cmd));
+    }
+
+    @Test
+    public void unitTestCmdSubWithSingleQuotes() throws IOException {
+
+        String cmd = "echo '`echo foo`'";
+        assertEquals("echo '`echo foo`'", parser.cmdSubstitution(cmd));
+    }
+
+    // INTEGRATION TESTS
     @Test
     public void testCommandSubstitution() throws IOException {
 

@@ -203,6 +203,7 @@ public class OurParser {
     }
 
     /**
+     * public to allow unit testing
      * Executes command substitution. The algoritm is outlined here:
      * 1) Loop through and split the cmd by ;. ; incased in backquotes is not split. E.g. `echo foo;echo bar` is 1 sub command not 2.
      * 2) For each command check if they have command substitution. If not add them to ret and continue.
@@ -214,7 +215,7 @@ public class OurParser {
      * 
      * @return string of commands without command substitution
     */
-    private String cmdSubstitution(String cmd) {
+    public String cmdSubstitution(String cmd) {
 
         ArrayList<String> commands = splitCommands(cmd);
 

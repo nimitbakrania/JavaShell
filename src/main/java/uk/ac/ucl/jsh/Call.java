@@ -22,5 +22,4 @@ public class Call implements Command {
         UnsafeDecorator application = this.factory.mkApplication(in, out, app, appArgs);
         application.accept(visitor);
     }
-    
 }

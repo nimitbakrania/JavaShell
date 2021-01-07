@@ -10,16 +10,63 @@ import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.stream.*;
 
 public class EchoTest {
     @Rule
     public TemporaryFolder TempFolder = new TemporaryFolder();
+    private VisitorApplication visitor = new VisitorApplication();
 
     @Before
     public void EnterTempFolder() throws IOException{
         Jsh.setCurrentDirectory(TempFolder.getRoot().toString());
     }
 
+    // UNIT TESTS
+    @Test
+    public void echoUnitTestOneArg() throws IOException {
+    
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);    
+        ArrayList<String> arr = new ArrayList<>();
+        Scanner scan = new Scanner(in);
+        arr.add("foo");
+        Visitable.Echo app = new Visitable.Echo(null, out, arr);
+        app.accept(this.visitor);
+        assertEquals("foo", scan.nextLine());
+       scan.close();
+    }
+    
+    @Test
+    public void echoUnitTestMultipleArgs() throws IOException {
+    
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);    
+        ArrayList<String> arr = new ArrayList<>();
+        Scanner scan = new Scanner(in);
+        arr.add("foo");
+        arr.add("bar");
+        Visitable.Echo app = new Visitable.Echo(null, out, arr);
+        app.accept(this.visitor);
+        assertEquals("foo bar", scan.nextLine());
+        scan.close();
+    }
+    
+    @Test
+    public void echoUnitTestNoArgs() throws IOException {
+    
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);    
+        ArrayList<String> arr = new ArrayList<>();
+        Scanner scan = new Scanner(in);
+        Visitable.Echo app = new Visitable.Echo(null, out, arr);
+        app.accept(this.visitor);
+        assertTrue(scan.nextLine().isEmpty());
+        scan.close();
+    }
+
+    // INTEGRATION TESTS
     @Test
     public void testEchoAppOneArg() throws IOException {
 
@@ -54,5 +101,4 @@ public class EchoTest {
         assertEquals("foobar", scn.next());
         scn.close();
     }
-
 }
