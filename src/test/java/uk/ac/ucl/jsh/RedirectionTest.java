@@ -50,7 +50,7 @@ public class RedirectionTest{
 
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
-        Jsh.eval("cat > *.txt", out);
+        Jsh.eval("_cat > *.txt", out);
     }
 
     @Test
@@ -70,7 +70,7 @@ public class RedirectionTest{
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
         String outputFileName = "output.txt";
-        Jsh.eval("ls > " + outputFileName, out);
+        Jsh.eval("_ls > " + outputFileName, out);
         Path path = Paths.get(Jsh.getCurrentDirectory() + System.getProperty("file.separator") + outputFileName);
         String contents = Files.readString(path);
         assertTrue("contents printed does not print '" + folder1 + "' (no args given)", contents.contains(folder1));
@@ -95,7 +95,7 @@ public class RedirectionTest{
 
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
-        Jsh.eval("cat < " + fileName, out);
+        Jsh.eval("_cat < " + fileName, out);
         out.close();
         String contents = new String(in.readAllBytes());
         assertEquals("File contents wrong", toWrite, contents);
@@ -105,7 +105,7 @@ public class RedirectionTest{
     public void multipleOutputFiles() throws Exception {
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
-        Jsh.eval("cat < test.txt < test.txt", out);
+        Jsh.eval("_cat < test.txt < test.txt", out);
 
     }
 
@@ -113,7 +113,7 @@ public class RedirectionTest{
     public void multipleInputFiles() throws Exception {
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
-        Jsh.eval("cat >test.txt >test.txt", out);
+        Jsh.eval("_cat >test.txt >test.txt", out);
 
     }
 
@@ -123,7 +123,7 @@ public class RedirectionTest{
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
         folder.newFile(); folder.newFile();
-        Jsh.eval("echo < *", out);
+        Jsh.eval("_echo < *", out);
         out.close();
     }
 
@@ -136,7 +136,7 @@ public class RedirectionTest{
 
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
-        Jsh.eval("cat < " +"'"+ fileName + "'", out);
+        Jsh.eval("_cat < " +"'"+ fileName + "'", out);
         out.close();
         String contents = new String(in.readAllBytes());
         assertEquals("File contents wrong", toWrite, contents);
