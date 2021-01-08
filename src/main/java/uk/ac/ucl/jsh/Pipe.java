@@ -50,7 +50,6 @@ public class Pipe implements Command {
                     } else {
                         call.eval(in, outp, app1, appArgs1);
                     }
-                    outp.close();
                 }
                 catch (IOException e){
                     throw new RuntimeException(e);

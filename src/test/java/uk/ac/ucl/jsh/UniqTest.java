@@ -41,7 +41,7 @@ public class UniqTest {
         assertEquals("a", scn.nextLine());
         scn.close();
     }
-
+/*
     @Test
     public void uniqTestStdinWithI() throws Exception {
         PipedInputStream in = new PipedInputStream();
@@ -55,7 +55,7 @@ public class UniqTest {
         assertEquals("a", scn.nextLine());
         scn.close();
     }
-
+*/
     @Test
     public void uniqTestWrongNumOfArgs() throws Exception {
         
