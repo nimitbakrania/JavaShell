@@ -1,19 +1,15 @@
 package uk.ac.ucl.jsh;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Scanner;
 import org.junit.Before;
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -21,33 +17,21 @@ import org.junit.rules.TemporaryFolder;
 
 public class CatTest{
     @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
+    public TemporaryFolder TempFolder = new TemporaryFolder();
 
     @Before
-    public void setUpDummyData() throws IOException {
+    public void setUp() throws IOException{
+        Jsh.setCurrentDirectory(TempFolder.getRoot().toString());
 
-        File testFile = folder.newFile("test1.txt");
-        OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(testFile), StandardCharsets.UTF_8);
-        writer.write("a\na\n2\nb\na");        
-        writer.close();
+        File tempFile = TempFolder.newFile("Test.txt");
+        File tempFile2 = TempFolder.newFile("testTextFile.txt");
+        File tempFile3 = TempFolder.newFile("Empty.txt");
+        FileWriter tempFileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
+        tempFileWriter.write("a\na\n2\nb\na");
+        tempFileWriter.close();
 
-        Jsh.setCurrentDirectory(folder.getRoot().getAbsolutePath());
     }
 
-    @After
-    public void deleteTempFolder() {
-        folder.delete();
-    }
-
-    protected void createTestFile(String fileName, String toWrite) throws IOException {
-        Charset encoding = StandardCharsets.UTF_8;
-        File file = folder.newFile(fileName);
-        if (toWrite != null) {
-            FileWriter writer = new FileWriter(file, encoding);
-            writer.write(toWrite);
-            writer.close();
-        }
-    }
     @Test
     public void catTestNoArg() throws Exception {
         try{
@@ -59,6 +43,14 @@ public class CatTest{
         {
             assertTrue(expected.getMessage().equals("cat: missing arguments"));
         }
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void catTestNoArgUnitTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        ArrayList<String> appArgs = new ArrayList<String>();
+        new Visitable.Cat(null, out, appArgs).accept(new VisitorApplication());
     }
 
     @Test
@@ -74,6 +66,15 @@ public class CatTest{
         }
     }
 
+    @Test(expected = RuntimeException.class)
+    public void catTestInvalidFileUnitTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        ArrayList<String> appArgs = new ArrayList<String>();
+        appArgs.add("Invalid");
+        new Visitable.Cat(null, out, appArgs).accept(new VisitorApplication());
+    }
+
     @Test
     public void catDirectory() throws Exception {
         PipedInputStream in = new PipedInputStream();
@@ -81,28 +82,57 @@ public class CatTest{
         Jsh.eval("_cat src", out);
     }
 
+    @Test(expected = RuntimeException.class)
+    public void catDirectoryUnitTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        ArrayList<String> appArgs = new ArrayList<String>();
+        appArgs.add("src");
+        new Visitable.Cat(null, out, appArgs).accept(new VisitorApplication());
+    }
+
     @Test
     public void catValidDirectory() throws Exception {
         String folderName = "src";
-        folder.newFolder(folderName);
+        TempFolder.newFolder(folderName);
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
         Jsh.eval("_cat " + folderName, out);
     }
 
+    @Test(expected = RuntimeException.class)
+    public void catValidDirectoryUnitTest() throws IOException{
+        String folderName = "src";
+        TempFolder.newFolder(folderName);
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        ArrayList<String> appArgs = new ArrayList<String>();
+        appArgs.add("src");
+        new Visitable.Cat(null, out, appArgs).accept(new VisitorApplication());
+    }
+
     @Test
     public void catSecondArgInvalid() throws Exception {
         String fileName = "testTextFile.txt";
-        createTestFile(fileName, null);
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
         Jsh.eval("_cat " + fileName + " Invalid", out);
     }
 
+    @Test(expected = RuntimeException.class)
+    public void ccatSecondArgInvalidUnitTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        ArrayList<String> appArgs = new ArrayList<String>();
+        appArgs.add("testTextFile");
+        appArgs.add(" Invalid");
+        appArgs.add(out.toString());
+        new Visitable.Cat(null, out, appArgs).accept(new VisitorApplication());
+    }
+
     @Test
     public void catEmptyFile() throws Exception {
-        String fileName = "testTextFile.txt";
-        createTestFile(fileName, null);
+        String fileName = "Empty.txt";
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
         Jsh.eval("_cat " + fileName, out);
@@ -111,13 +141,52 @@ public class CatTest{
         assertEquals("file not empty", "", contents);
     }
 
+
     @Test
-    public void catOneFile() throws Exception {
+    public void oneArgTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        Jsh.eval("cat Test.txt", out);
+        Scanner scn = new Scanner(in);
+        assertEquals("a", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        assertEquals("2", scn.nextLine());
+        assertEquals("b", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        scn.close();
+    }
+
+    @Test
+    public void oneArgUnitTest() throws IOException{
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
-        Jsh.eval("_cat test1.txt", out);
-        out.close();
-        String contents = new String(in.readAllBytes());
-        assertEquals("File contents wrong", "a\na\n2\nb\na\n", contents);
+        ArrayList<String> appArgs = new ArrayList<String>();
+        appArgs.add("Test.txt");
+        new Visitable.Cat(null, out, appArgs).accept(new VisitorApplication());
+        Scanner scn = new Scanner(in);
+        assertEquals("a", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        assertEquals("2", scn.nextLine());
+        assertEquals("b", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        scn.close();
     }
+
+    @Test
+    public void absoluteTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        File file = new File(TempFolder.getRoot().toString(), "Test.txt");
+        Jsh.eval("_cat '" + file.toString() + "'", out);
+        Scanner scn = new Scanner(in);
+        assertEquals("a", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        assertEquals("2", scn.nextLine());
+        assertEquals("b", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        scn.close();
+    }
+
 }

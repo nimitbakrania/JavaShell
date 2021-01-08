@@ -70,15 +70,6 @@ public class Factory {
             case "rmdir":
                 app = new UnsafeDecorator(new Visitable.Rmdir(in, out, appArgs), flag);
                 break;
-            case "datetime":
-                app = new UnsafeDecorator(new Visitable.DateTime(in, out, appArgs), flag);
-                break;
-            case "wc":
-                app = new UnsafeDecorator(new Visitable.WordCount(in, out, appArgs), flag);
-                break;
-            case "history":
-                app = new UnsafeDecorator(new Visitable.History(in, out, appArgs), flag);
-                break;
             case "cp":
                 app = new UnsafeDecorator(new Visitable.Copy(in, out, appArgs), flag);
                 break;

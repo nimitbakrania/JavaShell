@@ -11,9 +11,9 @@ public interface Visitable {
      * 
      * @param visitor is the app which is being called.
     */
-    public void accept(BaseVisitor visitor) throws IOException;
+    void accept(BaseVisitor visitor) throws IOException;
 
-    public class Cd implements Visitable {
+    class Cd implements Visitable {
 
         public InputStream input;
         public OutputStream output;
@@ -32,7 +32,7 @@ public interface Visitable {
         }
     }
 
-    public class Pwd implements Visitable {
+    class Pwd implements Visitable {
 
         public InputStream input;
         public OutputStream output;
@@ -52,7 +52,7 @@ public interface Visitable {
 
     }
 
-    public class Echo implements Visitable {
+    class Echo implements Visitable {
 
         public InputStream input;
         public OutputStream output;
@@ -71,7 +71,7 @@ public interface Visitable {
         }
     }
 
-    public class Head implements Visitable{
+    class Head implements Visitable{
 
         public InputStream input;
         public OutputStream output;
@@ -90,7 +90,7 @@ public interface Visitable {
         }
     }
 
-    public class Tail implements Visitable {
+    class Tail implements Visitable {
 
         public InputStream input;
         public OutputStream output;
@@ -110,7 +110,7 @@ public interface Visitable {
 
     }
 
-    public class Cat implements Visitable {
+    class Cat implements Visitable {
 
         public InputStream input;
         public OutputStream output;
@@ -129,7 +129,7 @@ public interface Visitable {
         }
     }
 
-    public class Ls implements Visitable {
+    class Ls implements Visitable {
 
         public InputStream input;
         public OutputStream output;
@@ -148,7 +148,7 @@ public interface Visitable {
         }
     }
 
-    public class Grep implements Visitable {
+    class Grep implements Visitable {
 
         public InputStream input;
         public OutputStream output;
@@ -167,7 +167,7 @@ public interface Visitable {
         }
     }
 
-    public class Cut implements Visitable {
+    class Cut implements Visitable {
 
         public InputStream input;
         public OutputStream output;
@@ -186,7 +186,7 @@ public interface Visitable {
         }
     }
 
-    public class Find implements Visitable {
+    class Find implements Visitable {
 
         public InputStream input;
         public OutputStream output;
@@ -205,7 +205,7 @@ public interface Visitable {
         }
     }
 
-    public class Uniq implements Visitable {
+    class Uniq implements Visitable {
 
         public InputStream input;
         public OutputStream output;
@@ -224,7 +224,7 @@ public interface Visitable {
         }
     }
 
-    public class Sort implements Visitable {
+    class Sort implements Visitable {
 
         public InputStream input;
         public OutputStream output;
@@ -243,7 +243,7 @@ public interface Visitable {
         }
     }
 
-    public class Mkdir implements Visitable {
+    class Mkdir implements Visitable {
 
         public InputStream input;
         public OutputStream output;
@@ -262,7 +262,7 @@ public interface Visitable {
         }
     }
 
-    public class Rmdir implements Visitable {
+    class Rmdir implements Visitable {
 
         public InputStream input;
         public OutputStream output;
@@ -281,64 +281,7 @@ public interface Visitable {
         }
     }
 
-    public class DateTime implements Visitable {
-
-        public InputStream input;
-        public OutputStream output;
-        public ArrayList<String> appArgs;
-
-        public DateTime(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
-
-            this.input = inputstream;
-            this.output = outputstream;
-            this.appArgs = args;
-        }
-
-        public void accept(BaseVisitor visitor) throws IOException {
-
-            visitor.visit(this);
-        }
-    }
-
-    public class WordCount implements Visitable {
-
-        public InputStream input;
-        public OutputStream output;
-        public ArrayList<String> appArgs;
-
-        public WordCount(InputStream inputstream, OutputStream outputstream, ArrayList<String> args) {
-
-            this.input = inputstream;
-            this.output = outputstream;
-            this.appArgs = args;
-        }
-
-        public void accept(BaseVisitor visitor) throws IOException {
-
-            visitor.visit(this);
-        }
-    }
-
-    public class History implements Visitable {
-
-        public InputStream input;
-        public OutputStream output;
-        public ArrayList<String> appArgs;
-
-        public History(InputStream input, OutputStream output, ArrayList<String> appArgs) {
-
-            this.input = input;
-            this.output = output;
-            this.appArgs = appArgs;
-        }
-
-        public void accept(BaseVisitor visitor) throws IOException {
-
-            visitor.visit(this);
-        }
-    }
-
-    public class Copy implements Visitable {
+    class Copy implements Visitable {
 
         public InputStream input;
         public OutputStream output;

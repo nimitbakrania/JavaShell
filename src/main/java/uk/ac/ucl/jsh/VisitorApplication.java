@@ -1,9 +1,6 @@
 package uk.ac.ucl.jsh;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -16,14 +13,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.sql.Date;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.*;
 import java.io.InputStream;
@@ -92,7 +85,7 @@ public class VisitorApplication implements BaseVisitor {
         int size = app.appArgs.size();
         String lastArg = app.appArgs.get(size - 1);
 
-        args.forEach(arg -> echoPrint(writer, arg, size, lastArg));
+        args.forEach(arg -> echoPrint(writer, arg, lastArg));
 
         if (size > 0) {
             // check if anything was printed if so print a newline.
@@ -101,8 +94,14 @@ public class VisitorApplication implements BaseVisitor {
         }
     }
 
-    // Auxiliary method for ECHO to print arg onto outputstream.
-    private void echoPrint(OutputStreamWriter writer, String arg, int size, String lastArg) {
+    /**
+     * Auxiliary method for echo which prints it out.
+     * 
+     * @param writer outputstream writer that writes to outputstream
+     * @param arg argument to print
+     * @param lastArg if arg == lastArg then dont print empty space.
+     */
+    private void echoPrint(OutputStreamWriter writer, String arg, String lastArg) {
 
         try {
             writer.write(arg);
@@ -168,14 +167,14 @@ public class VisitorApplication implements BaseVisitor {
             standardInputBuffer.lines().limit(headLines).forEach((line) -> lineOutputWriter(line, writer, "head"));
         } else if (app.appArgs.size() == 3 || app.appArgs.size() == 1) {
             if (isUri(headArg)){
-                headFile = uriToPath(headArg, "head").toFile();
+                headFile = uriToPath(headArg).toFile();
             }
             else{
-                headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
+                headFile = Path.of(Jsh.getCurrentDirectory()).resolve(headArg).toFile();;
             }
             if (headFile.exists()) {
                 Charset encoding = StandardCharsets.UTF_8;
-                Path filePath = Paths.get((String) Jsh.getCurrentDirectory() + File.separator + headArg);
+                Path filePath = headFile.toPath();
                 try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
                     reader.lines().limit(headLines).forEach((line) -> lineOutputWriter(line, writer, "head"));
                 } catch (IOException e) {
@@ -241,14 +240,14 @@ public class VisitorApplication implements BaseVisitor {
                     .forEach((line) -> lineOutputWriter(line, writer, "tail"));
         } else if (app.appArgs.size() == 3 || app.appArgs.size() == 1) {
             if (isUri(tailArg)){
-                tailFile = uriToPath(tailArg, "tail").toFile();
+                tailFile = uriToPath(tailArg).toFile();
             }
-            else{
-                tailFile = new File(Jsh.getCurrentDirectory() + File.separator + tailArg);
+            else {
+                tailFile = Path.of(Jsh.getCurrentDirectory()).resolve(tailArg).toFile();
             }
             if (tailFile.exists()) {
                 Charset encoding = StandardCharsets.UTF_8;
-                Path filePath = Paths.get((String) Jsh.getCurrentDirectory() + File.separator + tailArg);
+                Path filePath = tailFile.toPath();
                 try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
                     List<String> readerList = reader.lines().collect(Collectors.toList());
                     readerList.stream()
@@ -288,10 +287,10 @@ public class VisitorApplication implements BaseVisitor {
             Charset encoding = StandardCharsets.UTF_8;
             for (String arg : app.appArgs) {
                 if (isUri(arg)){
-                    currFile = uriToPath(arg, "head").toFile();
+                    currFile = uriToPath(arg).toFile();
                 }
                 else{
-                    currFile = new File(Jsh.getCurrentDirectory(), arg);
+                    currFile = Path.of(Jsh.getCurrentDirectory()).resolve(arg).toFile();
                 }
                 if (currFile.exists()) {
                     Path filePath = currFile.toPath();
@@ -323,7 +322,7 @@ public class VisitorApplication implements BaseVisitor {
         File currDir;
 
         if ((app.appArgs.size() == 1) && (isUri(app.appArgs.get(0)))) {
-            app.appArgs.set(0, uriToPath(app.appArgs.get(0), "ls").toString());
+            app.appArgs.set(0, uriToPath(app.appArgs.get(0)).toString());
         }
 
         if (app.appArgs.isEmpty()) {
@@ -407,7 +406,7 @@ public class VisitorApplication implements BaseVisitor {
 
             for (int i = 0; i < numOfFiles; i++) {
                 if (isUri(app.appArgs.get(i + 1))){
-                    filePath = uriToPath(app.appArgs.get(i + 1), "grep");
+                    filePath = uriToPath(app.appArgs.get(i + 1));
                 }
                 else{
                     filePath = currentDir.resolve(app.appArgs.get(i + 1));
@@ -576,12 +575,12 @@ public class VisitorApplication implements BaseVisitor {
         if (inputStreamUsed == 0) {
             // we are using app args
             if (isUri(app.appArgs.get(2))) {
-                filePath = uriToPath(app.appArgs.get(2), "cut");
+                filePath = uriToPath(app.appArgs.get(2));
                 file = new File(filePath.toString());
             }
             else {
-                file = new File(Jsh.getCurrentDirectory() + System.getProperty("file.separator") + app.appArgs.get(2));
-                filePath = Paths.get(Jsh.getCurrentDirectory() + System.getProperty("file.separator") + app.appArgs.get(2));
+                file = new File(Jsh.getCurrentDirectory() + System.getProperty("file.separator") + new File(new File(app.appArgs.get(2)).getName()));
+                filePath = Paths.get(Jsh.getCurrentDirectory() + System.getProperty("file.separator") + new File(new File(app.appArgs.get(2)).getName()));
             }
         }
         if (!args[0].contains("-")) {
@@ -759,6 +758,8 @@ public class VisitorApplication implements BaseVisitor {
      * algorithm takes each line, converts it to bytes then extracts the bytes that
      * we need and stores them in BYTESTOPRINT. Finally it outputs BYTESTOPRINT as a
      * string.
+     * The way it works with overlapping ranges is if it is -3,-7 it will do it to only -7.
+     * If it is 4-,8- it will do it from 4-. If it is 4-,-3 then we just print out entire line.
      * 
      * @param line    is the line we are looking at in file.
      * @param writer  is used to write to output
@@ -812,12 +813,11 @@ public class VisitorApplication implements BaseVisitor {
             temp.add(from.get(indexOfLowest));
             from = temp;
         }
-        if ((to.size() == 1) && (from.size() == 1)) {
-            if (to.get(0) > from.get(0)) {
-                // check if ranges from to and from overlap. E.g. -5,3- overlap so you would
-                // just output entire line.
-                lineOutputWriter(new String(bytes, charset), writer, "cut");
-            }
+        if ((to.size() == 1) && (from.size() == 1) && (to.get(0) > from.get(0))) {
+            // check if ranges from to and from overlap. E.g. -5,3- overlap so you would
+            // just output entire line.
+            lineOutputWriter(new String(bytes, charset), writer, "cut");
+            return;
         }
 
         // Extract and print relevant bytes.
@@ -917,12 +917,8 @@ public class VisitorApplication implements BaseVisitor {
         String reverse = "";
         String headArg = "";
         if (app.appArgs.size() == 2) {
-            try {
-                reverse = app.appArgs.get(0);
-                headArg = app.appArgs.get(1);
-            } catch (Exception e) {
-                throw new RuntimeException("sort: wrong argument here1" + app.appArgs.get(1));
-            }
+            reverse = app.appArgs.get(0);
+            headArg = app.appArgs.get(1);
         } else if (app.appArgs.size() == 1) {
             headArg = app.appArgs.get(0);
         }
@@ -937,38 +933,39 @@ public class VisitorApplication implements BaseVisitor {
         if(app.appArgs.size() == 1 || app.appArgs.size() == 2)
         {
             if (isUri(headArg)){
-                sortFile = uriToPath(headArg, "sort").toFile();
+                sortFile = uriToPath(headArg).toFile();
             }
             else{
                 sortFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
             }
         }
         String sortFileName = Jsh.getCurrentDirectory() + File.separator + headArg;
-        try (Stream<String> lines = Files.lines(Paths.get(sortFileName))) {
-            if (app.appArgs.isEmpty() || (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-r"))) {
-                if (app.input != null) {
+        if (app.appArgs.isEmpty() || (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-r"))) {
+            if (app.input != null) {
 
-                    // if the app args are empty and only -r is provided, we are using stdin
+                // if the app args are empty and only -r is provided, we are using stdin
 
-                    BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
-                    standardInputBuffer.lines().sorted().forEach((line) -> lineOutputWriter(line, writer, "sort"));
-                } else {
-                    throw new RuntimeException("sort: error with stdin");
-                }
-
+                BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
+                standardInputBuffer.lines().sorted().forEach((line) -> lineOutputWriter(line, writer, "sort"));
+            } else {
+                throw new RuntimeException("sort: error with stdin");
             }
-            if (app.appArgs.size() == 1 && sortFile.exists()) {
-                lines.sorted().forEach(s -> {
-                    lineOutputWriter(s, writer, "sort");
-                });
-            } else if (app.appArgs.size() == 2) {
-                // using the comparator to reverse the order if -r is provided in the args
 
-                lines.sorted(Comparator.reverseOrder()).forEach(s -> {
-                    lineOutputWriter(s, writer, "sort");
-                });
-            }
         }
+        if (app.appArgs.size() == 1 && sortFile.exists()) {
+            Stream<String> lines = Files.lines(Paths.get(sortFileName));
+            lines.sorted().forEach(s -> {
+                lineOutputWriter(s, writer, "sort");
+            });
+            lines.close();
+        } else if (app.appArgs.size() == 2) {
+            // using the comparator to reverse the order if -r is provided in the args
+            Stream<String> lines = Files.lines(Paths.get(sortFileName));
+            lines.sorted(Comparator.reverseOrder()).forEach(s -> {
+                lineOutputWriter(s, writer, "sort");
+            });
+            lines.close();
+        }   
     }
 
     /**
@@ -982,6 +979,7 @@ public class VisitorApplication implements BaseVisitor {
      * @param app contains info about arguments.
      */
     public void visit(Visitable.Uniq app) throws IOException {
+        
         OutputStreamWriter writer = new OutputStreamWriter(app.output);
         if (app.appArgs.size() > 2) {
             throw new RuntimeException("uniq: too many arguments");
@@ -989,136 +987,104 @@ public class VisitorApplication implements BaseVisitor {
         String reverse = "";
         String headArg = "";
         if (app.appArgs.size() == 2) {
-            try {
-                reverse = app.appArgs.get(0);
-                headArg = app.appArgs.get(1);
-            } catch (Exception e) {
-                throw new RuntimeException("uniq: wrong argument here1" + app.appArgs.get(1));
-            }
-        } else if (app.appArgs.size() == 1) {
+            reverse = app.appArgs.get(0);
+            headArg = app.appArgs.get(1);
+        } else if (app.appArgs.size() == 1 && (app.appArgs.get(0)!= "-i")) {
             headArg = app.appArgs.get(0);
         }
         if ((app.appArgs.size() == 2) && !reverse.equals("-i")) {
             throw new RuntimeException("uniq: wrong argument " + app.appArgs.get(0));
         }
-        File uniqFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
-        if(!uniqFile.exists())
-        {
+        File uniqFile;
+        String sortFile = "";
+        if (isUri(headArg)){
+            uniqFile = uriToPath(headArg).toFile();
+        }
+        else{
+            uniqFile = Path.of(Jsh.getCurrentDirectory()).resolve(headArg).toFile();
+        }
+        if(!uniqFile.exists() && app.appArgs.get(0) != "-i")
+        {   
+            System.out.println(app.appArgs.get(0));
+            
             throw new RuntimeException("uniq: file does not exist");
         }
-        String sortFile = "";
-        if(app.appArgs.size() == 1 || app.appArgs.size() == 2)
-        {
-            if (isUri(headArg)){
-                uniqFile = uriToPath(headArg, "uniq").toFile();
-            }
-            else{
-                uniqFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
-            }
-        }
-        sortFile = Jsh.getCurrentDirectory() + File.separator + headArg;
-        try (Stream<String> lines = Files.lines(Paths.get(sortFile))) {
-            if (app.appArgs.isEmpty() || (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-i"))) {
-                if (app.input != null) {
+        sortFile = Path.of(Jsh.getCurrentDirectory()).resolve(headArg).toString();
+        if (app.appArgs.isEmpty() || (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-i"))) {
+            
+            if (app.input != null) {
+                /*
+                    * It is worth noting why we have chosen a linkedlist. Mostly due to its
+                    * simplicity. While is may not be the most efficient for searching, it is
+                    * elegant for keeping track of the previous line in text file, and its
+                    * 'getLast()' method has shown to be effective.
+                    */
 
-                    /*
-                     * It is worth noting why we have chosen a linkedlist. Mostly due to its
-                     * simplicity. While is may not be the most efficient for searching, it is
-                     * elegant for keeping track of the previous line in text file, and its
-                     * 'getLast()' method has shown to be effective.
-                     */
-
-                    LinkedList<String> previous = new LinkedList<String>();
-                    previous.add("");
-                    BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
-                    if (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-i")) {
-
-                        // we are using stdin here as our input stream as no correct text file for
-                        // applying
-                        // the linux uniq command has been given.
-
-                        standardInputBuffer.lines().forEach((line) -> {
-                            if (!line.toLowerCase().equals(previous.getLast().toLowerCase())) {
-                                lineOutputWriter(line, writer, "uniq");
-                                previous.add(line);
-                            }
-                        });
-                    } else {
-                        standardInputBuffer.lines().forEach((line) -> {
-                            if (!line.equals(previous.getLast())) {
-                                lineOutputWriter(line, writer, "uniq");
-                                previous.add(line);
-                            }
-                        });
-                    }
-                } else {
-                    throw new RuntimeException("uniq: error with stdin");
-                }
-            }
-            if (app.appArgs.size() == 1 && uniqFile.exists()) {
-                File headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
-                headFile.delete();
-                File file = new File(headArg);
-                FileWriter fw = new FileWriter(file.getName(), false);
                 LinkedList<String> previous = new LinkedList<String>();
                 previous.add("");
-                lines.forEach(s -> {
-                    if (!s.equals(previous.getLast())) {
-                            lineOutputWriter(s, writer, "uniq");
-                            lineOutputWriter(s, fw, "uniq");
-                            previous.add(s);
-                    }
-                });
-                fw.close();
-            } else if (app.appArgs.size() == 2) {
-                File headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
-                headFile.delete();
-                File file = new File(headArg);
-                FileWriter fw = new FileWriter(file.getName(), false);
-                LinkedList<String> previous = new LinkedList<String>();
-                previous.add("");
-                lines.forEach(s -> {
-                    if (!s.toLowerCase().equals(previous.getLast().toLowerCase())) {
-                            lineOutputWriter(s, writer, "uniq");
-                            lineOutputWriter(s, fw, "uniq");
-                            previous.add(s);
+                BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
+                if (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-i")) {
+
+                    // we are using stdin here as our input stream as no correct text file for
+                    // applying
+                    // the linux uniq command has been given.
+
+                    standardInputBuffer.lines().forEach((line) -> {
+                        if (!line.toLowerCase().equals(previous.getLast().toLowerCase())) {
+                            lineOutputWriter(line, writer, "uniq");
+                            previous.add(line);
                         }
-                });
-                fw.close();
-                headFile.delete();
-                Boolean t = file.renameTo(headFile);
+                    });
+                } else {
+                    standardInputBuffer.lines().forEach((line) -> {
+                        if (!line.equals(previous.getLast())) {
+                            lineOutputWriter(line, writer, "uniq");
+                            previous.add(line);
+                        }
+                    });
+                }
+            } else {
+                throw new RuntimeException("uniq: error with stdin");
             }
         }
-    }
-
-    public void writeTo(File in, File out) {
-        FileInputStream instream = null;
-        FileOutputStream outstream = null;
-
-        try {
-
-            instream = new FileInputStream(in);
-            outstream = new FileOutputStream(out);
-
-            byte[] buffer = new byte[1024];
-
-            int length;
-            /*
-             * copying the contents from input stream to output stream using read and write
-             * methods
-             */
-            while ((length = instream.read(buffer)) > 0) {
-                outstream.write(buffer, 0, length);
-            }
-
-            // Closing the input/output file streams
-            instream.close();
-            outstream.close();
-
-            System.out.println("File copied successfully!!");
-
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
+        if (app.appArgs.size() == 1 && uniqFile.exists()) {
+            Stream<String> lines = Files.lines(Paths.get(sortFile));
+            File headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
+            headFile.delete();
+            File file = new File(headArg);
+            FileWriter fw = new FileWriter(file.getName(), false);
+            LinkedList<String> previous = new LinkedList<String>();
+            previous.add("");
+            lines.forEach(s -> {
+                if (!s.equals(previous.getLast())) {
+                        lineOutputWriter(s, writer, "uniq");
+                        lineOutputWriter(s, fw, "uniq");
+                        previous.add(s);
+                }
+            });
+            lines.close();
+            fw.close();
+            headFile.delete();
+            file.renameTo(headFile);
+        } else if (app.appArgs.size() == 2) {
+            Stream<String> lines = Files.lines(Paths.get(sortFile));
+            File headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
+            headFile.delete();
+            File file = new File(headArg);
+            FileWriter fw = new FileWriter(file.getName(), false);
+            LinkedList<String> previous = new LinkedList<String>();
+            previous.add("");
+            lines.forEach(s -> {
+                if (!s.toLowerCase().equals(previous.getLast().toLowerCase())) {
+                        lineOutputWriter(s, writer, "uniq");
+                        lineOutputWriter(s, fw, "uniq");
+                        previous.add(s);
+                    }
+            });
+            lines.close();
+            fw.close();
+            headFile.delete();
+            file.renameTo(headFile);
         }
     }
 
@@ -1236,333 +1202,6 @@ public class VisitorApplication implements BaseVisitor {
         }
     }
 
-    // Run application by typing in date, application named Datetime to avoid name
-    // conflict with imported Date package
-    /**
-     * Outputs to the OutputStream the current date and time in the following
-     * format. E M d H:m:s z Y according to date and time patterns described in the
-     * oracle docs for SimpleDateFormat.
-     *
-     * @param commandLineArgs Holds the new dirctory that is being requested
-     * @param input           The InputStream from which to read from if a pipe or
-     *                        redirection is occuring
-     * @param output          The OutputStream to write the result of the
-     *                        application to.
-     * @throws IOException Exception thrown by BufferedWriter because of something
-     *                     like a closed pipe
-     */
-    @Override
-    public void visit(Visitable.DateTime app) throws IOException {
-        Charset encoding = StandardCharsets.UTF_8;
-        Date date = new Date(System.currentTimeMillis());
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(app.output, encoding));
-        writer.write(date.toString());
-        writer.write(System.getProperty("line.separator"));
-        writer.flush();
-    }
-
-    public void visit(Visitable.WordCount app) throws IOException {
-        boolean totalNeeded = false;
-        boolean useInputStream = false;
-        useInputStream = validateArgs(app.appArgs, app.input);
-
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(app.output, StandardCharsets.UTF_8));
-
-        if (useInputStream) {
-            String s = new String(app.input.readAllBytes());
-            String[] lines = s.split(System.getProperty("line.separator"));
-
-            if (app.appArgs.size() == 0) {
-                writeUsingInputStream(writer, lines, "all");
-            } else {
-                writeUsingInputStream(writer, lines, app.appArgs.get(0));
-            }
-        } else {
-            int numOfFiles = app.appArgs.size();
-            int offset = 0;
-
-            // if statement ensures that for loop in getFilePathArray doesn't treat option
-            // as a file
-            if (app.appArgs.get(0).equals("-m") || app.appArgs.get(0).equals("-w") || app.appArgs.get(0).equals("-l")) {
-                offset = 1;
-                numOfFiles -= 1;
-            }
-
-            if (numOfFiles > 1) {
-                totalNeeded = true;
-            }
-
-            Path[] filePathArray = getFilePathArray(Jsh.getCurrentDirectory(), numOfFiles, offset, app.appArgs);
-
-            if (app.appArgs.get(0).equals("-m") || app.appArgs.get(0).equals("-w") || app.appArgs.get(0).equals("-l")) {
-                writeUsingFiles(writer, filePathArray, app.appArgs.get(0), totalNeeded);
-            } else {
-                writeUsingFiles(writer, filePathArray, "all", totalNeeded);
-            }
-        }
-    }
-
-    /*
-     * Method loops through files and adds path to returned array if valid.
-     */
-    private Path[] getFilePathArray(String currentDirectory, int numOfFiles, int offset, ArrayList<String> args) {
-        Path filePath;
-        Path currentDir = Paths.get(currentDirectory);
-        Path[] filePathArray = new Path[numOfFiles];
-
-        // if file specified in command line by user is a real/usable file, it will
-        // return an array of the paths of the files
-        for (int i = 0; i < numOfFiles; i++) {
-            filePath = currentDir.resolve(args.get(i + offset));
-            if (Files.isDirectory(filePath) || !Files.isReadable(filePath)) {
-                throw new RuntimeException("wc: wrong file argument");
-            } else {
-                filePathArray[i] = filePath;
-            }
-        }
-        return filePathArray;
-    }
-
-    /*
-     * Method removes directory details to obtain only file name when given path as
-     * string.
-     */
-    private String getFileName(String string) {
-        return string.split("/")[string.split("/").length - 1];
-    }
-
-    /*
-     * Method stores word, char and newline counts for each file in hashmap. Writes
-     * count specified by option to OutputStream, and total if neccesary.
-     */
-    private void writeUsingFiles(BufferedWriter writer, Path[] filePathArray, String option, Boolean totalNeeded)
-            throws IOException {
-        int totalLineCount = 0;
-        int totalWordCount = 0;
-        int totalCharCount = 0;
-        int totalCount = 0;
-
-        List<String> options = Arrays.asList("-l", "-w", "-m");
-
-        for (Path path : filePathArray) {
-            Map<String, String> resultsHashMap = new HashMap<>();
-
-            resultsHashMap.put("-w", calcWords(path));
-            resultsHashMap.put("-m", calcChars(path));
-            resultsHashMap.put("-l", calcNewlines(path));
-
-            if (option != "all") {
-                String result = resultsHashMap.get(option);
-                totalCount += Integer.parseInt(result);
-                writer.write(result + '\t');
-
-            } else {
-                List<String> result = new ArrayList<>();
-
-                for (String opt : options) {
-                    result.add(resultsHashMap.get(opt));
-                    writer.write(resultsHashMap.get(opt) + '\t');
-                    writer.flush();
-                }
-
-                totalCharCount += Integer.parseInt(result.get(2));
-                totalWordCount += Integer.parseInt(result.get(1));
-                totalLineCount += Integer.parseInt(result.get(0));
-            }
-
-            writer.write(getFileName(path.toString()));
-            writer.write(System.getProperty("line.separator"));
-            writer.flush();
-        }
-
-        Map<String, String> totalsHashMap = new HashMap<>();
-        totalsHashMap.put("-m", Integer.toString(totalCharCount));
-        totalsHashMap.put("-w", Integer.toString(totalWordCount));
-        totalsHashMap.put("-l", Integer.toString(totalLineCount));
-
-        if (totalNeeded) {
-            if (option != "all") {
-                writer.write(Integer.toString(totalCount) + '\t');
-            } else {
-                for (String opt : options) {
-                    writer.write(totalsHashMap.get(opt) + '\t');
-                    writer.flush();
-                }
-            }
-            writer.write("total");
-            writer.write(System.getProperty("line.separator"));
-            writer.flush();
-        }
-    }
-
-    /*
-     * Method stores word, char and newline counts for stdin in hashmap. Writes
-     * count specified by option to OutputStream, and total if neccesary.
-     */
-    private void writeUsingInputStream(BufferedWriter writer, String[] lines, String option) throws IOException {
-
-        List<String> options = Arrays.asList("-l", "-w", "-m");
-        Map<String, String> resultsHashMap = new HashMap<>();
-
-        resultsHashMap.put("-w", calcWords(lines));
-        resultsHashMap.put("-m", calcChars(lines));
-        resultsHashMap.put("-l", Integer.toString(lines.length));
-
-        if (option != "all") {
-            writer.write(resultsHashMap.get(option));
-        } else {
-            for (String opt : options) {
-                writer.write(resultsHashMap.get(opt) + '\t');
-            }
-        }
-
-        writer.write(System.getProperty("line.separator"));
-        writer.flush();
-    }
-
-    /*
-     * Method to calculate newline count when using Files. Increases a counter
-     * everytime '\n' is seen and returns counter as string.
-     */
-    private String calcNewlines(Path path) throws IOException {
-        Charset encoding = StandardCharsets.UTF_8;
-        int value;
-        int newlineCount = 0;
-
-        try (BufferedReader reader = Files.newBufferedReader(path, encoding)) {
-            while ((value = reader.read()) != -1) {
-                char c = (char) value;
-                if (c == '\n') {
-                    newlineCount += 1;
-                }
-            }
-            reader.close();
-        }
-        return Integer.toString(newlineCount);
-    }
-
-    /*
-     * Method to calculate char count when using Files. Increases a counter by
-     * number of chars in line, accounting for newline char. Returns string form of
-     * counter.
-     */
-    private String calcChars(Path path) throws IOException {
-        int charCount = Integer.parseInt(calcNewlines(path));
-        try (BufferedReader reader = Files.newBufferedReader(path)) {
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                charCount += line.length();
-            }
-        }
-        return Integer.toString(charCount);
-    }
-
-    /*
-     * Method to calculate char count when using stdin. Increases a counter by
-     * number of chars in line, accounting for newline char. Returns string form of
-     * counter.
-     */
-    private String calcChars(String[] lines) {
-        int charCount = lines.length;
-        for (String line : lines) {
-            charCount += line.length();
-        }
-        return Integer.toString(charCount);
-    }
-
-    /*
-     * Method to calculate word count when using Files. Increases a counter by size
-     * of array of words in each line, for every line. Returns string form of
-     * counter.
-     */
-    private String calcWords(Path path) throws IOException {
-        int wordCount = 0;
-        try (BufferedReader reader = Files.newBufferedReader(path)) {
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                String[] preWords = line.split("[\\s]+");
-                ArrayList<String> words = new ArrayList<>();
-
-                for (int i = 0; i < preWords.length; i++) {
-                    if (preWords[i].length() > 0) {
-                        words.add(preWords[i]);
-                    }
-                }
-                wordCount += words.size();
-            }
-        }
-        return Integer.toString(wordCount);
-    }
-
-    /*
-     * Method to calculate word count when using stdin. Increases a counter by size
-     * of array of words in each line, for every line. Returns string form of
-     * counter.
-     */
-    private String calcWords(String[] lines) {
-        int wordCount = 0;
-        for (String line : lines) {
-            String[] preWords = line.split("[\\s]+");
-            ArrayList<String> words = new ArrayList<>();
-
-            for (int i = 0; i < preWords.length; i++) {
-                if (preWords[i].length() > 0) {
-                    words.add(preWords[i]);
-                }
-            }
-            wordCount += words.size();
-        }
-        return Integer.toString(wordCount);
-    }
-
-    /*
-     * Method checks args using if statements to update useInputStream if stdin is
-     * to be used and ensures options valid.
-     */
-    private boolean validateArgs(ArrayList<String> args, InputStream input) {
-        if (args.size() == 0) {
-            if (input == null) {
-                throw new RuntimeException("wc: wrong number of arguments");
-            } else {
-                return true;
-            }
-        }
-
-        if (args.get(0).startsWith("-")
-                && !(args.get(0).equals("-m") || args.get(0).equals("-w") || args.get(0).equals("-l"))) {
-            throw new RuntimeException("wc: illegal option given");
-        }
-
-        if (args.size() == 1 && args.get(0).startsWith("-")) {
-            if (input != null) {
-                return true;
-            } else {
-                throw new RuntimeException("wc: wrong number of arguments");
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Prints out each command that has been entered before. Simply gets an
-     * arraylist of previous commands and converts it to a stream and prints them
-     * one by one.
-     * 
-     * @param app object contains relevant variables such as outputstream as
-     *            app.output and app arguments as app.appArgs.
-     * @throws RuntimeException if you supply any arguments to it.
-     */
-    public void visit(Visitable.History app) {
-
-        if (app.appArgs.size() != 0) {
-            throw new RuntimeException("history: too many arguments supplied");
-        }
-
-        Stream<String> history = Jsh.getHistory().stream();
-        OutputStreamWriter writer = new OutputStreamWriter(app.output, StandardCharsets.UTF_8);
-        history.forEach(elem -> lineOutputWriter(elem, writer, "history"));
-    }
-
     /**
      * Of the format "cp (-r) source1 source2 source3 ... dest". "-r" is optional
      * and if it is supplied it means copy directories. There can be any number of
@@ -1596,8 +1235,8 @@ public class VisitorApplication implements BaseVisitor {
                 String destDir;
                 if (isUri(directory)) {
                     // assume that all arguments are uri.
-                    srcDir = uriToPath(directory, "copy").toString();
-                    destDir = uriToPath(dest, "copy").toString();
+                    srcDir = uriToPath(directory).toString();
+                    destDir = uriToPath(dest).toString();
                 }
                 else {
                     srcDir = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + directory;
@@ -1612,13 +1251,13 @@ public class VisitorApplication implements BaseVisitor {
                 String src;
                 String destFile;
                 if (isUri(file)) {
-                    src = uriToPath(file, "copy").toString();
-                    destFile = uriToPath(dest, "copy").toString() + System.getProperty("file.separator") + file;
+                    src = uriToPath(file).toString();
+                    destFile = uriToPath(dest).toString() + System.getProperty("file.separator") + new File(file).getName();
                 }
                 else {
                     src = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + file;
                     destFile = Jsh.getCurrentDirectory() + System.getProperty("file.separator") + dest
-                                + System.getProperty("file.separator") + file;
+                                + System.getProperty("file.separator") + new File(file).getName();
                 }
                 try {
                     copyFile(src, destFile);
@@ -1678,7 +1317,7 @@ public class VisitorApplication implements BaseVisitor {
         }
     }
 
-    private Path uriToPath(String uri, String appname){
+    private Path uriToPath(String uri){
         URI newuri;
         Path path;
         try {

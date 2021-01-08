@@ -40,6 +40,20 @@ public class CopyTest {
     // UNIT TESTS
 
     @Test
+    public void testCopyWithGlobbingDir() throws IOException {
+
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        Scanner scan = new Scanner(in);
+        Jsh.eval("cp dir1/*.txt dir2", out);
+        Jsh.eval("ls dir2", out);
+        String line = scan.nextLine();
+        assertTrue(line.contains("test2.txt"));
+        assertTrue(line.contains("test1.txt"));
+        scan.close();
+    }
+
+    @Test
     public void copyUnitTestWithOneFile() throws IOException {
 
         PipedInputStream in = new PipedInputStream();
@@ -230,5 +244,4 @@ public class CopyTest {
         }
 
     }
-    
 }

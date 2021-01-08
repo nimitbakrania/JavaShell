@@ -37,14 +37,14 @@ public class IoRedirection implements Command {
                 File outputFile = new File(Jsh.getCurrentDirectory(), appArgs.get(index2 + 1));
                 outputFile.createNewFile(); //If a file already exists this doesn't reset it, just uses it
                 output = new FileOutputStream(outputFile);
-                if (appArgs1.size() > index2 + 2){
+                if (appArgs.size() > index2 + 2){
                     in.close();
                     output.close();
                     throw new RuntimeException("redirection: too many arguments after redirection symbol");
                 }
             }
             else{
-                if (appArgs1.size() > index1 + 2){
+                if (appArgs.size() > index1 + 2){
                     in.close();
                     throw new RuntimeException("redirection: too many arguments after redirection symbol");
                 }
@@ -56,13 +56,10 @@ public class IoRedirection implements Command {
             File outputFile = new File(Jsh.getCurrentDirectory(), appArgs.get(index1 + 1));
             outputFile.createNewFile();
             output = new FileOutputStream(outputFile);
-            if (appArgs1.size() > index1 + 2){
+            if (appArgs.size() > index1 + 2){
                 output.close();
                 throw new RuntimeException("redirection: too many arguments after redirection symbol");
             }
-        }
-        if (appArgs1.contains(">") || appArgs1.contains("<")){
-            throw new RuntimeException("redirection: too many redirection symbols");
         }
         call.eval(in, output, app, appArgs1);
         if (in != null){

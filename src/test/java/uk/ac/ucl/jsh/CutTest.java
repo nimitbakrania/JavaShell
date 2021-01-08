@@ -17,7 +17,6 @@ import java.io.OutputStreamWriter;
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.stream.*;
 
 public class CutTest {
 
@@ -37,7 +36,11 @@ public class CutTest {
                       "ulla bibendum ornare tortor, in dignissim diam. Vivamus rutrum facilisis nibh eu congue. Pellentesque laoreet leo massa.\n");           // 1 byte per character
         writer.close();
 
+        File dir = folder.newFolder("dir");
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
         Jsh.setCurrentDirectory(folder.getRoot().getAbsolutePath());
+        Jsh.eval("cp test1.txt dir", out);
     }
 
     // UNIT TESTS
@@ -185,6 +188,87 @@ public class CutTest {
         assertEquals("Aene ac lorem et justo malesuada hendrerit.", scan.nextLine());
         assertEquals("Etiaet erat leo. Ut fringilla quam nisi, at laoreet lacus volutpat sit amet.", scan.nextLine());
         assertEquals("ullaibendum ornare tortor, in dignissim diam. Vivamus rutrum facilisis nibh eu congue. Pellentesque laoreet leo massa.", scan.nextLine());
+        scan.close();
+    }
+
+    @Test
+    public void cutUnitTestWithHalfIntervalsOverlappingFrom() throws IOException {
+
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        Scanner scan = new Scanner(in);
+        ArrayList<String> arr = new ArrayList<>();
+        arr.add("-b");
+        arr.add("2-,5-");
+        arr.add("test1.txt");
+        Visitable.Cut app = new Visitable.Cut(null, out, arr);
+        app.accept(visitor);
+        assertEquals("orem ipsum dolor sit mi.", scan.nextLine());
+        assertEquals("uis velit enim, maximus quis orci sit amet, sollicitudin bibendum eros.", scan.nextLine());
+        assertEquals("enean ac lorem et justo malesuada hendrerit.", scan.nextLine());
+        assertEquals("tiam et erat leo. Ut fringilla quam nisi, at laoreet lacus volutpat sit amet.", scan.nextLine());
+        assertEquals("lla bibendum ornare tortor, in dignissim diam. Vivamus rutrum facilisis nibh eu congue. Pellentesque laoreet leo massa.", scan.nextLine());
+        scan.close();
+    }
+
+    @Test
+    public void cutUnitTestWithHalfIntervalsOverlappingTo() throws IOException {
+
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        Scanner scan = new Scanner(in);
+        ArrayList<String> arr = new ArrayList<>();
+        arr.add("-b");
+        arr.add("-3,-7");
+        arr.add("test1.txt");
+        Visitable.Cut app = new Visitable.Cut(null, out, arr);
+        app.accept(visitor);
+        assertEquals("Lorem i", scan.nextLine());
+        assertEquals("Duis ve", scan.nextLine());
+        assertEquals("Aenean ", scan.nextLine());
+        assertEquals("Etiam e", scan.nextLine());
+        assertEquals("ulla bi", scan.nextLine());
+        scan.close();
+    }
+
+    @Test
+    public void cutUnitTestWithHalfIntervalsOverlapping() throws IOException {
+    
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        Scanner scan = new Scanner(in);
+        ArrayList<String> arr = new ArrayList<>();
+        arr.add("-b");
+        arr.add("-3,2-");
+        arr.add("test1.txt");
+        Visitable.Cut app = new Visitable.Cut(null, out, arr);
+        app.accept(visitor);
+        assertEquals("Lorem ipsum dolor sit mi.", scan.nextLine());
+        assertEquals("Duis velit enim, maximus quis orci sit amet, sollicitudin bibendum eros.", scan.nextLine());
+        assertEquals("Aenean ac lorem et justo malesuada hendrerit.", scan.nextLine());
+        assertEquals("Etiam et erat leo. Ut fringilla quam nisi, at laoreet lacus volutpat sit amet.", scan.nextLine());
+        assertEquals("ulla bibendum ornare tortor, in dignissim diam. Vivamus rutrum facilisis nibh eu congue. Pellentesque laoreet leo massa.", scan.nextLine());
+        scan.close();
+
+    }
+
+    @Test
+    public void cutUnitTestWithPathInput() throws IOException {
+
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        Scanner scan = new Scanner(in);
+        ArrayList<String> arr = new ArrayList<>();
+        arr.add("-b");
+        arr.add("-3,2-");
+        arr.add("dir/test1.txt");
+        Visitable.Cut app = new Visitable.Cut(null, out, arr);
+        app.accept(visitor);
+        assertEquals("Lorem ipsum dolor sit mi.", scan.nextLine());
+        assertEquals("Duis velit enim, maximus quis orci sit amet, sollicitudin bibendum eros.", scan.nextLine());
+        assertEquals("Aenean ac lorem et justo malesuada hendrerit.", scan.nextLine());
+        assertEquals("Etiam et erat leo. Ut fringilla quam nisi, at laoreet lacus volutpat sit amet.", scan.nextLine());
+        assertEquals("ulla bibendum ornare tortor, in dignissim diam. Vivamus rutrum facilisis nibh eu congue. Pellentesque laoreet leo massa.", scan.nextLine());
         scan.close();
     }
 
