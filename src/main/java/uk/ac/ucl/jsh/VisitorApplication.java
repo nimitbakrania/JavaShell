@@ -926,7 +926,7 @@ public class VisitorApplication implements BaseVisitor {
             throw new RuntimeException("sort: wrong argument " + app.appArgs.get(0));
         }
         File sortFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
-        if(!sortFile.exists())
+        if(!sortFile.exists() && !app.appArgs.get(0).equals("-r"))
         {
             throw new RuntimeException("sort: file does not exist");
         }
@@ -944,9 +944,17 @@ public class VisitorApplication implements BaseVisitor {
             if (app.input != null) {
 
                 // if the app args are empty and only -r is provided, we are using stdin
+                if (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-r")) {
 
-                BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
-                standardInputBuffer.lines().sorted().forEach((line) -> lineOutputWriter(line, writer, "sort"));
+                    // we are using stdin here as our input stream as no correct text file for
+                    // applying
+                    // the linux uniq command has been given
+                    BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
+                    standardInputBuffer.lines().sorted(Comparator.reverseOrder()).forEach((line) -> lineOutputWriter(line, writer, "sort"));
+                } else {
+                    BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
+                    standardInputBuffer.lines().sorted().forEach((line) -> lineOutputWriter(line, writer, "sort"));
+                }
             } else {
                 throw new RuntimeException("sort: error with stdin");
             }
@@ -1003,10 +1011,8 @@ public class VisitorApplication implements BaseVisitor {
         else{
             uniqFile = Path.of(Jsh.getCurrentDirectory()).resolve(headArg).toFile();
         }
-        if(!uniqFile.exists() && app.appArgs.get(0) != "-i")
+        if(!uniqFile.exists() && !app.appArgs.get(0).equals("-i"))
         {   
-            System.out.println(app.appArgs.get(0));
-            
             throw new RuntimeException("uniq: file does not exist");
         }
         sortFile = Path.of(Jsh.getCurrentDirectory()).resolve(headArg).toString();

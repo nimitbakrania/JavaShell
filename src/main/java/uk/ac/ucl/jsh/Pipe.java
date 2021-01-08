@@ -38,12 +38,12 @@ public class Pipe implements Command {
             eval(inp, out, app2, appArgs2);    
         }
         else{
-            evalThread2(inp, out, app2, appArgs2);
+            evalThread(inp, out, app2, appArgs2);
         }
         
     }
 
-    private void evalThread(InputStream in, PipedOutputStream outp, String app1, ArrayList<String> appArgs1) throws IOException{
+    private void evalThread(InputStream in, OutputStream outp, String app1, ArrayList<String> appArgs1) throws IOException{
         new Thread(){
             public void run(){
                 try{
@@ -59,21 +59,5 @@ public class Pipe implements Command {
                 }
             }
         }.start();
-    }   
-    private void evalThread2(PipedInputStream in, OutputStream outp, String app1, ArrayList<String> appArgs1) throws IOException{
-        new Thread(){
-            public void run(){
-                try{
-                    if (appArgs1.contains(">") || appArgs1.contains("<")) {
-                        redirect.eval(in, outp, app1, appArgs1);
-                    } else {
-                        call.eval(in, outp, app1, appArgs1);
-                    }
-                }
-                catch (IOException e){
-                    throw new RuntimeException(e);
-                }
-            }
-        }.start();
-    }   
+    }     
 }

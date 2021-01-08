@@ -43,7 +43,7 @@ public class SortTest {
         assertEquals("b", scn.nextLine());
         scn.close();
     }
-/*
+
     @Test
     public void sortTestStdinWithI() throws Exception {
         PipedInputStream in = new PipedInputStream();
@@ -58,7 +58,7 @@ public class SortTest {
         assertEquals("2", scn.nextLine());
         scn.close();
     }
-*/
+
     @Test
     public void sortTestWrongNumOfArgs() throws Exception {
         
