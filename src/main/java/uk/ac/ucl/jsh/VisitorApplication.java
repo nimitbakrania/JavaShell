@@ -917,12 +917,8 @@ public class VisitorApplication implements BaseVisitor {
         String reverse = "";
         String headArg = "";
         if (app.appArgs.size() == 2) {
-            try {
-                reverse = app.appArgs.get(0);
-                headArg = app.appArgs.get(1);
-            } catch (Exception e) {
-                throw new RuntimeException("sort: wrong argument here1" + app.appArgs.get(1));
-            }
+            reverse = app.appArgs.get(0);
+            headArg = app.appArgs.get(1);
         } else if (app.appArgs.size() == 1) {
             headArg = app.appArgs.get(0);
         }
@@ -944,31 +940,32 @@ public class VisitorApplication implements BaseVisitor {
             }
         }
         String sortFileName = Jsh.getCurrentDirectory() + File.separator + headArg;
-        try (Stream<String> lines = Files.lines(Paths.get(sortFileName))) {
-            if (app.appArgs.isEmpty() || (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-r"))) {
-                if (app.input != null) {
+        if (app.appArgs.isEmpty() || (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-r"))) {
+            if (app.input != null) {
 
-                    // if the app args are empty and only -r is provided, we are using stdin
+                // if the app args are empty and only -r is provided, we are using stdin
 
-                    BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
-                    standardInputBuffer.lines().sorted().forEach((line) -> lineOutputWriter(line, writer, "sort"));
-                } else {
-                    throw new RuntimeException("sort: error with stdin");
-                }
-
+                BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
+                standardInputBuffer.lines().sorted().forEach((line) -> lineOutputWriter(line, writer, "sort"));
+            } else {
+                throw new RuntimeException("sort: error with stdin");
             }
-            if (app.appArgs.size() == 1 && sortFile.exists()) {
-                lines.sorted().forEach(s -> {
-                    lineOutputWriter(s, writer, "sort");
-                });
-            } else if (app.appArgs.size() == 2) {
-                // using the comparator to reverse the order if -r is provided in the args
 
-                lines.sorted(Comparator.reverseOrder()).forEach(s -> {
-                    lineOutputWriter(s, writer, "sort");
-                });
-            }
         }
+        if (app.appArgs.size() == 1 && sortFile.exists()) {
+            Stream<String> lines = Files.lines(Paths.get(sortFileName));
+            lines.sorted().forEach(s -> {
+                lineOutputWriter(s, writer, "sort");
+            });
+            lines.close();
+        } else if (app.appArgs.size() == 2) {
+            // using the comparator to reverse the order if -r is provided in the args
+            Stream<String> lines = Files.lines(Paths.get(sortFileName));
+            lines.sorted(Comparator.reverseOrder()).forEach(s -> {
+                lineOutputWriter(s, writer, "sort");
+            });
+            lines.close();
+        }   
     }
 
     /**
@@ -982,6 +979,7 @@ public class VisitorApplication implements BaseVisitor {
      * @param app contains info about arguments.
      */
     public void visit(Visitable.Uniq app) throws IOException {
+        
         OutputStreamWriter writer = new OutputStreamWriter(app.output);
         if (app.appArgs.size() > 2) {
             throw new RuntimeException("uniq: too many arguments");
@@ -989,13 +987,9 @@ public class VisitorApplication implements BaseVisitor {
         String reverse = "";
         String headArg = "";
         if (app.appArgs.size() == 2) {
-            try {
-                reverse = app.appArgs.get(0);
-                headArg = app.appArgs.get(1);
-            } catch (Exception e) {
-                throw new RuntimeException("uniq: wrong argument here1" + app.appArgs.get(1));
-            }
-        } else if (app.appArgs.size() == 1) {
+            reverse = app.appArgs.get(0);
+            headArg = app.appArgs.get(1);
+        } else if (app.appArgs.size() == 1 && (app.appArgs.get(0)!= "-i")) {
             headArg = app.appArgs.get(0);
         }
         if ((app.appArgs.size() == 2) && !reverse.equals("-i")) {
@@ -1009,82 +1003,89 @@ public class VisitorApplication implements BaseVisitor {
         else{
             uniqFile = Path.of(Jsh.getCurrentDirectory()).resolve(headArg).toFile();
         }
-        if(!uniqFile.exists())
-        {
+        if(!uniqFile.exists() && app.appArgs.get(0) != "-i")
+        {   
+            System.out.println(app.appArgs.get(0));
+            
             throw new RuntimeException("uniq: file does not exist");
         }
         sortFile = Path.of(Jsh.getCurrentDirectory()).resolve(headArg).toString();
-        try (Stream<String> lines = Files.lines(Paths.get(sortFile))) {
-            if (app.appArgs.isEmpty() || (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-i"))) {
-                if (app.input != null) {
+        if (app.appArgs.isEmpty() || (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-i"))) {
+            
+            if (app.input != null) {
+                /*
+                    * It is worth noting why we have chosen a linkedlist. Mostly due to its
+                    * simplicity. While is may not be the most efficient for searching, it is
+                    * elegant for keeping track of the previous line in text file, and its
+                    * 'getLast()' method has shown to be effective.
+                    */
 
-                    /*
-                     * It is worth noting why we have chosen a linkedlist. Mostly due to its
-                     * simplicity. While is may not be the most efficient for searching, it is
-                     * elegant for keeping track of the previous line in text file, and its
-                     * 'getLast()' method has shown to be effective.
-                     */
-
-                    LinkedList<String> previous = new LinkedList<String>();
-                    previous.add("");
-                    BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
-                    if (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-i")) {
-
-                        // we are using stdin here as our input stream as no correct text file for
-                        // applying
-                        // the linux uniq command has been given.
-
-                        standardInputBuffer.lines().forEach((line) -> {
-                            if (!line.toLowerCase().equals(previous.getLast().toLowerCase())) {
-                                lineOutputWriter(line, writer, "uniq");
-                                previous.add(line);
-                            }
-                        });
-                    } else {
-                        standardInputBuffer.lines().forEach((line) -> {
-                            if (!line.equals(previous.getLast())) {
-                                lineOutputWriter(line, writer, "uniq");
-                                previous.add(line);
-                            }
-                        });
-                    }
-                } else {
-                    throw new RuntimeException("uniq: error with stdin");
-                }
-            }
-            if (app.appArgs.size() == 1 && uniqFile.exists()) {
-                File headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
-                headFile.delete();
-                File file = new File(headArg);
-                FileWriter fw = new FileWriter(file.getName(), false);
                 LinkedList<String> previous = new LinkedList<String>();
                 previous.add("");
-                lines.forEach(s -> {
-                    if (!s.equals(previous.getLast())) {
-                            lineOutputWriter(s, writer, "uniq");
-                            lineOutputWriter(s, fw, "uniq");
-                            previous.add(s);
-                    }
-                });
-                fw.close();
-            } else if (app.appArgs.size() == 2) {
-                File headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
-                headFile.delete();
-                File file = new File(headArg);
-                FileWriter fw = new FileWriter(file.getName(), false);
-                LinkedList<String> previous = new LinkedList<String>();
-                previous.add("");
-                lines.forEach(s -> {
-                    if (!s.toLowerCase().equals(previous.getLast().toLowerCase())) {
-                            lineOutputWriter(s, writer, "uniq");
-                            lineOutputWriter(s, fw, "uniq");
-                            previous.add(s);
+                BufferedReader standardInputBuffer = new BufferedReader(new InputStreamReader(app.input));
+                if (app.appArgs.size() == 1 && app.appArgs.get(0).equals("-i")) {
+
+                    // we are using stdin here as our input stream as no correct text file for
+                    // applying
+                    // the linux uniq command has been given.
+
+                    standardInputBuffer.lines().forEach((line) -> {
+                        if (!line.toLowerCase().equals(previous.getLast().toLowerCase())) {
+                            lineOutputWriter(line, writer, "uniq");
+                            previous.add(line);
                         }
-                });
-                fw.close();
-                headFile.delete();
-                Boolean t = file.renameTo(headFile);
+                    });
+                } else {
+                    standardInputBuffer.lines().forEach((line) -> {
+                        if (!line.equals(previous.getLast())) {
+                            lineOutputWriter(line, writer, "uniq");
+                            previous.add(line);
+                        }
+                    });
+                }
+            } else {
+                throw new RuntimeException("uniq: error with stdin");
             }
+        }
+        if (app.appArgs.size() == 1 && uniqFile.exists()) {
+            Stream<String> lines = Files.lines(Paths.get(sortFile));
+            File headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
+            headFile.delete();
+            File file = new File(headArg);
+            FileWriter fw = new FileWriter(file.getName(), false);
+            LinkedList<String> previous = new LinkedList<String>();
+            previous.add("");
+            lines.forEach(s -> {
+                if (!s.equals(previous.getLast())) {
+                        lineOutputWriter(s, writer, "uniq");
+                        lineOutputWriter(s, fw, "uniq");
+                        previous.add(s);
+                }
+            });
+            lines.close();
+            fw.close();
+            headFile.delete();
+            Boolean t = file.renameTo(headFile);
+        } else if (app.appArgs.size() == 2) {
+            Stream<String> lines = Files.lines(Paths.get(sortFile));
+            File headFile = new File(Jsh.getCurrentDirectory() + File.separator + headArg);
+            headFile.delete();
+            File file = new File(headArg);
+            FileWriter fw = new FileWriter(file.getName(), false);
+            LinkedList<String> previous = new LinkedList<String>();
+            previous.add("");
+            lines.forEach(s -> {
+                if (!s.toLowerCase().equals(previous.getLast().toLowerCase())) {
+                        lineOutputWriter(s, writer, "uniq");
+                        lineOutputWriter(s, fw, "uniq");
+                        previous.add(s);
+                    }
+            });
+            lines.close();
+            fw.close();
+            headFile.delete();
+            Boolean t = file.renameTo(headFile);
+            
         }
     }
 

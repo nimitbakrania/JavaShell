@@ -29,6 +29,35 @@ public class SortTest {
 
     }
 
+    @Test
+    public void sortTestStdin() throws Exception {
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        Jsh.eval("sort < Test.txt", out);
+        Scanner scn = new Scanner(in);
+        assertEquals("2", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        assertEquals("b", scn.nextLine());
+        scn.close();
+    }
+
+    @Test
+    public void sortTestStdinWithI() throws Exception {
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        Jsh.eval("sort -r < Test.txt", out);
+        Scanner scn = new Scanner(in);
+        assertEquals("b", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        assertEquals("2", scn.nextLine());
+        scn.close();
+    }
 
     @Test
     public void sortTestWrongNumOfArgs() throws Exception {
@@ -156,6 +185,21 @@ public class SortTest {
         assertEquals("a", scn.nextLine());
         assertEquals("a", scn.nextLine());
         assertEquals("b", scn.nextLine());
+        scn.close();
+    }
+
+    @Test
+    public void twoArgTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        Jsh.eval("sort -r Test.txt", out);
+        Scanner scn = new Scanner(in);
+        assertEquals("b", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        assertEquals("2", scn.nextLine());
         scn.close();
     }
 }

@@ -29,6 +29,34 @@ public class UniqTest {
     }
 
     @Test
+    public void uniqTestStdin() throws Exception {
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        Jsh.eval("uniq < Test.txt", out);
+        Scanner scn = new Scanner(in);
+        assertEquals("a", scn.nextLine());
+        assertEquals("2", scn.nextLine());
+        assertEquals("b", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        scn.close();
+    }
+
+    @Test
+    public void uniqTestStdinWithI() throws Exception {
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        Jsh.eval("uniq -i < Test.txt", out);
+        Scanner scn = new Scanner(in);
+        assertEquals("a", scn.nextLine());
+        assertEquals("2", scn.nextLine());
+        assertEquals("b", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        scn.close();
+    }
+
+    @Test
     public void uniqTestWrongNumOfArgs() throws Exception {
         
         try{
@@ -147,6 +175,20 @@ public class UniqTest {
         ArrayList<String> appArgs = new ArrayList<String>();
         appArgs.add("Test.txt");
         new Visitable.Uniq(null, out, appArgs).accept(new VisitorApplication());
+        Scanner scn = new Scanner(in);
+        assertEquals("a", scn.nextLine());
+        assertEquals("2", scn.nextLine());
+        assertEquals("b", scn.nextLine());
+        assertEquals("a", scn.nextLine());
+        scn.close();
+    }
+
+    @Test
+    public void twoArgTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        Jsh.eval("uniq -i Test.txt", out);
         Scanner scn = new Scanner(in);
         assertEquals("a", scn.nextLine());
         assertEquals("2", scn.nextLine());
