@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 
@@ -162,17 +161,4 @@ public class RedirectionTest {
         assertEquals("hello world hello everybody", scn.nextLine());
         scn.close();
     }
-    
-    @Test
-    public void redirect2PipeTest() throws IOException{
-        PipedInputStream in = new PipedInputStream();
-        PipedOutputStream out = new PipedOutputStream(in);
-        Jsh.eval("cat < Test.txt | head -n 2 > Test11.txt", System.out);
-        Jsh.eval("cat Test11.txt", out);
-        Scanner scn = new Scanner(in);
-        assertEquals("Hello", scn.nextLine());
-        assertEquals("hello world hello everybody", scn.nextLine());
-        scn.close();
-    }
-
 }
