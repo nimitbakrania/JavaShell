@@ -237,4 +237,16 @@ public class TailTest{
         assertEquals("hello", scn.nextLine());
         scn.close();
     }
+
+    @Test
+    public void tailSize1Test() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        Jsh.eval("_tail < Test2.txt", out);
+        Scanner scn = new Scanner(in);
+        assertEquals("Hello", scn.nextLine());
+        assertEquals("hello", scn.nextLine());
+        scn.close();
+    }
 }

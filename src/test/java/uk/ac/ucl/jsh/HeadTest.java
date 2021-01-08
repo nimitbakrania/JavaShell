@@ -4,9 +4,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import uk.ac.ucl.jsh.Visitable.Find;
-
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -271,4 +268,11 @@ public class HeadTest {
         scn.close();
     }
 
+    @Test(expected = RuntimeException.class)
+    public void headNoStreamTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        Jsh.eval("head -n 5", out);
+    }
 }

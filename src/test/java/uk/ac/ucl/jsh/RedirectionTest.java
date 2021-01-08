@@ -163,5 +163,16 @@ public class RedirectionTest {
         scn.close();
     }
     
+    @Test
+    public void redirect2PipeTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        Jsh.eval("cat < Test.txt | head -n 2 > Test11.txt", System.out);
+        Jsh.eval("cat Test11.txt", out);
+        Scanner scn = new Scanner(in);
+        assertEquals("Hello", scn.nextLine());
+        assertEquals("hello world hello everybody", scn.nextLine());
+        scn.close();
+    }
 
 }

@@ -175,5 +175,12 @@ public class GrepTest {
         scn.close();
     }
    
+    @Test(expected = RuntimeException.class)
+    public void grepNoStreamTest() throws IOException{
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        Jsh.eval("grep Test", out);
+    }
     
 }
